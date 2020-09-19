@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterUnLoadImage" Id="{231e0c02-f2ca-4c36-91e7-652a8ba56844}">
+    <Declaration><![CDATA[TYPE inserterUnLoadImage :
+STRUCT
+	
+ // Входове
+   xGrip_open 	        : imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Grip_open,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 1 );	
+									   
+   xGrip_close			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Grip_close,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 2 );
+
+    xInsert_up 			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Insert_up,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );
+									   
+    xInsert_down 		: imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Insert_down,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );									   	   
+									   
+    xNest 			    : imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Nest,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );
+
+	// Изходи								   									   
+    yGrip_open 			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Grip_open,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 ); 
+
+    yGrip_close 		: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Grip_close,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 ); 
+
+    yInsert_up 			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Insert_up,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 ); 
+
+    yInsert_down 		: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Insert_down,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 ); 	
+
+	  
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

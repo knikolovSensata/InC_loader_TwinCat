@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="machineStates" Id="{155b62da-a96a-48ef-bfe7-765c0731c658}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE machineStates :
+(
+		stNull      :=    Consts.ST_NULL,
+		stStartUp   :=    Consts.ST_START_UP,
+		stInit      :=    Consts.ST_INIT,
+		stReady     :=    Consts.ST_READY,
+		stStop      :=    Consts.ST_STOP,
+		stStepBlock :=    Consts.ST_STEP_BLOCK,	
+		stEMG		:=    Consts.ST_EMG,
+		
+		stSafetyStop    :=    1000,
+		stCheckState,
+		stStopMach,
+		stStopping,
+		stAutoRun,
+		stMachError,
+		
+	    stPurgeStart,
+		stPurgeDialIndexSync,
+		stPurgeRobot,
+		stPurgeStackers,
+		stPurgeDone
+
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

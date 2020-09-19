@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <GVL Name="TagsHMI" Id="{33a54b35-7920-4a42-88f9-40a8beead288}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	   // Пишат се от HMI, четат се от TwinCat
+		stopZumer      				: BOOL;          	// Сприране на сигнализация (има сигнализация при последна тара в Load Stacker)
+		startPurge                  : BOOL;             // Стартирене на PURGE проседура на машаната
+		camResult                   : DINT;             // Резултат от камерата
+		
+		// Пишат се от TwinCat, четат се от HMI
+		AlarmActive                 : BOOL;             // Има активна аларма
+		LoadStackerSignal           : BOOL;             // Входният стакер има нужда да се зареди с тари
+		UnloadStackerSignal         : BOOL; 			// Изходният стакер има нужда да се зареди с тари 
+
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

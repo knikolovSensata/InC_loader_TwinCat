@@ -1,0 +1,3083 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="roboArmStation" Id="{4aab7008-6b72-4d53-8710-c74444b4e93b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK roboArmStation EXTENDS stateMachine
+VAR_INPUT
+	
+	ioImage                : roboArmImage;
+
+END_VAR
+
+VAR
+
+	activeState            : roboArmStates;	
+	
+	initDone			   : BOOL := FALSE; 						   // Робота е инизиализиран
+	resetActive            : BOOL := FALSE;                            // Процедура за homming  на робота - ипълнявасе за повечето движение след EMG или Err
+	nextMoveStart          : BOOL := FALSE;                            // Тук се решава следващият ход на робота
+	moveToEmptyStart       : BOOL := FALSE;                            // Робота отива да вземе тара от чакащата поз.
+	emptyToUnloadStart     : BOOL := FALSE;                            // Тара се мести от чакащата поз. на изходен стакер
+	unloadPalletStart      : BOOL := FALSE;                            // Робота подава празна тара на изх. стакер за закл.
+	loadPalletStart        : BOOL := FALSE;                            // Има празна тара за взимане от вх. стакер
+	emptyPosStart          : BOOL := FALSE;                            // Робота премества празна тара на чакащата поз.
+	loadStart              : BOOL := FALSE;                            // Робота търси сензор за взимане от входната тара
+	unloadStart            : BOOL := FALSE;                            // Робота търси място да остави сензор в изх. тара
+	lInsertStart           : BOOL := FALSE;                            // Робота трябва да зареди със сензор Load Inserter
+	lInsertLockStart       : BOOL := FALSE;                            // Подаване на сензора от робота към Load Inserter
+	lInsertBack            : BOOL := FALSE;                            // Зареждането на сензора в Load Inserter е завършено
+	uInsertStart           : BOOL := FALSE;                            // Робота трябва да вземе сензора от Unload Inserter
+	uInsertLockStart       : BOOL := FALSE;                            // Взимане на сензора от робота към Uload Inserter
+	uInsertBack            : BOOL := FALSE;                            // Вимането на сензора в Load Inserter е завършено	
+	
+	fixturesCount          : INT; 									   // Брой гнезда на тара спрямо избраната рецепта
+	loadFixtures           : INT; 									   // Брой гнезда на входната тара
+	unLoadFixtures         : INT; 									   // Брой гнезда на изходната тара
+    xWaitPos               : REFERENCE TO imageIO;                     // В зависимост от рецептата се използва само едната чакаща поз. 
+	typeHEX24              : BOOL;                                     // Работи се с HEX 24 
+	typeHEX27              : BOOL;                                     // Работи се с HEX 27 	
+    lamp24On               : BOOL;                                     // Сигнализация че оператора трябва да постави празна тара на чакаща поз. HEX24                              
+	lamp27On               : BOOL;                                     // Сигнализация че оператора трябва да постави празна тара на чакаща поз. HEX27 
+	palletIn			   : BOOL := FALSE;                            // Има захваната празна тара от робота
+	palletMiss             : BOOL;                                     // На чакаща поз. липсва тара - робота не е донесъл
+	palletOnEmptyPos       : BOOL;                                     // На чакаща поз. има поставена тара
+	purgeActive            : BOOL;                                     // Има активна процедура PURGE
+	initWaitLStacker       : BOOL;
+	tempUnloadMove         : BOOL;
+	checkLoadStacker       : BOOL;
+	
+	TON_0				   : TON;                                      // Тимери за мигането на лампите за чакащата поз.
+	TON_1                  : TON;
+	TOF_0                  : TOF;
+	TOF_1                  : TOF;	
+	
+	gripTime			   : TIME := T#250MS;                          // Време за ход на грипера  	
+	gripTimeOut            : TIME := T#2S;                             // Време за отваряне/затваряне на гриперите
+	rotTimeOut             : TIME := T#2S;                             // Време за завъртане на сензора	
+	slideTime              : TIME := T#2S;                             // Време за сваляне/качване на слайдера за тара
+	palletGripTime         : TIME := T#500MS;                          // Време за захващатане на тара от "мекия" грипер
+	robotHomeTime          : TIME := T#20S;                            // Време за ресетване на робота - изпълнение на HOME
+	robotMoveTime		   : TIME := T#10S;                            // Макс. време за ход на робота
+	robotRecipeTime        : TIME := T#1S;                             // Време за зареждане на рецепта в робота
+	sensorTime             : TIME := T#250MS;                          // Време за отчитане на сигнал от лазерната ролетка
+	rotAfterTime		   : TIME := T#1S;                             // След ход на робота, след това време за обръща сензора
+	
+END_VAR
+
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+signalLamps(enable   := palletOnEmptyPos,
+			lamp24   := lamp24On, 
+			sensor24 :=	io.getX(ioImage.xWaitPos24),		
+            lamp27   := lamp27On, 
+			sensor27 :=	io.getX(ioImage.xWaitPos27) );
+
+setStateVars(ioImage, activeState);
+
+
+CASE activeState OF 
+	
+
+// *** Starting Up
+//  Старт на станцията след подаване на захр.
+	
+	roboArmStates.stStartUp:
+		setDisplayState(roboArmDisplayStates.dStPowerUp);
+		nextState(roboArmStates.stPowerUp);
+		
+// *** Power Up
+// Проверява се дали няма останал сензор в робота
+
+	roboArmStates.stPowerUp:
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			setError(roboArmStates.stErrInitSensor);
+		END_IF
+		
+		IF io.getX(ioImage.xWaitPos24) THEN
+			setError(roboArmStates.stErrInitPalletOn24);
+		END_IF
+		
+		IF io.getX(ioImage.xWaitPos27) THEN
+			setError(roboArmStates.stErrInitPalletOn27);
+		END_IF		
+	
+// *** Init 
+//  Инициализация на станцията
+
+	roboArmStates.stInit:
+		
+		depWait(globalDeps.depRoboInitDone);
+		
+		IF resetActive THEN
+			nextState(roboArmStates.stResetStart);
+		ELSE
+			nextState(roboArmStates.stNextRobotState);	
+		END_IF		
+		
+// *** Next Robot State
+		
+	roboArmStates.stNextRobotState:
+	
+		IF initWaitLStacker THEN
+			nextState(roboArmStates.stInitWaitLoadStacker);			
+		END_IF
+
+		IF NOT initDone THEN
+			nextState(roboArmStates.stInitStart);
+		END_IF
+
+		IF nextMoveStart THEN
+			nextState(roboArmStates.stNextMoveStart);
+		END_IF	
+
+		IF moveToEmptyStart THEN
+			nextState(roboArmStates.stMoveToEmptyStart);
+		END_IF	
+	
+		IF emptyToUnloadStart THEN
+			nextState(roboArmStates.stEmptyToUnloadMove);
+		END_IF
+		
+		IF unloadPalletStart THEN
+			nextState(roboArmStates.stUnloadPalletStart);
+		END_IF	
+		
+		IF loadPalletStart THEN
+			nextState(roboArmStates.stLoadPalletStart);
+		END_IF	
+		
+		IF emptyPosStart THEN
+			nextState(roboArmStates.stEmptyPosStart);
+		END_IF		
+		
+		IF loadStart THEN
+			nextState(roboArmStates.stLoadStart);
+		END_IF		
+		
+		IF unloadStart THEN
+			nextState(roboArmStates.stUnloadStart);
+		END_IF	
+		
+		IF lInsertStart THEN
+			nextState(roboArmStates.stLInsertStart);
+		END_IF	
+
+		IF lInsertLockStart THEN
+			nextState(roboArmStates.stLInsertLockStart);
+		END_IF	
+		
+		IF lInsertBack THEN
+			nextState(roboArmStates.stLInsertBackStart);
+		END_IF	
+
+		IF uInsertStart THEN
+			nextState(roboArmStates.stUInsertStart);
+		END_IF		
+		
+		IF uInsertLockStart THEN
+			nextState(roboArmStates.stUInsertLockStart);
+		END_IF		
+		
+		IF uInsertBack THEN
+			nextState(roboArmStates.stUInsertBackStart);
+		END_IF				
+		
+		nextState(roboArmStates.stInitDone);	
+	
+// *** Init Done	
+	
+	roboArmStates.stInitDone:
+		nextState(roboArmStates.stReady);
+ 
+// *** Ready
+
+	roboArmStates.stReady:
+		setDisplayState(roboArmDisplayStates.dStWorking);	
+		depNextState(Stations.machineStBase,  globalDeps.depMachineStopping,  roboArmStates.stStationStop);
+		depNextState(Stations.machineStBase,  globalDeps.depMachineStop,      roboArmStates.stStationStop);
+		IF purgeActive THEN
+			nextState(roboArmStates.stPurgeStart);			
+		END_IF
+		nextState(roboArmStates.stNextMoveStart);		
+
+// *** Station Stop	
+	
+	roboArmStates.stStationStop:
+		setDisplayState(roboArmDisplayStates.dStPowerUp);
+		depWait(globalDeps.depRoboStop);
+		depNextState(stations.machineStBase, globalDeps.depMachineAuto, 	  roboArmStates.stInit);
+		depNextState(stations.machineStBase, globalDeps.depMachinePurgeStart, roboArmStates.stPurgeStart);
+		Global.robotSafe := TRUE;
+
+// *** Purge  - Start	
+	
+	roboArmStates.stPurgeStart:
+		purgeActive      := TRUE;	
+		Global.robotSafe := FALSE;		
+		depNextState(stations.machineStBase, globalDeps.depMachinePurgeRobot,  roboArmStates.stPurgeMove);	
+		IF Global.sensorOnIUnload THEN
+			nextState(roboArmStates.stUInsertStart);	
+			Global.sensorOnIUnload := FALSE;	
+		END_IF
+		
+// *** Purge - Move
+// Премества се робота на HOME поз.	
+	
+	roboArmStates.stPurgeMove:
+		Stations.roboData := dataRequestRobot.roboPrg_Home;
+		nextState(roboArmStates.stPurgeMoveCheck);	
+		
+// *** Purge - Move Check
+// Робота изпчълни ли си хода ?
+	
+	roboArmStates.stPurgeMoveCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			nextState(roboArmStates.stPurgeSync);
+		END_IF
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotHomeTime, roboArmStates.stErrRobotReset);
+		
+// *** Purge - Sync 
+	
+	roboArmStates.stPurgeSync:		
+		depWait(globalDeps.depRoboPurgeDone); 
+		nextState(roboArmStates.stPurgeMoveDone);			
+			
+// *** Purge - Done 
+	
+	roboArmStates.stPurgeMoveDone:
+		purgeActive := FALSE;
+		initDone    := FALSE; 
+		nextState(roboArmStates.stStationStop);	
+
+// *** Init - Start
+// Робота се прибира на безопасно място и инициялизира толинга си
+
+	roboArmStates.stInitStart:
+		initDone          := FALSE;
+		resetActive       := FALSE;
+        Stations.roboData := dataRequestRobot.done;		
+		nextState(roboArmStates.stInitMoveHome);
+		
+// *** Init - Move Home
+// Задаване на робота програма HOME
+
+	roboArmStates.stInitMoveHome:
+		Stations.roboData := dataRequestRobot.roboPrg_Home;
+		nextState(roboArmStates.stInitMoveCheck);
+		
+// *** Init - Move Check
+// Проверка дали се е робота е на HOME поз.
+
+	roboArmStates.stInitMoveCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
+			io.setSR(ioImage.yRot_home, ioImage.yRot_back);
+			io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
+			io.rstY(ioImage.yPalletLoad);
+			nextState(roboArmStates.stInitToolCheck);
+		END_IF
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotHomeTime, roboArmStates.stErrRobotReset);
+
+// *** Init - Tool Check
+// Проверка дали толинга на робота се е инциализирал
+
+	roboArmStates.stInitToolCheck:
+		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) AND
+		   io.getSR(ioImage.xRot_home, ioImage.xRot_back)    AND
+		   io.getSR(ioImage.xSlide_up, ioImage.xSlide_down)  THEN
+		   		nextState(roboArmStates.stInitLoadRecipe);
+		END_IF
+		
+		IF stateDelay(slideTime * 2) THEN
+			IF NOT io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
+				setError(roboArmStates.stErrGripNotOpen);
+			END_IF
+		
+			IF NOT io.getSR(ioImage.xRot_home, ioImage.xRot_back) THEN
+				setError(roboArmStates.stErrRotNotTurn0);
+			END_IF
+
+			IF NOT io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN
+				setError(roboArmStates.stErrSlideNotUp);
+			END_IF
+		END_IF	
+
+// *** Init - Load Recipe
+// Заражда правилната рецепта в зависимост от подадените данни от InC
+
+	roboArmStates.stInitLoadRecipe:
+		fixturesCount := Stations.roboSetings.roboArmParams[Global.recipe].fixtureNum;		
+		IF Stations.roboSetings.roboArmParams[Global.recipe].waitPos24 THEN
+			xWaitPos  REF= ioImage.xWaitPos24;
+			typeHEX24 := TRUE; 
+			typeHEX27 := FALSE;			
+		ELSIF Stations.roboSetings.roboArmParams[Global.recipe].waitPos27 THEN
+			xWaitPos  REF= ioImage.xWaitPos27;
+			typeHEX27 := TRUE;
+			typeHEX24 := FALSE;  			
+		END_IF	
+		palletOnEmptyPos        := TRUE;		
+		TagsRobot.roboRecipeNum := Global.recipe;
+		Stations.roboData       := dataRequestRobot.roboRecipe;
+		nextState(roboArmStates.stInitRecipeCheck);		
+
+// *** Init - Recipe Check
+// Проверка дали е заредена рецептата в робота
+
+	roboArmStates.stInitRecipeCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			nextState(roboArmStates.stInitSyncStations);
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotRecipeTime, roboArmStates.stErrRobotRecipeTimeOut);
+
+// *** Init - Sync Stations
+// Робота се е ресетнал - сега могат да се движат и останали станций
+
+	roboArmStates.stInitSyncStations:
+		IF NOT Global.robotSafe THEN
+			depSync(Stations.sLoadStBase,        globalDeps.depSLoadWaitRobotReady);		
+			depSync(Stations.sUnloadStBase,      globalDeps.depSUnloadWaitRobotReady);		
+			depSync(Stations.insertLoadStBase,   globalDeps.depILoadWaitRobotReady);		
+			depSync(Stations.insertUnloadStBase, globalDeps.depULoadWaitRobotReady);
+			nextState(roboArmStates.stInitWaitLoadStacker);	
+		ELSE
+			nextState(roboArmStates.stInitWaitLoadStacker);	
+		END_IF					
+
+
+// *** Init - Wait Load Stacker
+// Изчакава вх. стакер да си зареди тарите
+// Тук се влиза след EMG -  оператора трябва да отвори вратите да зареди тари
+// Сиглилзира на другите станций, че робота е на безопастно място - не е направено добре
+// С глобална променлиеа - порази факта, че има само едно dependancy за state !
+
+	roboArmStates.stInitWaitLoadStacker:
+		initWaitLStacker := TRUE;	
+		Global.robotSafe := TRUE;	
+    	depWait(globalDeps.depSLoadStationReady);	
+		nextState(roboArmStates.stInitReady);		
+	
+// *** Init - Ready
+
+	roboArmStates.stInitReady:	
+		initDone           := TRUE;
+		initWaitLStacker   := FALSE;
+		Global.robotSafe   := FALSE;
+    	loadFixtures       := fixturesCount;
+		nextState(roboArmStates.stMoveToEmptyStart);	
+		
+// *** Reset - Start
+// Робота се прибира на Home позицията си и в зависимост дали е взел сенсор или тара
+// се избира следващият state
+
+	roboArmStates.stResetStart:		
+		resetActive := TRUE;
+		nextState(roboArmStates.stResetSlider);			
+	
+// *** Reset - Slider
+// Ако няма захваната тара робота вдига слайдера нагора 
+// Ako има захваната тара грипера за тарата и слайдера не се пипат
+
+	roboArmStates.stResetSlider:	
+		IF 	palletIn THEN
+			nextState(roboArmStates.stResetGrip);	
+		ELSE
+			io.rstY(ioImage.yPalletLoad);
+			IF stateDelay(palletGripTime) THEN
+				io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
+			    nextState(roboArmStates.stResetSliderCheck);				
+			END_IF
+		END_IF
+	
+// *** Reset - Slider Check
+// Няма захваната тара и се проверява дали слайдера е горе
+
+	roboArmStates.stResetSliderCheck:	
+		IF io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN 
+			nextState(roboArmStates.stResetGrip);
+		END_IF
+		timeOutError(slideTime, roboArmStates.stErrSlideNotUp);	
+
+// *** Reset - Grip
+// Ако има сензор в грипера на робота той не се пипа
+// Ако няма може грипера да се отвори
+
+	roboArmStates.stResetGrip:
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			Stations.roboData := dataRequestRobot.roboPrg_Home;	
+			nextState(roboArmStates.stResetMoveCheck);			
+		ELSE
+			io.setSR(ioImage.yGrip_open, ioImage.xGrip_close);
+			nextState(roboArmStates.stResetGripCheck);	
+		END_IF	
+
+// *** Reset - Grip Check
+// В грипера на робота е нямало сензор 
+// Проверява се дали се е отворил
+
+	roboArmStates.stResetGripCheck:
+		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
+			Stations.roboData := dataRequestRobot.roboPrg_Home;	
+			nextState(roboArmStates.stResetMoveCheck);				
+		END_IF
+		timeOutError(gripTimeOut, roboArmStates.stErrGripNotOpen);	
+
+// *** Reset - Move Check
+// Проверка дали робота е в HOME
+
+	roboArmStates.stResetMoveCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			io.setSR(ioImage.yRot_home, ioImage.yRot_back);
+			nextState(roboArmStates.stResetRotCheck);
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotHomeTime, roboArmStates.stErrRobotReset);
+
+// *** Reset - Rot Check
+// Проверка дали ротатора се е завъртял на 0 град.
+
+	roboArmStates.stResetRotCheck:
+		IF io.getSR(ioImage.xRot_home, ioImage.xRot_back) THEN
+			nextState(roboArmStates.stResetSync);				
+		END_IF
+		timeOutError(rotTimeOut, roboArmStates.stErrRotNotTurn0);	
+		
+// *** Reset - Sync
+// Синхронизазия с останалите станция, че робота е готов
+
+	roboArmStates.stResetSync:	
+		nextState(roboArmStates.stNextRobotState);				
+
+// *** Reset - Done
+
+	roboArmStates.stResetDone:
+		resetActive := FALSE;
+		nextState(roboArmStates.stInit);
+
+// *** Next Move - Start
+// Тук се рещава какъв е следващият ход на робота на базата на ред условия
+
+	roboArmStates.stNextMoveStart:
+		nextMoveStart := TRUE;
+        resetActive   := TRUE;
+		IF NOT Global.lStackerEmpty THEN
+			IF checkLoadStacker AND loadFixtures = 0 THEN
+				 depWait(globalDeps.depSLoadStationReady);
+		   		 nextState(roboArmStates.stNextMoveWaitLStacker);	
+			ELSE
+				nextState(roboArmStates.stNextMovePalletCheck);
+	   		END_IF	
+		END_IF
+		
+// *** Next Move  - Wait Load Stacker
+// Изчаква се вх. стакер да си свърши работата
+
+	roboArmStates.stNextMoveWaitLStacker:
+		checkLoadStacker := FALSE;		
+		loadFixtures     := fixturesCount;
+		nextState(roboArmStates.stNextMovePalletCheck);	
+
+// *** Next Move - Pallet Check
+// Ако робота има захванта тара, то:
+// 1. Има бройки на изх. тара - захванатата тара се оставя на чакащата поз.
+// 2. Няма борйки на изх. тара захванатата тара се мести на изх. стакер
+
+	roboArmStates.stNextMovePalletCheck:
+		checkLoadStacker := FALSE;
+		IF palletIn THEN
+			IF unLoadFixtures > 0 OR Global.uStackerFull THEN
+				nextMoveStart := FALSE;
+				nextState(roboArmStates.stEmptyPosStart);				
+			ELSE
+				IF NOT tempUnloadMove THEN
+					depSync(Stations.sUnloadStBase, globalDeps.depSUnloadStationReady);
+					nextState(roboArmStates.stNextMoveSync);
+				ELSE
+					nextState(roboArmStates.stNextMoveSync);
+				END_IF
+				END_IF							
+			END_IF
+		nextState(roboArmStates.stNextMoveUnlodeFull);	
+
+//*** Next MOVE - Sync
+// ИЗходния стакер трява да е готов 
+
+	roboArmStates.stNextMoveSync:	
+	tempUnloadMove := TRUE;
+ 	Stations.roboData := dataRequestRobot.roboPrg_LoadToUnload;
+		nextState(roboArmStates.stNextMoveCheck1);		
+	
+// *** Next Move - Move Check
+// Робота е занесъл празна тара над изх. стакер ?
+
+	roboArmStates.stNextMoveCheck1:	
+		IF Stations.roboData = dataRequestRobot.done THEN			
+			nextState(roboArmStates.stNextMovePass);
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);			
+
+// *** Next Move - Pass 1 
+
+	roboArmStates.stNextMovePass:
+	    tempUnloadMove := FALSE;
+		nextMoveStart  := FALSE;	
+		nextState(roboArmStates.stUnloadPalletStart);
+		
+// *** Next Move - Unload Full
+// Изх. тара е пълна и трябва да се смени:
+// 1. Ако има тара на чакаща поз. - тя се взима
+// 2. Ако вх. тарата е празна     - тя се взима 
+
+	roboArmStates.stNextMoveUnlodeFull:
+	
+		IF unLoadFixtures = 0 THEN		
+		
+			IF palletOnEmptyPos THEN
+				IF io.getX(xWaitPos) THEN 
+			    	Stations.roboData := dataRequestRobot.roboPrg_EmptyPlace;	
+					nextState(roboArmStates.stNextMoveEmptyCheck);	
+				ELSE									// На чакащата поз. е трябвало да има тара, но няма !
+					IF typeHEX24 THEN
+						lamp24On := TRUE;
+						lamp27On := FALSE;
+					ELSIF typeHEX27 THEN
+						lamp24On := FALSE;
+						lamp27On := TRUE;
+					END_IF	
+					setError(roboArmStates.stErrNoPalletWaitPos);
+				END_IF		
+		
+			ELSIF NOT palletOnEmptyPos AND loadFixtures = 0 THEN
+				nextState(roboArmStates.stNextMoveLoadMove);	
+			END_IF	
+		
+		END_IF
+		nextState(roboArmStates.stNextMoveLoadEmpty);		
+
+// *** Next Move - EmptyCheck
+// Робота трябва да е над чакащата поз. 
+
+	roboArmStates.stNextMoveEmptyCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			depSignal(globalDeps.depRoboUnLodPalletFull);
+			nextState(roboArmStates.stNextMovePalletOnUload);
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);	
+	
+// *** Next Move - EmptyCheck
+// Тарата може да се захване от робота
+
+	roboArmStates.stNextMovePalletOnUload:
+		nextMoveStart := FALSE;	
+		IF NOT Global.uStackerFull THEN
+			nextState(roboArmStates.stMoveToEmptySliderDown);
+		ELSE
+	    	moveToEmptyStart   := TRUE;			
+		END_IF
+			
+// *** Next Move - Load 
+// Робота отива над вх. стакер
+
+	roboArmStates.stNextMoveLoadMove:		
+			Stations.roboData := dataRequestRobot.roboPrg_LoadStacker;	
+			nextState(roboArmStates.stNextMoveLoadMoveCheck);			
+
+// *** Next Move - Load Check
+// Робота трябва да е над вх. стакер
+
+	roboArmStates.stNextMoveLoadMoveCheck:		
+		IF Stations.roboData = dataRequestRobot.done THEN	
+			depSignal(globalDeps.depRoboUnLodPalletFull);		
+			nextState(roboArmStates.stNextMoveLoadDone);	
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);
+
+// *** Next Move - Load Done
+// Изх. стакер може да заради тара 
+
+	roboArmStates.stNextMoveLoadDone:	
+			nextMoveStart := FALSE;			
+			nextState(roboArmStates.stLoadPalletStart);			
+		
+// *** Next Move - Load Empty
+// Входната тара е празна трябв да се зенесе на чакаща поз.
+// Тук на изх. тара все още има място 
+
+	roboArmStates.stNextMoveLoadEmpty:		
+		IF loadFixtures = 0 AND unLoadFixtures > 0 THEN	
+			IF NOT io.getX(xWaitPos) THEN
+				Stations.roboData := dataRequestRobot.roboPrg_LoadStacker;				
+				nextState(roboArmStates.stNextMoveCheck2);	
+			ELSE 
+				setError(roboArmStates.stErrPalletOnWaitPos);
+			END_IF		
+		END_IF
+		nextState(roboArmStates.stNextNewCycle);			
+			
+// *** Next Move - Load Empty
+// Робота трябва да е над вх. стакер
+
+	roboArmStates.stNextMoveCheck2:		
+		IF Stations.roboData = dataRequestRobot.done THEN			
+			nextMoveStart := FALSE;			
+			nextState(roboArmStates.stLoadPalletStart);	
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);			
+			
+// *** Next Move - New Cycle
+// Във вх. тара има сензор
+// Във изх. тара има още място - робота продължава
+
+	roboArmStates.stNextNewCycle:	
+		IF loadFixtures > 0 AND unLoadFixtures > 0 THEN
+			nextMoveStart := FALSE;			
+			nextState(roboArmStates.stLoadStart);	
+		ELSE
+			// изх. стакер е празен, вх. е пълен и е няма тара на чакаща пoз.
+			// затова се кара оператора да сложи тари на чакащата поз.
+			palletOnEmptyPos := TRUE;
+			IF typeHEX24 THEN
+				lamp24On := TRUE;
+				lamp27On := FALSE;
+		    ELSIF typeHEX27 THEN
+				lamp24On := FALSE;
+				lamp27On := TRUE;
+			END_IF	
+			nextState(roboArmStates.stNextMoveUnlodeFull);		
+		END_IF
+
+// *** Move to Empty - Start
+// Празна тара се взиама от чакащата поз. и се премества отгоре на изходният стакер
+
+	roboArmStates.stMoveToEmptyStart:
+		moveToEmptyStart   := TRUE;	
+		resetActive        := TRUE;
+		nextState(roboArmStates.stMoveToEmptyCheck);		
+		
+// *** Move to Empty - Check
+// На чакаща поз. трябва да има тара
+// Ако има робота отива там 
+
+	roboArmStates.stMoveToEmptyCheck:		
+		IF io.getX(xWaitPos) THEN
+			lamp24On 		   := FALSE;
+			lamp27On           := FALSE;	
+		    Stations.roboData  := dataRequestRobot.roboPrg_EmptyPlace;
+			nextState(roboArmStates.stMoveToEmptyMoveCheck);	
+		ELSE
+			IF typeHEX24 THEN
+				lamp24On := TRUE;
+				lamp27On := FALSE;
+			ELSIF typeHEX27 THEN
+				lamp24On := FALSE;
+				lamp27On := TRUE;
+			END_IF	
+			setError(roboArmStates.stErrNoPalletWaitPos);
+		END_IF		
+	
+// *** Move to Empty - Move Check
+// Проверка дали робота е стигнал над чакащата поз.
+
+	roboArmStates.stMoveToEmptyMoveCheck:		
+		IF Stations.roboData = dataRequestRobot.done THEN
+			nextState(roboArmStates.stMoveToEmptySliderDown);
+		END_IF
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);		
+		
+// *** Move to Empty - Slider Down
+// Слайдера слиза надолу
+
+	roboArmStates.stMoveToEmptySliderDown:		
+		io.setSR(ioImage.ySlide_down, ioImage.ySlide_up);	
+		nextState(roboArmStates.stMoveToEmptySliderCheck);		
+
+// *** Move to Empty - Slider Check
+// Проверка дали скайдера е долу
+
+	roboArmStates.stMoveToEmptySliderCheck:
+		IF io.getSR(ioImage.xSlide_down, ioImage.xSlide_up) THEN 
+			io.setY(ioImage.yPalletLoad);
+			IF stateDelay(palletGripTime) THEN
+				palletIn         := TRUE;
+				palletOnEmptyPos := FALSE;
+				lamp24On 		 := FALSE;
+				lamp27On         := FALSE;
+				nextState(roboArmStates.stMoveToEmptyDone);				
+			END_IF
+		END_IF		
+		timeOutError(slideTime + palletGripTime, roboArmStates.stErrSlliderNotDown);
+
+// *** Move to Empty - Done
+
+	roboArmStates.stMoveToEmptyDone:	
+		moveToEmptyStart := FALSE;				
+		nextState(roboArmStates.stEmptyToUnloadStart);		
+		
+// *** Empty to Unload - Start  
+// Преместване на захваната тара от чакащата поз. към изх. стакер
+
+	roboArmStates.stEmptyToUnloadStart:		
+		resetActive        := TRUE;
+		nextState(roboArmStates.stMoveToUnloadSync);
+
+// *** Empty to Unload - Sync
+// Изходният стакер трябва да е готов преди да му се носи тара от робота
+
+	roboArmStates.stMoveToUnloadSync:		
+		depSync(Stations.sUnloadStBase, globalDeps.depSUnloadStationReady);
+		nextState(roboArmStates.stEmptyToUnloadMove);						
+
+// *** Empty to Unload - Move
+// Робота тръгва към изх. стакер с празна тара
+
+	roboArmStates.stEmptyToUnloadMove:
+		emptyToUnloadStart := TRUE;	
+		Stations.roboData  := dataRequestRobot.roboPrg_EmptyPlaceToUnload;
+		nextState(roboArmStates.stEmptyToUnloadMoveCheck);			
+
+// *** Empty to Unload - Move Check
+// Проверка дали робта е там
+
+	roboArmStates.stEmptyToUnloadMoveCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			nextState(roboArmStates.stEmptyToUnloadDone);
+		END_IF
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);	
+
+// *** Empty to Unload -Done
+
+	roboArmStates.stEmptyToUnloadDone:
+		nextState(roboArmStates.stUnloadPalletStart);		
+			
+// *** Unload Pallet - Start
+// Занесената празна тара от робота, трябва да се закл. от изх. стакер
+// на върха му
+
+	roboArmStates.stUnloadPalletStart:		
+		depSignal(globalDeps.depRoboStartLoadStacker);
+		nextState(roboArmStates.stUnloadPalletSyncStacker);			
+	
+// *** Unload Pallet - Sync Stacker
+// Цинхронизация с UnloadStacker - Робота синква, че е донесъл тара, 
+// а стакера потвърждава, че я закл.
+// Проверява се (на базата на xTop сензора на върха на стакера) дали изхобщо 
+// робота е донесъл тара
+
+	roboArmStates.stUnloadPalletSyncStacker:
+		unloadPalletStart  := TRUE;
+		emptyToUnloadStart := FALSE;
+		resetActive        := FALSE;
+		IF Global.palletFail THEN
+			setError(roboArmStates.stErrNoPalletUnload);
+			Global.palletFail := FALSE;
+			resetActive       := TRUE;
+        END_IF			
+		depSync(Stations.sUnloadStBase, globalDeps.depSUnloadRobotUnloadGrip);		
+		depWait(globalDeps.depRoboUnLoadPalletLock);
+		nextState(roboArmStates.stUnlodPalletRelease);		
+		
+// *** Unload Pallet - Pallet Release
+// Тарата е успешно закл. на върха на изходният стакер, робота
+// може да я усвободи
+
+	roboArmStates.stUnlodPalletRelease:	
+		palletOnEmptyPos := FALSE;
+		lamp24On         := FALSE;
+		lamp27On         := FALSE;	
+		io.rstY(ioImage.yPalletLoad);
+		IF stateDelay (palletGripTime) THEN
+			io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
+		    nextState(roboArmStates.stUnloadPalletSlideCheck);	
+       END_IF							
+		
+// *** Unload Pallet - Slide Check
+// Когато слайдера е горе може да се синкне unloadStaker, че робота е
+// освободил тарата
+
+	roboArmStates.stUnloadPalletSlideCheck:		
+		IF io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN 
+			resetActive     := TRUE;
+			palletIn        := FALSE;
+			unLoadFixtures  := fixturesCount;		
+			nextState(roboArmStates.stUnloadPalletSync);
+		END_IF
+		timeOutError(slideTime, roboArmStates.stErrSlideNotUp);	
+
+// *** Unload Pallet - Sync
+
+	roboArmStates.stUnloadPalletSync:
+		depSync(Stations.sUnloadStBase, globalDeps.depSUnloadRobotOutOfReach);		
+		nextState(roboArmStates.stUnloadPalletDone);		
+		
+// *** Unload Pallet - Done
+
+	roboArmStates.stUnloadPalletDone:			
+		unloadPalletStart := FALSE;		
+		checkLoadStacker  := TRUE;		
+		nextState(roboArmStates.stNextMoveStart);	
+
+// *** Load Pallet - Start
+// Робота трябва да взема вече празната тара от вх. стакер
+
+	roboArmStates.stLoadPalletStart:			
+		loadPalletStart := TRUE;	
+		resetActive     := TRUE;
+		nextState(roboArmStates.stLoadPalletSlideDown);
+
+// *** Load Pallet - Slider Down
+// Сваляне на слайдера
+
+	roboArmStates.stLoadPalletSlideDown:			
+		io.setSR(ioImage.ySlide_down, ioImage.ySlide_up);
+		nextState(roboArmStates.stLoadPalletSliderCheck);	
+	
+// *** Load Pallet - Slider Check
+// Проверка дали слайдера е в долна поз.
+
+	roboArmStates.stLoadPalletSliderCheck:		
+		IF io.getSR(ioImage.xSlide_down, ioImage.xSlide_up) THEN 
+			io.setY(ioImage.yPalletLoad);
+			resetActive := FALSE;
+			IF stateDelay(palletGripTime) THEN
+				nextState(roboArmStates.stLoadPalletSignal);				
+			END_IF
+		END_IF		
+		timeOutError(slideTime + palletGripTime, roboArmStates.stErrSlliderNotDown);			
+		
+// *** Load Pallet - Pallet Signal
+// Синква стакера - той трябва да оключи тарата
+
+	roboArmStates.stLoadPalletSignal:		
+		depSignal(globalDeps.depSLoadRobotLoadGrip);
+		nextState(roboArmStates.stLoadPalletSync);
+		
+// *** Load Pallet - Pallet Sync
+// Изчаква стакера да завърши
+
+	roboArmStates.stLoadPalletSync:
+		depWait(GlobalDeps.depRoboLoadPalletUnlock);
+		nextState(roboArmStates.stLoadPalletDone);		
+		
+// *** Load Pallet - Done
+
+	roboArmStates.stLoadPalletDone:	
+		palletIn        := TRUE;		
+		loadPalletStart := FALSE;
+		resetActive     := TRUE;	
+		nextState(roboArmStates.stNextMoveStart);		
+
+// *** Empty Pos  - Start
+// Празната тара от вх. стакер трябва да се занесе на
+// чакащата поз.
+
+	roboArmStates.stEmptyPosStart:
+		emptyPosStart := TRUE;
+		resetActive   := TRUE;
+		nextState(roboArmStates.stEmptyPosMove);		
+		
+// *** Empty Pos  - Move
+// Робота се премества над чакащата поз.
+
+	roboArmStates.stEmptyPosMove:
+		Stations.roboData     := dataRequestRobot.roboPrg_LoadToEmptyPlace;
+		nextState(roboArmStates.stEmptyPosMoveCheck);			
+	
+// *** Empty Pos  - Move Check
+// Проверка дали робота е на поз.
+
+	roboArmStates.stEmptyPosMoveCheck:	
+		IF Stations.roboData = dataRequestRobot.done THEN
+		    depSignal(globalDeps.depRoboStartLoadStacker);   
+			IF io.getX(xWaitPos) THEN
+				palletMiss := FALSE;
+			ELSE
+				palletMiss := TRUE;
+			END_IF	
+			nextState(roboArmStates.stEmptyPosRelease);
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);			
+		
+// *** Empty Pos - Release
+// Освобождаване на тарата
+
+	roboArmStates.stEmptyPosRelease:	
+		io.rstY(ioImage.yPalletLoad);
+		IF stateDelay(palletGripTime) THEN
+			io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
+			nextState(roboArmStates.stEmptyPosSlideCheck);			
+		END_IF
+
+// *** Empty Pos - Slide Check
+// Проверка дали слайдера е горe
+
+	roboArmStates.stEmptyPosSlideCheck:
+		IF io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN 
+			nextState(roboArmStates.stEmptyPosSync);
+		    palletIn := FALSE;			
+		END_IF
+		timeOutError(slideTime, roboArmStates.stErrSlideNotUp);			
+		
+// *** Empty Pos - Done
+// Ако по някакава причина е нямало донесена тара от робота,
+// вгида грешка и лампата за тара започва да мига
+
+	roboArmStates.stEmptyPosSync:	
+		palletOnEmptyPos := TRUE;
+		checkLoadStacker := TRUE;		
+
+		IF palletMiss THEN
+			IF typeHEX24 THEN
+				lamp24On := TRUE;
+				lamp27On := FALSE;
+			ELSIF typeHEX27 THEN
+				lamp24On := FALSE;
+				lamp27On := TRUE;	
+			END_IF			
+			setError(roboArmStates.stErrNoPalletWaitPos);
+			emptyPosStart    := FALSE;	
+		ELSE		
+			nextState(roboArmStates.stEmptyPosDone);	
+	
+		END_IF	
+		
+// *** Empty Pos - Done
+
+	roboArmStates.stEmptyPosDone:		
+		emptyPosStart    := FALSE;			
+		nextState(roboArmStates.stNextMoveStart);			
+		
+// *** Load - Start
+// Робота се мести на входния стакер и чрез лазерната си ролетка
+// търси сенсзор. След като намери слиза надолу и го захваща с грипера си.
+
+	roboArmStates.stLoadStart:			
+		loadStart   := TRUE;
+		resetActive := TRUE;	
+		nextState(roboArmStates.stLoadMove1);		
+		
+// *** Load - Move 1
+// Робота утива над следващата поз. на изходанта тара
+
+	roboArmStates.stLoadMove1:			
+		TagsRobot.loadPalletPos := loadFixtures;
+		Stations.roboData       := dataRequestRobot.roboPrg_SensorLoad;	
+		nextState(roboArmStates.stLoadMoveCheck1);	
+
+// *** Load - Move Check1
+// Проверка дали робота е стигнал над зададенто гнездо
+// Ако там няма сензор се мести на следващото
+
+	roboArmStates.stLoadMoveCheck1:	
+		IF Stations.roboData = dataRequestRobot.done THEN
+			IF io.getX(ioImage.xLaser) THEN
+				nextState(roboArmStates.stLoadWaitCommand);			
+			ELSE
+				loadFixtures := loadFixtures - 1;
+				IF loadFixtures < 1 THEN
+					nextState(roboArmStates.stNextMoveStart);					
+				ELSE
+					nextState(roboArmStates.stLoadMove1);
+			    END_IF 
+		    END_IF
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);
+
+// *** Load - Wait Command
+// Робота изчаква някой от Inserter да си "поиска" сенсор
+// LoadInserter ще иска робота да му занесе сензор
+// Ако по някаква причина LoadInserer не иска сензор, то UnloadInser, 
+// може да пойска робота да го разтовари
+
+	roboArmStates.stLoadWaitCommand:	
+		depNextState(Stations.insertLoadStBase, globalDeps.depILoadSignalForLoad, roboArmStates.stLoadMove2);	
+		depNextState(Stations.machineStBase,    globalDeps.depMachineStopping,    roboArmStates.stStationStop);
+		depNextState(Stations.machineStBase,    globalDeps.depMachineStop,        roboArmStates.stStationStop);		
+		
+		IF Global.sensorOnIUnload THEN
+			nextState(roboArmStates.stUInsertStart);
+	        Global.sensorOnIUnload	:= FALSE;
+		    loadStart               := FALSE; 	
+		END_IF	
+
+// *** Load - Move 2
+// Има намерен сензор в гнездото и робота е извикам от Load Inserter
+// Робота слиза надолу да захване сензора с гриперат си
+
+	roboArmStates.stLoadMove2:
+		Stations.roboData     := dataRequestRobot.roboPrg_SensorDown;
+		nextState(roboArmStates.stLoadMoveCheck2);		
+
+// *** Load - Move Check 2
+// Робота е слезнал на позиция за затваряне на грипера
+
+	roboArmStates.stLoadMoveCheck2:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
+			IF stateDelay(gripTime) THEN
+		   		 nextState(roboArmStates.stLoadGripCheck);		
+			END_IF		
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);		
+
+// *** Load - Grip Check
+// Затворил ли е грипера ?
+
+	roboArmStates.stLoadGripCheck:
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			nextState(roboArmStates.stLoadDone);	
+			loadFixtures := loadFixtures - 1;			
+		END_IF
+		timeOutError(gripTimeOut, roboArmStates.stErrGripNotClose);			
+
+// *** Load - Done
+
+	roboArmStates.stLoadDone:
+		loadStart := FALSE;
+		nextState(roboArmStates.stLInsertStart);			
+	
+// *** Unload - Start
+// След като е взел сензор от UnloadInserter робота трябва да го остави
+// на изходната тара
+
+	roboArmStates.stUnloadStart:			
+		unloadStart   := TRUE;
+		resetActive   := TRUE;	
+		nextState(roboArmStates.stUnloadMove1);		
+		
+// *** Unload - Move 1
+// Робота утива над следващата поз. на изходанта тара
+
+	roboArmStates.stUnloadMove1:	
+		io.setSR(ioImage.yRot_home, ioImage.yRot_back);		
+		TagsRobot.unLoadPalletPos := unloadFixtures;
+		Stations.roboData         := dataRequestRobot.roboPrg_SensorUnload;	
+		nextState(roboArmStates.stUnloadMoveCheck1);	
+
+// *** Unload - Move Check1
+// За да постави роботе сензоре в гнездо на изх. тара, то трябва да е празно
+
+	roboArmStates.stUnloadMoveCheck1:	
+		IF Stations.roboData = dataRequestRobot.done THEN
+			IF NOT io.getX(ioImage.xLaser) THEN
+				nextState(roboArmStates.stUnloadRotCheck);				
+			ELSE
+				unloadFixtures := unloadFixtures - 1;
+				IF unloadFixtures < 1 THEN
+					nextState(roboArmStates.stNextMoveStart);					
+				ELSE
+					nextState(roboArmStates.stUnloadMove1);
+			    END_IF 
+		    END_IF
+		END_IF	
+		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);
+
+// *** Unload - Check Rot
+// Робота слиза надолу зада остави сензора в изх. тара
+// ако ротатора е на правилната поз.
+
+	roboArmStates.stUnloadRotCheck:
+		IF io.getSR(ioImage.xRot_home, ioImage.xRot_back) THEN
+			Stations.roboData     := dataRequestRobot.roboPrg_SensorDown;
+			nextState(roboArmStates.stUnloadMoveCheck2);
+		END_IF
+		timeOutError(rotTimeOut, roboArmStates.stErrRotNotTurn0);
+
+// *** Unload - Move Check 2
+// Робота трябва да си отвори грипера за да остави сензора в изх. тара
+
+	roboArmStates.stUnloadMoveCheck2:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
+		    nextState(roboArmStates.stUnloadGripCheck);				
+		END_IF	
+		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);		
+
+// *** Unload - Grip Check
+// Отворил ли е грипера ?
+
+	roboArmStates.stUnloadGripCheck:
+		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
+		    unloadFixtures := unloadFixtures - 1;
+			nextState(roboArmStates.stUnloadDone);				
+		END_IF
+		timeOutError(gripTimeOut, roboArmStates.stErrGripNotOpen);			
+
+// *** Unload - Done
+
+	roboArmStates.stUnloadDone:
+		unLoadStart := FALSE;
+		nextState(roboArmStates.stReady);		
+		
+// *** Load Insert - Start
+// Робота трябва да подаде сензор на Load Inserter
+
+	roboArmStates.stLInsertStart:			
+		lInsertStart  := TRUE;
+		resetActive   := TRUE;	
+		nextState(roboArmStates.stLInsertMove1);			
+		
+// *** Load Insert - Move 1
+// Робота утива на поз. малко преди грипера на инсъртъра
+// Малко след кат оробота е тръгнал се завърта и сензора
+// Въртенето е на базата само на таймер !
+
+	roboArmStates.stLInsertMove1:			
+		Stations.roboData       := dataRequestRobot.roboPrg_PreLoad;
+		IF stateDelay (rotAfterTime) THEN
+			io.setSR(ioImage.yRot_back, ioImage.yRot_home);
+	    	nextState(roboArmStates.stLInsertMoveCheck1);			
+		END_IF
+							
+// *** Load Insert - Move Check 1
+// Робота изпълни ли си хода ?
+
+	roboArmStates.stLInsertMoveCheck1:				
+		IF Stations.roboData = dataRequestRobot.done THEN
+		    nextState(roboArmStates.stLInsertRotCheck);				
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);		
+		
+// *** Load Insert - Rot Check
+// За да може да се подаде сензора от робота на инсъртъра
+// той трябва да е завъртян на 180 град. След което го подава на инсътръта
+
+	roboArmStates.stLInsertRotCheck:		
+		IF io.getSR(ioImage.xRot_back, ioImage.xRot_home) THEN
+			nextState(roboArmStates.stLInsertMoveCheck2);	
+		    Stations.roboData     := dataRequestRobot.roboPrg_Load;			
+		END_IF
+		timeOutError(rotTimeOut, roboArmStates.stErrRotNotTurn180);	
+
+// *** Load Insert - Move Check 2
+// Робота изпълни ли си хода ?
+
+	roboArmStates.stLInsertMoveCheck2:				
+		IF Stations.roboData = dataRequestRobot.done THEN
+		    nextState(roboArmStates.stLInsertMoveDone);				
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);
+		
+// *** Load Insert - Done
+
+	roboArmStates.stLInsertMoveDone:
+		lInsertStart     := FALSE;	
+		nextState(roboArmStates.stLInsertLockStart);	
+		
+// *** Load Insert Lock - Start
+// Робота подава сензора на грипера на инсъттъра
+
+	roboArmStates.stLInsertLockStart:		
+        lInsertLockStart := TRUE;
+		resetActive      := FALSE;		
+		nextState(roboArmStates.stLInsertLockSync);
+		
+// *** Load Insert Lock - Sync
+// Робота се синква с Load Inserter, последият може да затвори грипера си да 
+// захване сензора. Робта изчаква това да се случи и тогава отваря грипера си.
+
+	roboArmStates.stLInsertLockSync:			
+		depSignal(globalDeps.depRoboILoadOnPos);		
+		depSync(Stations.insertLoadStBase, globalDeps.depRoboGripOpen);
+		nextState(roboArmStates.stLInsertLockGripOpen);		
+	
+// *** Load Insert Lock - Grip open
+// Робота си отваря грипера
+
+	roboArmStates.stLInsertLockGripOpen:		
+		io.setSR(ioImage.xGrip_open, ioImage.xGrip_close);
+		nextState(roboArmStates.stLInsertLockGripCheck);		
+	
+// *** Load Insert Lock - Grip Check
+// Отворил ли се е грипера ?
+
+	roboArmStates.stLInsertLockGripCheck:		
+		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
+			nextState(roboArmStates.stLInsertLockDone);					
+		END_IF
+		timeOutError(gripTimeOut, roboArmStates.stErrGripNotOpen);	
+	
+// *** Load Insert Lock - Done
+
+	roboArmStates.stLInsertLockDone:
+		lInsertLockStart := FALSE;		
+		nextState(roboArmStates.stLInsertBackStart);		
+		
+// *** Load Insert Back - Start
+// Робата се мръдва леко на зад след като е зареди сензор
+// така инсъртъра е безппастно да рабори 
+
+	roboArmStates.stLInsertBackStart:		
+		lInsertBack  := TRUE;
+		resetActive  := TRUE;
+		nextState(roboArmStates.stLInsertBackMove);				
+		
+// *** Load Insert Back - Move
+// Задава се програма на робота
+
+	roboArmStates.stLInsertBackMove:		
+		Stations.roboData := dataRequestRobot.roboPrg_PreLoad;		
+		nextState(roboArmStates.stLInsertBackMoveCheck);		
+		
+// *** Load Insert Back - Move Check
+// Робота изпълни ли си хода ?
+
+	roboArmStates.stLInsertBackMoveCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			depSignal(globalDeps.depILoadRobotBack);				
+		    nextState(roboArmStates.stLInsertBackDone);			
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);			
+		
+// *** Load Insert Back - Done
+// Зависи дали има изваден сензор от UnloadIserter
+// Робота или отива към него или към вх. стакер
+
+	roboArmStates.stLInsertBackDone:
+        lInsertBack	:= FALSE;
+        resetActive := FALSE;		
+		IF Global.sensorOnIUnload THEN 
+			nextState(roboArmStates.stUInsertStart);
+			Global.sensorOnIUnload := FALSE;
+		END_IF
+		IF loadFixtures > 0 THEN
+			nextState(roboArmStates.stLoadStart);
+		ELSE
+			nextState(roboArmStates.stNextMoveStart);
+		END_IF						
+	
+// *** Unload Insert - Start
+// Робота трябва да вземе сензор на Unload Inserter
+
+	roboArmStates.stUInsertStart:			
+		uInsertStart  := TRUE;
+		resetActive   := TRUE;	
+		nextState(roboArmStates.stUInsertMove1);			
+		
+// *** Unload Insert - Move 1
+// Робота утива на поз. малко преди грипера на инсъртъра
+
+	roboArmStates.stUInsertMove1:			
+		Stations.roboData   := dataRequestRobot.roboPrg_PreUnload;
+		IF stateDelay (rotAfterTime) THEN
+			io.setSR(ioImage.yRot_back, ioImage.yRot_home);
+			io.setSR(ioImage.xGrip_open, ioImage.xGrip_close);
+	    	nextState(roboArmStates.stUInsertMoveCheck1);			
+		END_IF
+							
+// *** Unload Insert - Move Check 1
+// Робота изпълни ли си хода ?
+
+	roboArmStates.stUInsertMoveCheck1:				
+		IF Stations.roboData = dataRequestRobot.done THEN
+		    nextState(roboArmStates.stUInsertRotCheck);				
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);		
+		
+// *** Unload Insert - Rot Check
+// За да може да се вземе сензора от робота на инсъртъра
+// той трябва да е завъртян на 0 град. 
+
+	roboArmStates.stUInsertRotCheck:		
+		IF io.getSR(ioImage.xRot_back, ioImage.xRot_home) THEN
+			nextState(roboArmStates.stUInsertSync);			
+		END_IF
+		timeOutError(rotTimeOut, roboArmStates.stErrRotNotTurn180);
+		
+// *** Unload Insert - Sync
+
+	roboArmStates.stUInsertSync:
+		depWait(globalDeps.depRoboULoadOnPos); 
+		nextState(roboArmStates.stUInsertMove2);	
+
+// *** Unload Insert - Move 2
+// Когато инсертъра е готов, робота се преближава за да вземе сензор
+
+	roboArmStates.stUInsertMove2:	
+		Stations.roboData     := dataRequestRobot.roboPrg_Unload;	
+		nextState(roboArmStates.stUInsertMoveCheck2);		
+
+// *** Unload Insert - Move Check 2
+// Робота изпълни ли си хода ?
+
+	roboArmStates.stUInsertMoveCheck2:				
+		IF Stations.roboData = dataRequestRobot.done THEN
+		    nextState(roboArmStates.stUInsertMoveDone);				
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);
+		
+// *** Unload Insert - Done
+
+	roboArmStates.stUInsertMoveDone:
+		uInsertStart     := FALSE;	
+		nextState(roboArmStates.stUInsertLockStart);	
+
+// *** Unload Insert Lock - Start
+// Робота взима сензора от грипера на инсъттъра
+
+	roboArmStates.stUInsertLockStart:		
+        uInsertLockStart := TRUE;
+		resetActive      := FALSE;			
+		nextState(roboArmStates.stUInsertLockGripClose);		
+	
+// *** Unload Insert Lock - Grip Close
+// Робота си затваря грипера
+
+	roboArmStates.stUInsertLockGripClose:		
+		io.setSR(ioImage.xGrip_close, ioImage.xGrip_open);
+		IF stateDelay(gripTime) THEN
+			nextState(roboArmStates.stUInsertLockGripCheck);	
+		END_IF	
+	
+// *** Unload Insert Lock - Grip Check
+// Затворил ли се е грипера ?
+
+	roboArmStates.stUInsertLockGripCheck:		
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			nextState(roboArmStates.stUInsertLockSync);					
+		END_IF
+		timeOutError(gripTimeOut, roboArmStates.stErrGripNotClose);	
+		
+// *** Unload Insert Lock - Sync
+// Робота се синква с UnLoad Inserter. 
+	roboArmStates.stUInsertLockSync:			
+		depSignal(globalDeps.depRoboGripClose);
+		depSync(Stations.insertUnLoadStBase, globalDeps.depRoboLoadSensor);	
+		nextState(roboArmStates.stUInsertLockDone);
+	
+// *** Unload Insert Lock - Done
+
+	roboArmStates.stUInsertLockDone:
+		uInsertLockStart := FALSE;		
+		nextState(roboArmStates.stUInsertBackStart);	
+
+// *** Unload Insert Back - Start
+// Робата се мръдва леко на зад след като е взел сензор
+
+	roboArmStates.stUInsertBackStart:		
+		uInsertBack  := TRUE;
+		resetActive  := TRUE;
+		nextState(roboArmStates.stUInsertBackMove);				
+		
+// *** Unload Insert Back - Move
+// Задава се програма на робота
+
+	roboArmStates.stUInsertBackMove:		
+		Stations.roboData := dataRequestRobot.roboPrg_PreUnload;		
+		nextState(roboArmStates.stUInsertBackMoveCheck);		
+		
+// *** Unload Insert Back - Move Check
+// Робота изпълни ли си хода ?
+
+	roboArmStates.stUInsertBackMoveCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN				
+		    nextState(roboArmStates.stUInsertBackSync);		
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);
+
+// *** Unload Insert Back - Sync
+
+	roboArmStates.stUInsertBackSync:	
+		depWait(globalDeps.depULoadRobotOutOfRich);	     			
+		nextState(roboArmStates.stUInsertBackDone);				
+		
+// *** Unload Insert Back - Done
+
+	roboArmStates.stUInsertBackDone:
+        uInsertBack	:= FALSE;
+		nextState(roboArmStates.stUnloadStart);		
+	
+// *** Step Mode
+		
+	roboArmStates.stStepBlock:
+		setDisplayState(roboArmDisplayStates.dStWaitForNextStep);
+		
+// *** Stop 
+// Станията е деактивирана
+	
+	roboArmStates.stStop:
+	
+		initDone			  := FALSE; 			
+		resetActive           := FALSE;                           
+		nextMoveStart         := FALSE;                            
+		moveToEmptyStart      := FALSE;                           
+		emptyToUnloadStart    := FALSE;                           
+		unloadPalletStart     := FALSE;                            
+		loadPalletStart       := FALSE;                            
+		emptyPosStart         := FALSE;                            
+		loadStart             := FALSE;                            
+		unloadStart           := FALSE;                            
+		lInsertStart          := FALSE;                            
+		lInsertLockStart      := FALSE;                 
+		lInsertBack           := FALSE;             
+		uInsertStart          := FALSE;                           
+		uInsertLockStart      := FALSE;                          
+		uInsertBack           := FALSE;         
+		
+// *** ERRORS
+
+// *** ERROR - Init Sensor
+// При стартиране на програмата не трябва да има сензор в грипера на робота
+		roboArmStates.stErrInitSensor:
+			setDisplayState(roboArmDisplayStates.dStErrInitSensorInGrip);
+			
+// *** ERROR - Pallet On 24
+// При стартиране на програмата не трябва да има тара на чакаща поз. HEX 24
+		roboArmStates.stErrInitPalletOn24:
+			setDisplayState(roboArmDisplayStates.dStErrInitPalletOnWaitPos24);			
+
+// *** ERROR - Pallet On 27
+// При стартиране на програмата не трябва да има тара на чакаща поз. HEX 27
+		roboArmStates.stErrInitPalletOn27:
+			setDisplayState(roboArmDisplayStates.dStErrInitPalletOnWaitPos27);		
+
+// *** ERROR - Grip Not Open
+// Гирипера на робота не е отворил навреме
+		roboArmStates.stErrGripNotOpen:
+			setDisplayState(roboArmDisplayStates.dStErrGripNotOpen);
+	
+// *** ERROR - Grip Not Close
+// Гирипера на робота не е затворил навреме
+		roboArmStates.stErrGripNotClose:
+			setDisplayState(roboArmDisplayStates.dStErrGripNotClose);			
+			
+// *** ERROR - Rot Not turn 180
+// Ротатора не е завъртял сензора на обратно (180 град.)
+		roboArmStates.stErrRotNotTurn180:
+			setDisplayState(roboArmDisplayStates.dStErrRotatorNotTurn180);			
+			
+// *** ERROR - Rot Not turn 0
+// Ротатора не е завъртял сензора (0 град.)
+		roboArmStates.stErrRotNotTurn0:
+			setDisplayState(roboArmDisplayStates.dStErrRotatorNotTurn0);					
+			
+// *** ERROR - Slinde Not Down
+// Слайдера който захваща тарата не в долна поз.
+		roboArmStates.stErrSlliderNotDown:
+			setDisplayState(roboArmDisplayStates.dStErrSlideNotDown);			
+			
+// *** ERROR - Slinde Not Up
+// Слайдера който захваща тарата не в горна поз.
+		roboArmStates.stErrSlideNotUp:
+			setDisplayState(roboArmDisplayStates.dStErrSlideNotUp);	
+
+// *** ERROR - Robot Error
+// Има някаква грашка върната от робот контролера
+		roboArmStates.stErrRobot:	
+			setDisplayState(roboArmDisplayStates.dStErrRobotError);	
+		
+// *** ERROR - Robot Reset
+// Времето за изпълнение на HOME програмата на работа е отнело трвърде мн.
+		roboArmStates.stErrRobotReset:	
+			setDisplayState(roboArmDisplayStates.dStErrRobotHomeMoveIsTooLong);			
+
+// *** ERROR - Robot Time out
+// Времето за изпълнение на движение на робота е отнело твърде мн.
+		roboArmStates.stErrRobotTimeOut:	
+			setDisplayState(roboArmDisplayStates.dStErrRobotMoveIsTooLong);	
+
+// *** ERROR - Robot Recipe TimeOut
+// Времето за зареждане на рецепта в робота е отнело твърде мн.
+		roboArmStates.stErrRobotRecipeTimeOut:	
+			setDisplayState(roboArmDisplayStates.dStErrRobotRecipeLoadIsTooLong);		
+		
+// *** ERROR - Robot Wait Pos Pallet Fail
+// На мястото на чакащата поз. няма тара
+		roboArmStates.stErrNoPalletWaitPos:	
+			setDisplayState(roboArmDisplayStates.dStErrRobotWaitPosIsEmpty);	
+
+// *** ERROR - Paallet On Wait Pos
+// Робота трябва да занесе тара на чакаща поз, но там вече има
+		roboArmStates.stErrPalletOnWaitPos:			
+			setDisplayState(roboArmDisplayStates.dStErrRobotWaitPosIsNotEmpty);			
+			
+// *** ERROR - No Pallet Unload
+// Робота не е могъл да вдигне или е изпуснал тара
+		roboArmStates.stErrNoPalletUnload:	
+			setDisplayState(roboArmDisplayStates.dStErrRobotNoPalletAtUnloadStacker);
+			unloadPalletStart := FALSE;
+			palletIn          := FALSE;	
+			
+// *** EMG State					
+	roboArmStates.stEMG: 
+		nextState(roboArmStates.stInit);
+
+END_CASE
+
+
+
+
+]]></ST>
+    </Implementation>
+    <Method Name="signalLamps" Id="{72995312-9ece-4e4f-8565-6940a627a1a7}">
+      <Declaration><![CDATA[METHOD PRIVATE signalLamps
+VAR_INPUT
+	
+	enable      : BOOL;                  
+	lamp24      : BOOL;                  // Активиране на лампа за чакаща поз. за HEX 24
+	sensor24    : BOOL;                  // Сигнал от сензора за поставена тара на поз. HEX 24
+	lamp27      : BOOL;                  // Активиране на лампа за чакаща поз. за HEX 24	
+	sensor27    : BOOL;                  // Сигнал от сензора за поставена тара на поз. HEX 27
+
+END_VAR
+
+VAR
+	
+	lamp24On    : BOOL;
+	lamp27On    : BOOL;
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <NWL>
+          <XmlArchive>
+            <Data>
+              <o xml:space="preserve" t="NWLImplementationObject">
+                <v n="NetworkListComment">""</v>
+                <v n="DefaultViewMode">"Ld"</v>
+                <l2 n="NetworkList" cet="Network">
+                  <o>
+                    <v n="ILActive">false</v>
+                    <v n="FBDValid">false</v>
+                    <v n="ILValid">false</v>
+                    <l2 n="ILLines" />
+                    <v n="Comment">""</v>
+                    <v n="Title">""</v>
+                    <v n="Label">""</v>
+                    <v n="OutCommented">false</v>
+                    <l2 n="NetworkItems" cet="BoxTreeAssign">
+                      <o>
+                        <o n="OutputItems" t="OutputItemList">
+                          <l2 n="OutputItems" cet="Operand">
+                            <o>
+                              <v n="Operand">"lamp24On"</v>
+                              <v n="Type">"BOOL"</v>
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">true</v>
+                              <v n="Boolean">false</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">217L</v>
+                            </o>
+                          </l2>
+                        </o>
+                        <o n="Flags" t="Flags">
+                          <v n="Flags">0</v>
+                          <v n="Fixed">false</v>
+                          <v n="Extensible">false</v>
+                        </o>
+                        <o n="RValue" t="BoxTreeBox">
+                          <v n="BoxType">"AND"</v>
+                          <o n="Instance" t="Operand">
+                            <n n="Operand" />
+                            <v n="Type">""</v>
+                            <v n="Comment">""</v>
+                            <v n="SymbolComment">""</v>
+                            <v n="Address">""</v>
+                            <o n="Flags" t="Flags">
+                              <v n="Flags">0</v>
+                              <v n="Fixed">false</v>
+                              <v n="Extensible">false</v>
+                            </o>
+                            <v n="LValue">false</v>
+                            <v n="Boolean">false</v>
+                            <v n="IsInstance">true</v>
+                            <v n="Id">166L</v>
+                          </o>
+                          <o n="OutputItems" t="OutputItemList">
+                            <l2 n="OutputItems" />
+                          </o>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <n n="InputFlags" />
+                          <l2 n="InputItems" cet="BoxTreeOperand">
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"enable"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">220L</v>
+                              </o>
+                              <v n="Id">219L</v>
+                            </o>
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"lamp24"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">53L</v>
+                              </o>
+                              <v n="Id">52L</v>
+                            </o>
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"lamp27"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">1</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">169L</v>
+                              </o>
+                              <v n="Id">168L</v>
+                            </o>
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"sensor24"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">1</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">216L</v>
+                              </o>
+                              <v n="Id">215L</v>
+                            </o>
+                          </l2>
+                          <o n="InputParam" t="ParamList">
+                            <l2 n="Names" />
+                            <l2 n="Types" />
+                          </o>
+                          <o n="OutputParam" t="ParamList">
+                            <l2 n="Names" />
+                            <l2 n="Types" />
+                          </o>
+                          <v n="CallType" t="Operator">And</v>
+                          <n n="EN" />
+                          <n n="ENO" />
+                          <n n="STSnippet" />
+                          <v n="ContainsExtensibleInputs">false</v>
+                          <v n="ProvidesSTSnippet">false</v>
+                          <v n="Id">167L</v>
+                        </o>
+                        <v n="Id">55L</v>
+                      </o>
+                    </l2>
+                    <l2 n="Connectors" />
+                    <v n="Id">51L</v>
+                  </o>
+                  <o>
+                    <v n="ILActive">false</v>
+                    <v n="FBDValid">false</v>
+                    <v n="ILValid">false</v>
+                    <l2 n="ILLines" />
+                    <v n="Comment">""</v>
+                    <v n="Title">""</v>
+                    <v n="Label">""</v>
+                    <v n="OutCommented">false</v>
+                    <l2 n="NetworkItems">
+                      <o t="BoxTreeDemux">
+                        <v n="VarId">9</v>
+                        <o n="Input" t="BoxTreeBox">
+                          <v n="BoxType">"TOF"</v>
+                          <o n="Instance" t="Operand">
+                            <v n="Operand">"TOF_0"</v>
+                            <v n="Type">"TOF"</v>
+                            <v n="Comment">""</v>
+                            <v n="SymbolComment">""</v>
+                            <v n="Address">""</v>
+                            <o n="Flags" t="Flags">
+                              <v n="Flags">0</v>
+                              <v n="Fixed">false</v>
+                              <v n="Extensible">false</v>
+                            </o>
+                            <v n="LValue">false</v>
+                            <v n="Boolean">false</v>
+                            <v n="IsInstance">true</v>
+                            <v n="Id">96L</v>
+                          </o>
+                          <o n="OutputItems" t="OutputItemList">
+                            <l2 n="OutputItems" cet="Operand">
+                              <n />
+                              <o>
+                                <v n="Operand">""</v>
+                                <v n="Type">"TIME"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">false</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">true</v>
+                                <v n="Boolean">false</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">98L</v>
+                              </o>
+                            </l2>
+                          </o>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <n n="InputFlags" />
+                          <l2 n="InputItems">
+                            <o t="BoxTreeBox">
+                              <v n="BoxType">"TON"</v>
+                              <o n="Instance" t="Operand">
+                                <v n="Operand">"TON_0"</v>
+                                <v n="Type">"TON"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">false</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">false</v>
+                                <v n="IsInstance">true</v>
+                                <v n="Id">99L</v>
+                              </o>
+                              <o n="OutputItems" t="OutputItemList">
+                                <l2 n="OutputItems" cet="Operand">
+                                  <n />
+                                  <o>
+                                    <v n="Operand">""</v>
+                                    <v n="Type">"TIME"</v>
+                                    <v n="Comment">""</v>
+                                    <v n="SymbolComment">""</v>
+                                    <v n="Address">""</v>
+                                    <o n="Flags" t="Flags">
+                                      <v n="Flags">0</v>
+                                      <v n="Fixed">false</v>
+                                      <v n="Extensible">false</v>
+                                    </o>
+                                    <v n="LValue">true</v>
+                                    <v n="Boolean">false</v>
+                                    <v n="IsInstance">false</v>
+                                    <v n="Id">101L</v>
+                                  </o>
+                                </l2>
+                              </o>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <n n="InputFlags" />
+                              <l2 n="InputItems">
+                                <o t="BoxTreeBox">
+                                  <v n="BoxType">"AND"</v>
+                                  <o n="Instance" t="Operand">
+                                    <n n="Operand" />
+                                    <v n="Type">""</v>
+                                    <v n="Comment">""</v>
+                                    <v n="SymbolComment">""</v>
+                                    <v n="Address">""</v>
+                                    <o n="Flags" t="Flags">
+                                      <v n="Flags">0</v>
+                                      <v n="Fixed">false</v>
+                                      <v n="Extensible">false</v>
+                                    </o>
+                                    <v n="LValue">false</v>
+                                    <v n="Boolean">false</v>
+                                    <v n="IsInstance">true</v>
+                                    <v n="Id">102L</v>
+                                  </o>
+                                  <o n="OutputItems" t="OutputItemList">
+                                    <l2 n="OutputItems" />
+                                  </o>
+                                  <o n="Flags" t="Flags">
+                                    <v n="Flags">0</v>
+                                    <v n="Fixed">false</v>
+                                    <v n="Extensible">false</v>
+                                  </o>
+                                  <n n="InputFlags" />
+                                  <l2 n="InputItems" cet="BoxTreeOperand">
+                                    <o>
+                                      <o n="Operand" t="Operand">
+                                        <v n="Operand">"lamp24On"</v>
+                                        <v n="Type">"BOOL"</v>
+                                        <v n="Comment">""</v>
+                                        <v n="SymbolComment">""</v>
+                                        <v n="Address">""</v>
+                                        <o n="Flags" t="Flags">
+                                          <v n="Flags">0</v>
+                                          <v n="Fixed">true</v>
+                                          <v n="Extensible">false</v>
+                                        </o>
+                                        <v n="LValue">false</v>
+                                        <v n="Boolean">true</v>
+                                        <v n="IsInstance">false</v>
+                                        <v n="Id">105L</v>
+                                      </o>
+                                      <v n="Id">104L</v>
+                                    </o>
+                                    <o>
+                                      <o n="Operand" t="Operand">
+                                        <v n="Operand">"TOF_0.Q"</v>
+                                        <v n="Type">"BOOL"</v>
+                                        <v n="Comment">""</v>
+                                        <v n="SymbolComment">""</v>
+                                        <v n="Address">""</v>
+                                        <o n="Flags" t="Flags">
+                                          <v n="Flags">1</v>
+                                          <v n="Fixed">true</v>
+                                          <v n="Extensible">false</v>
+                                        </o>
+                                        <v n="LValue">false</v>
+                                        <v n="Boolean">true</v>
+                                        <v n="IsInstance">false</v>
+                                        <v n="Id">107L</v>
+                                      </o>
+                                      <v n="Id">106L</v>
+                                    </o>
+                                  </l2>
+                                  <o n="InputParam" t="ParamList">
+                                    <l2 n="Names" />
+                                    <l2 n="Types" />
+                                  </o>
+                                  <o n="OutputParam" t="ParamList">
+                                    <l2 n="Names" />
+                                    <l2 n="Types" />
+                                  </o>
+                                  <v n="CallType" t="Operator">And</v>
+                                  <n n="EN" />
+                                  <n n="ENO" />
+                                  <n n="STSnippet" />
+                                  <v n="ContainsExtensibleInputs">false</v>
+                                  <v n="ProvidesSTSnippet">false</v>
+                                  <v n="Id">103L</v>
+                                </o>
+                                <o t="BoxTreeOperand">
+                                  <o n="Operand" t="Operand">
+                                    <v n="Operand">"T#500MS"</v>
+                                    <v n="Type">"TIME"</v>
+                                    <v n="Comment">""</v>
+                                    <v n="SymbolComment">""</v>
+                                    <v n="Address">""</v>
+                                    <o n="Flags" t="Flags">
+                                      <v n="Flags">0</v>
+                                      <v n="Fixed">false</v>
+                                      <v n="Extensible">false</v>
+                                    </o>
+                                    <v n="LValue">false</v>
+                                    <v n="Boolean">false</v>
+                                    <v n="IsInstance">false</v>
+                                    <v n="Id">109L</v>
+                                  </o>
+                                  <v n="Id">108L</v>
+                                </o>
+                              </l2>
+                              <o n="InputParam" t="ParamList">
+                                <l2 n="Names" cet="String">
+                                  <v>IN</v>
+                                  <v>PT</v>
+                                </l2>
+                                <l2 n="Types" cet="String">
+                                  <v>BOOL</v>
+                                  <v>TIME</v>
+                                </l2>
+                              </o>
+                              <o n="OutputParam" t="ParamList">
+                                <l2 n="Names" cet="String">
+                                  <v>Q</v>
+                                  <v>ET</v>
+                                </l2>
+                                <l2 n="Types" cet="String">
+                                  <v>BOOL</v>
+                                  <v>TIME</v>
+                                </l2>
+                              </o>
+                              <v n="CallType" t="Operator">FunctionBlock</v>
+                              <v n="EN">false</v>
+                              <v n="ENO">false</v>
+                              <n n="STSnippet" />
+                              <v n="ContainsExtensibleInputs">false</v>
+                              <v n="ProvidesSTSnippet">false</v>
+                              <v n="Id">100L</v>
+                            </o>
+                            <o t="BoxTreeOperand">
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"T#500MS"</v>
+                                <v n="Type">"TIME"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">false</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">false</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">111L</v>
+                              </o>
+                              <v n="Id">110L</v>
+                            </o>
+                          </l2>
+                          <o n="InputParam" t="ParamList">
+                            <l2 n="Names" cet="String">
+                              <v>IN</v>
+                              <v>PT</v>
+                            </l2>
+                            <l2 n="Types" cet="String">
+                              <v>BOOL</v>
+                              <v>TIME</v>
+                            </l2>
+                          </o>
+                          <o n="OutputParam" t="ParamList">
+                            <l2 n="Names" cet="String">
+                              <v>Q</v>
+                              <v>ET</v>
+                            </l2>
+                            <l2 n="Types" cet="String">
+                              <v>BOOL</v>
+                              <v>TIME</v>
+                            </l2>
+                          </o>
+                          <v n="CallType" t="Operator">FunctionBlock</v>
+                          <v n="EN">false</v>
+                          <v n="ENO">false</v>
+                          <n n="STSnippet" />
+                          <v n="ContainsExtensibleInputs">false</v>
+                          <v n="ProvidesSTSnippet">false</v>
+                          <v n="Id">97L</v>
+                        </o>
+                        <v n="Id">95L</v>
+                      </o>
+                      <o t="BoxTreeBox">
+                        <v n="BoxType">"EXECUTE"</v>
+                        <o n="Instance" t="Operand">
+                          <n n="Operand" />
+                          <v n="Type">""</v>
+                          <v n="Comment">""</v>
+                          <v n="SymbolComment">""</v>
+                          <v n="Address">""</v>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <v n="LValue">false</v>
+                          <v n="Boolean">false</v>
+                          <v n="IsInstance">true</v>
+                          <v n="Id">112L</v>
+                        </o>
+                        <o n="OutputItems" t="OutputItemList">
+                          <l2 n="OutputItems">
+                            <n />
+                          </l2>
+                        </o>
+                        <o n="Flags" t="Flags">
+                          <v n="Flags">0</v>
+                          <v n="Fixed">true</v>
+                          <v n="Extensible">false</v>
+                        </o>
+                        <n n="InputFlags" />
+                        <l2 n="InputItems">
+                          <o t="BoxTreeDemux">
+                            <v n="VarId">9</v>
+                            <n n="Input" />
+                            <v n="Id">115L</v>
+                          </o>
+                          <o t="BoxTreeOperand">
+                            <o n="Operand" t="Operand">
+                              <v n="Operand">""</v>
+                              <v n="Type">"BOOL"</v>
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">true</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">false</v>
+                              <v n="Boolean">true</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">117L</v>
+                            </o>
+                            <v n="Id">116L</v>
+                          </o>
+                        </l2>
+                        <o n="InputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>EN</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <o n="OutputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>ENO</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <v n="CallType" t="Operator">None</v>
+                        <v n="EN">true</v>
+                        <v n="ENO">true</v>
+                        <o n="STSnippet" t="STSnippet">
+                          <o n="STSnippet" t="STImplementationObject">
+                            <o n="TextDocument" t="TextDocument">
+                              <a n="TextLines" cet="TextLine">
+                                <o>
+                                  <v n="Id">67L</v>
+                                  <n n="Tag" />
+                                  <v n="Text">"io.setY(ioImage.ySignalLamp24);"</v>
+                                </o>
+                              </a>
+                            </o>
+                          </o>
+                          <v n="Id">113L</v>
+                        </o>
+                        <v n="ContainsExtensibleInputs">false</v>
+                        <v n="ProvidesSTSnippet">true</v>
+                        <v n="Id">114L</v>
+                      </o>
+                      <o t="BoxTreeBox">
+                        <v n="BoxType">"EXECUTE"</v>
+                        <o n="Instance" t="Operand">
+                          <n n="Operand" />
+                          <v n="Type">""</v>
+                          <v n="Comment">""</v>
+                          <v n="SymbolComment">""</v>
+                          <v n="Address">""</v>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <v n="LValue">false</v>
+                          <v n="Boolean">false</v>
+                          <v n="IsInstance">true</v>
+                          <v n="Id">118L</v>
+                        </o>
+                        <o n="OutputItems" t="OutputItemList">
+                          <l2 n="OutputItems">
+                            <n />
+                          </l2>
+                        </o>
+                        <o n="Flags" t="Flags">
+                          <v n="Flags">0</v>
+                          <v n="Fixed">true</v>
+                          <v n="Extensible">false</v>
+                        </o>
+                        <l2 n="InputFlags" cet="Flags">
+                          <o>
+                            <v n="Flags">1</v>
+                            <v n="Fixed">true</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                        </l2>
+                        <l2 n="InputItems" cet="BoxTreeDemux">
+                          <o>
+                            <v n="VarId">9</v>
+                            <n n="Input" />
+                            <v n="Id">121L</v>
+                          </o>
+                        </l2>
+                        <o n="InputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>EN</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <o n="OutputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>ENO</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <v n="CallType" t="Operator">None</v>
+                        <v n="EN">true</v>
+                        <v n="ENO">true</v>
+                        <o n="STSnippet" t="STSnippet">
+                          <o n="STSnippet" t="STImplementationObject">
+                            <o n="TextDocument" t="TextDocument">
+                              <a n="TextLines" cet="TextLine">
+                                <o>
+                                  <v n="Id">90L</v>
+                                  <n n="Tag" />
+                                  <v n="Text">"io.rstY(ioImage.ySignalLamp24);"</v>
+                                </o>
+                              </a>
+                            </o>
+                          </o>
+                          <v n="Id">119L</v>
+                        </o>
+                        <v n="ContainsExtensibleInputs">false</v>
+                        <v n="ProvidesSTSnippet">true</v>
+                        <v n="Id">120L</v>
+                      </o>
+                    </l2>
+                    <l2 n="Connectors" />
+                    <v n="Id">94L</v>
+                  </o>
+                  <o>
+                    <v n="ILActive">false</v>
+                    <v n="FBDValid">false</v>
+                    <v n="ILValid">false</v>
+                    <l2 n="ILLines" />
+                    <v n="Comment">""</v>
+                    <v n="Title">""</v>
+                    <v n="Label">""</v>
+                    <v n="OutCommented">false</v>
+                    <l2 n="NetworkItems" cet="BoxTreeAssign">
+                      <o>
+                        <o n="OutputItems" t="OutputItemList">
+                          <l2 n="OutputItems" cet="Operand">
+                            <o>
+                              <v n="Operand">"lamp27On"</v>
+                              <v n="Type">"BOOL"</v>
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">true</v>
+                              <v n="Boolean">false</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">221L</v>
+                            </o>
+                          </l2>
+                        </o>
+                        <o n="Flags" t="Flags">
+                          <v n="Flags">0</v>
+                          <v n="Fixed">false</v>
+                          <v n="Extensible">false</v>
+                        </o>
+                        <o n="RValue" t="BoxTreeBox">
+                          <v n="BoxType">"AND"</v>
+                          <o n="Instance" t="Operand">
+                            <n n="Operand" />
+                            <v n="Type">""</v>
+                            <v n="Comment">""</v>
+                            <v n="SymbolComment">""</v>
+                            <v n="Address">""</v>
+                            <o n="Flags" t="Flags">
+                              <v n="Flags">0</v>
+                              <v n="Fixed">false</v>
+                              <v n="Extensible">false</v>
+                            </o>
+                            <v n="LValue">false</v>
+                            <v n="Boolean">false</v>
+                            <v n="IsInstance">true</v>
+                            <v n="Id">170L</v>
+                          </o>
+                          <o n="OutputItems" t="OutputItemList">
+                            <l2 n="OutputItems" />
+                          </o>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <n n="InputFlags" />
+                          <l2 n="InputItems" cet="BoxTreeOperand">
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"enable"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">223L</v>
+                              </o>
+                              <v n="Id">222L</v>
+                            </o>
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"lamp27"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">135L</v>
+                              </o>
+                              <v n="Id">134L</v>
+                            </o>
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"lamp24"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">1</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">173L</v>
+                              </o>
+                              <v n="Id">172L</v>
+                            </o>
+                            <o>
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"sensor27"</v>
+                                <v n="Type">"BOOL"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">1</v>
+                                  <v n="Fixed">true</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">true</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">227L</v>
+                              </o>
+                              <v n="Id">226L</v>
+                            </o>
+                          </l2>
+                          <o n="InputParam" t="ParamList">
+                            <l2 n="Names" />
+                            <l2 n="Types" />
+                          </o>
+                          <o n="OutputParam" t="ParamList">
+                            <l2 n="Names" />
+                            <l2 n="Types" />
+                          </o>
+                          <v n="CallType" t="Operator">And</v>
+                          <n n="EN" />
+                          <n n="ENO" />
+                          <n n="STSnippet" />
+                          <v n="ContainsExtensibleInputs">false</v>
+                          <v n="ProvidesSTSnippet">false</v>
+                          <v n="Id">171L</v>
+                        </o>
+                        <v n="Id">137L</v>
+                      </o>
+                    </l2>
+                    <l2 n="Connectors" />
+                    <v n="Id">133L</v>
+                  </o>
+                  <o>
+                    <v n="ILActive">false</v>
+                    <v n="FBDValid">false</v>
+                    <v n="ILValid">false</v>
+                    <l2 n="ILLines" />
+                    <v n="Comment">""</v>
+                    <v n="Title">""</v>
+                    <v n="Label">""</v>
+                    <v n="OutCommented">false</v>
+                    <l2 n="NetworkItems">
+                      <o t="BoxTreeDemux">
+                        <v n="VarId">3</v>
+                        <o n="Input" t="BoxTreeBox">
+                          <v n="BoxType">"TOF"</v>
+                          <o n="Instance" t="Operand">
+                            <v n="Operand">"TOF_1"</v>
+                            <v n="Type">"TOF"</v>
+                            <v n="Comment">""</v>
+                            <v n="SymbolComment">""</v>
+                            <v n="Address">""</v>
+                            <o n="Flags" t="Flags">
+                              <v n="Flags">0</v>
+                              <v n="Fixed">false</v>
+                              <v n="Extensible">false</v>
+                            </o>
+                            <v n="LValue">false</v>
+                            <v n="Boolean">false</v>
+                            <v n="IsInstance">true</v>
+                            <v n="Id">41L</v>
+                          </o>
+                          <o n="OutputItems" t="OutputItemList">
+                            <l2 n="OutputItems" cet="Operand">
+                              <n />
+                              <o>
+                                <v n="Operand">""</v>
+                                <v n="Type">"TIME"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">false</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">true</v>
+                                <v n="Boolean">false</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">43L</v>
+                              </o>
+                            </l2>
+                          </o>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <n n="InputFlags" />
+                          <l2 n="InputItems">
+                            <o t="BoxTreeBox">
+                              <v n="BoxType">"TON"</v>
+                              <o n="Instance" t="Operand">
+                                <v n="Operand">"TON_1"</v>
+                                <v n="Type">"TON"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">false</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">false</v>
+                                <v n="IsInstance">true</v>
+                                <v n="Id">29L</v>
+                              </o>
+                              <o n="OutputItems" t="OutputItemList">
+                                <l2 n="OutputItems" cet="Operand">
+                                  <n />
+                                  <o>
+                                    <v n="Operand">""</v>
+                                    <v n="Type">"TIME"</v>
+                                    <v n="Comment">""</v>
+                                    <v n="SymbolComment">""</v>
+                                    <v n="Address">""</v>
+                                    <o n="Flags" t="Flags">
+                                      <v n="Flags">0</v>
+                                      <v n="Fixed">false</v>
+                                      <v n="Extensible">false</v>
+                                    </o>
+                                    <v n="LValue">true</v>
+                                    <v n="Boolean">false</v>
+                                    <v n="IsInstance">false</v>
+                                    <v n="Id">31L</v>
+                                  </o>
+                                </l2>
+                              </o>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <n n="InputFlags" />
+                              <l2 n="InputItems">
+                                <o t="BoxTreeBox">
+                                  <v n="BoxType">"AND"</v>
+                                  <o n="Instance" t="Operand">
+                                    <n n="Operand" />
+                                    <v n="Type">""</v>
+                                    <v n="Comment">""</v>
+                                    <v n="SymbolComment">""</v>
+                                    <v n="Address">""</v>
+                                    <o n="Flags" t="Flags">
+                                      <v n="Flags">0</v>
+                                      <v n="Fixed">false</v>
+                                      <v n="Extensible">false</v>
+                                    </o>
+                                    <v n="LValue">false</v>
+                                    <v n="Boolean">false</v>
+                                    <v n="IsInstance">true</v>
+                                    <v n="Id">37L</v>
+                                  </o>
+                                  <o n="OutputItems" t="OutputItemList">
+                                    <l2 n="OutputItems" />
+                                  </o>
+                                  <o n="Flags" t="Flags">
+                                    <v n="Flags">0</v>
+                                    <v n="Fixed">false</v>
+                                    <v n="Extensible">false</v>
+                                  </o>
+                                  <n n="InputFlags" />
+                                  <l2 n="InputItems" cet="BoxTreeOperand">
+                                    <o>
+                                      <o n="Operand" t="Operand">
+                                        <v n="Operand">"lamp27On"</v>
+                                        <v n="Type">"BOOL"</v>
+                                        <v n="Comment">""</v>
+                                        <v n="SymbolComment">""</v>
+                                        <v n="Address">""</v>
+                                        <o n="Flags" t="Flags">
+                                          <v n="Flags">0</v>
+                                          <v n="Fixed">true</v>
+                                          <v n="Extensible">false</v>
+                                        </o>
+                                        <v n="LValue">false</v>
+                                        <v n="Boolean">true</v>
+                                        <v n="IsInstance">false</v>
+                                        <v n="Id">28L</v>
+                                      </o>
+                                      <v n="Id">27L</v>
+                                    </o>
+                                    <o>
+                                      <o n="Operand" t="Operand">
+                                        <v n="Operand">"TOF_1.Q"</v>
+                                        <v n="Type">"BOOL"</v>
+                                        <v n="Comment">""</v>
+                                        <v n="SymbolComment">""</v>
+                                        <v n="Address">""</v>
+                                        <o n="Flags" t="Flags">
+                                          <v n="Flags">1</v>
+                                          <v n="Fixed">true</v>
+                                          <v n="Extensible">false</v>
+                                        </o>
+                                        <v n="LValue">false</v>
+                                        <v n="Boolean">true</v>
+                                        <v n="IsInstance">false</v>
+                                        <v n="Id">57L</v>
+                                      </o>
+                                      <v n="Id">56L</v>
+                                    </o>
+                                  </l2>
+                                  <o n="InputParam" t="ParamList">
+                                    <l2 n="Names" />
+                                    <l2 n="Types" />
+                                  </o>
+                                  <o n="OutputParam" t="ParamList">
+                                    <l2 n="Names" />
+                                    <l2 n="Types" />
+                                  </o>
+                                  <v n="CallType" t="Operator">And</v>
+                                  <n n="EN" />
+                                  <n n="ENO" />
+                                  <n n="STSnippet" />
+                                  <v n="ContainsExtensibleInputs">false</v>
+                                  <v n="ProvidesSTSnippet">false</v>
+                                  <v n="Id">38L</v>
+                                </o>
+                                <o t="BoxTreeOperand">
+                                  <o n="Operand" t="Operand">
+                                    <v n="Operand">"T#500MS"</v>
+                                    <v n="Type">"TIME"</v>
+                                    <v n="Comment">""</v>
+                                    <v n="SymbolComment">""</v>
+                                    <v n="Address">""</v>
+                                    <o n="Flags" t="Flags">
+                                      <v n="Flags">0</v>
+                                      <v n="Fixed">false</v>
+                                      <v n="Extensible">false</v>
+                                    </o>
+                                    <v n="LValue">false</v>
+                                    <v n="Boolean">false</v>
+                                    <v n="IsInstance">false</v>
+                                    <v n="Id">33L</v>
+                                  </o>
+                                  <v n="Id">32L</v>
+                                </o>
+                              </l2>
+                              <o n="InputParam" t="ParamList">
+                                <l2 n="Names" cet="String">
+                                  <v>IN</v>
+                                  <v>PT</v>
+                                </l2>
+                                <l2 n="Types" cet="String">
+                                  <v>BOOL</v>
+                                  <v>TIME</v>
+                                </l2>
+                              </o>
+                              <o n="OutputParam" t="ParamList">
+                                <l2 n="Names" cet="String">
+                                  <v>Q</v>
+                                  <v>ET</v>
+                                </l2>
+                                <l2 n="Types" cet="String">
+                                  <v>BOOL</v>
+                                  <v>TIME</v>
+                                </l2>
+                              </o>
+                              <v n="CallType" t="Operator">FunctionBlock</v>
+                              <v n="EN">false</v>
+                              <v n="ENO">false</v>
+                              <n n="STSnippet" />
+                              <v n="ContainsExtensibleInputs">false</v>
+                              <v n="ProvidesSTSnippet">false</v>
+                              <v n="Id">30L</v>
+                            </o>
+                            <o t="BoxTreeOperand">
+                              <o n="Operand" t="Operand">
+                                <v n="Operand">"T#500MS"</v>
+                                <v n="Type">"TIME"</v>
+                                <v n="Comment">""</v>
+                                <v n="SymbolComment">""</v>
+                                <v n="Address">""</v>
+                                <o n="Flags" t="Flags">
+                                  <v n="Flags">0</v>
+                                  <v n="Fixed">false</v>
+                                  <v n="Extensible">false</v>
+                                </o>
+                                <v n="LValue">false</v>
+                                <v n="Boolean">false</v>
+                                <v n="IsInstance">false</v>
+                                <v n="Id">45L</v>
+                              </o>
+                              <v n="Id">44L</v>
+                            </o>
+                          </l2>
+                          <o n="InputParam" t="ParamList">
+                            <l2 n="Names" cet="String">
+                              <v>IN</v>
+                              <v>PT</v>
+                            </l2>
+                            <l2 n="Types" cet="String">
+                              <v>BOOL</v>
+                              <v>TIME</v>
+                            </l2>
+                          </o>
+                          <o n="OutputParam" t="ParamList">
+                            <l2 n="Names" cet="String">
+                              <v>Q</v>
+                              <v>ET</v>
+                            </l2>
+                            <l2 n="Types" cet="String">
+                              <v>BOOL</v>
+                              <v>TIME</v>
+                            </l2>
+                          </o>
+                          <v n="CallType" t="Operator">FunctionBlock</v>
+                          <v n="EN">false</v>
+                          <v n="ENO">false</v>
+                          <n n="STSnippet" />
+                          <v n="ContainsExtensibleInputs">false</v>
+                          <v n="ProvidesSTSnippet">false</v>
+                          <v n="Id">42L</v>
+                        </o>
+                        <v n="Id">78L</v>
+                      </o>
+                      <o t="BoxTreeBox">
+                        <v n="BoxType">"EXECUTE"</v>
+                        <o n="Instance" t="Operand">
+                          <n n="Operand" />
+                          <v n="Type">""</v>
+                          <v n="Comment">""</v>
+                          <v n="SymbolComment">""</v>
+                          <v n="Address">""</v>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <v n="LValue">false</v>
+                          <v n="Boolean">false</v>
+                          <v n="IsInstance">true</v>
+                          <v n="Id">126L</v>
+                        </o>
+                        <o n="OutputItems" t="OutputItemList">
+                          <l2 n="OutputItems">
+                            <n />
+                          </l2>
+                        </o>
+                        <o n="Flags" t="Flags">
+                          <v n="Flags">0</v>
+                          <v n="Fixed">true</v>
+                          <v n="Extensible">false</v>
+                        </o>
+                        <n n="InputFlags" />
+                        <l2 n="InputItems" cet="BoxTreeDemux">
+                          <o>
+                            <v n="VarId">3</v>
+                            <n n="Input" />
+                            <v n="Id">79L</v>
+                          </o>
+                        </l2>
+                        <o n="InputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>EN</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <o n="OutputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>ENO</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <v n="CallType" t="Operator">None</v>
+                        <v n="EN">true</v>
+                        <v n="ENO">true</v>
+                        <o n="STSnippet" t="STSnippet">
+                          <o n="STSnippet" t="STImplementationObject">
+                            <o n="TextDocument" t="TextDocument">
+                              <a n="TextLines" cet="TextLine">
+                                <o>
+                                  <v n="Id">125L</v>
+                                  <n n="Tag" />
+                                  <v n="Text">"io.setY(ioImage.ySignalLamp27);"</v>
+                                </o>
+                              </a>
+                            </o>
+                          </o>
+                          <v n="Id">127L</v>
+                        </o>
+                        <v n="ContainsExtensibleInputs">false</v>
+                        <v n="ProvidesSTSnippet">true</v>
+                        <v n="Id">128L</v>
+                      </o>
+                      <o t="BoxTreeBox">
+                        <v n="BoxType">"EXECUTE"</v>
+                        <o n="Instance" t="Operand">
+                          <n n="Operand" />
+                          <v n="Type">""</v>
+                          <v n="Comment">""</v>
+                          <v n="SymbolComment">""</v>
+                          <v n="Address">""</v>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <v n="LValue">false</v>
+                          <v n="Boolean">false</v>
+                          <v n="IsInstance">true</v>
+                          <v n="Id">130L</v>
+                        </o>
+                        <o n="OutputItems" t="OutputItemList">
+                          <l2 n="OutputItems">
+                            <n />
+                          </l2>
+                        </o>
+                        <o n="Flags" t="Flags">
+                          <v n="Flags">0</v>
+                          <v n="Fixed">true</v>
+                          <v n="Extensible">false</v>
+                        </o>
+                        <l2 n="InputFlags" cet="Flags">
+                          <o>
+                            <v n="Flags">1</v>
+                            <v n="Fixed">true</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                        </l2>
+                        <l2 n="InputItems" cet="BoxTreeDemux">
+                          <o>
+                            <v n="VarId">3</v>
+                            <n n="Input" />
+                            <v n="Id">80L</v>
+                          </o>
+                        </l2>
+                        <o n="InputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>EN</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <o n="OutputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>ENO</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                          </l2>
+                        </o>
+                        <v n="CallType" t="Operator">None</v>
+                        <v n="EN">true</v>
+                        <v n="ENO">true</v>
+                        <o n="STSnippet" t="STSnippet">
+                          <o n="STSnippet" t="STImplementationObject">
+                            <o n="TextDocument" t="TextDocument">
+                              <a n="TextLines" cet="TextLine">
+                                <o>
+                                  <v n="Id">129L</v>
+                                  <n n="Tag" />
+                                  <v n="Text">"io.rstY(ioImage.ySignalLamp27);"</v>
+                                </o>
+                              </a>
+                            </o>
+                          </o>
+                          <v n="Id">131L</v>
+                        </o>
+                        <v n="ContainsExtensibleInputs">false</v>
+                        <v n="ProvidesSTSnippet">true</v>
+                        <v n="Id">132L</v>
+                      </o>
+                    </l2>
+                    <l2 n="Connectors" />
+                    <v n="Id">5L</v>
+                  </o>
+                </l2>
+                <v n="BranchCounter">10</v>
+                <v n="ValidIds">true</v>
+              </o>
+            </Data>
+            <TypeList>
+              <Type n="Boolean">System.Boolean</Type>
+              <Type n="BoxTreeAssign">{9873c309-1f09-4ebf-9078-42d8057ef11b}</Type>
+              <Type n="BoxTreeBox">{acfc6f68-8e3a-4af5-bf81-3dd512095a46}</Type>
+              <Type n="BoxTreeDemux">{b1d55618-017c-4bc5-990a-55c2f27d9d3a}</Type>
+              <Type n="BoxTreeOperand">{9de7f100-1b87-424c-a62e-45b0cfc85ed2}</Type>
+              <Type n="Flags">{668066f2-6069-46b3-8962-8db8d13d7db2}</Type>
+              <Type n="Int32">System.Int32</Type>
+              <Type n="Int64">System.Int64</Type>
+              <Type n="Network">{d9a99d73-b633-47db-b876-a752acb25871}</Type>
+              <Type n="NWLImplementationObject">{25e509de-33d4-4447-93f8-c9e4ea381c8b}</Type>
+              <Type n="Operand">{c9b2f165-48a2-4a45-8326-3952d8a3d708}</Type>
+              <Type n="Operator">{bffb3c53-f105-4e85-aba2-e30df579d75f}</Type>
+              <Type n="OutputItemList">{f40d3e09-c02c-4522-a88c-dac23558cfc4}</Type>
+              <Type n="ParamList">{71496971-9e0c-4677-a832-b9583b571130}</Type>
+              <Type n="STImplementationObject">{3b83b776-fb25-43b8-99f2-3c507c9143fc}</Type>
+              <Type n="String">System.String</Type>
+              <Type n="STSnippet">{b2131366-6917-4304-87a9-64c0585560a8}</Type>
+              <Type n="TextDocument">{f3878285-8e4f-490b-bb1b-9acbb7eb04db}</Type>
+              <Type n="TextLine">{a5de0b0b-1cb5-4913-ac21-9d70293ec00d}</Type>
+            </TypeList>
+          </XmlArchive>
+        </NWL>
+      </Implementation>
+    </Method>
+    <LineIds Name="roboArmStation">
+      <LineId Id="12463" Count="1" />
+      <LineId Id="14759" Count="0" />
+      <LineId Id="12465" Count="135" />
+      <LineId Id="14683" Count="0" />
+      <LineId Id="12601" Count="1" />
+      <LineId Id="15004" Count="0" />
+      <LineId Id="12603" Count="4" />
+      <LineId Id="15003" Count="0" />
+      <LineId Id="12608" Count="0" />
+      <LineId Id="14669" Count="1" />
+      <LineId Id="14672" Count="0" />
+      <LineId Id="14671" Count="0" />
+      <LineId Id="12610" Count="12" />
+      <LineId Id="12624" Count="5" />
+      <LineId Id="14852" Count="0" />
+      <LineId Id="14856" Count="1" />
+      <LineId Id="14853" Count="0" />
+      <LineId Id="14858" Count="0" />
+      <LineId Id="14854" Count="0" />
+      <LineId Id="12630" Count="4" />
+      <LineId Id="14780" Count="0" />
+      <LineId Id="14685" Count="0" />
+      <LineId Id="12635" Count="36" />
+      <LineId Id="14751" Count="1" />
+      <LineId Id="14754" Count="1" />
+      <LineId Id="14753" Count="0" />
+      <LineId Id="14757" Count="0" />
+      <LineId Id="12672" Count="11" />
+      <LineId Id="12685" Count="0" />
+      <LineId Id="12687" Count="14" />
+      <LineId Id="14761" Count="0" />
+      <LineId Id="12702" Count="19" />
+      <LineId Id="15005" Count="0" />
+      <LineId Id="12722" Count="4" />
+      <LineId Id="15006" Count="0" />
+      <LineId Id="15008" Count="0" />
+      <LineId Id="15010" Count="0" />
+      <LineId Id="12727" Count="4" />
+      <LineId Id="13861" Count="1" />
+      <LineId Id="12732" Count="2" />
+      <LineId Id="13863" Count="0" />
+      <LineId Id="12736" Count="7" />
+      <LineId Id="13864" Count="0" />
+      <LineId Id="12744" Count="84" />
+      <LineId Id="12833" Count="13" />
+      <LineId Id="14545" Count="0" />
+      <LineId Id="14274" Count="1" />
+      <LineId Id="14277" Count="0" />
+      <LineId Id="14276" Count="0" />
+      <LineId Id="12847" Count="0" />
+      <LineId Id="14278" Count="0" />
+      <LineId Id="14546" Count="0" />
+      <LineId Id="14269" Count="0" />
+      <LineId Id="14271" Count="2" />
+      <LineId Id="14270" Count="0" />
+      <LineId Id="14284" Count="0" />
+      <LineId Id="14282" Count="1" />
+      <LineId Id="12848" Count="6" />
+      <LineId Id="14372" Count="0" />
+      <LineId Id="12855" Count="4" />
+      <LineId Id="14191" Count="0" />
+      <LineId Id="12860" Count="1" />
+      <LineId Id="14192" Count="2" />
+      <LineId Id="13981" Count="0" />
+      <LineId Id="12862" Count="0" />
+      <LineId Id="12864" Count="0" />
+      <LineId Id="14188" Count="0" />
+      <LineId Id="12866" Count="3" />
+      <LineId Id="14189" Count="0" />
+      <LineId Id="12870" Count="7" />
+      <LineId Id="12879" Count="9" />
+      <LineId Id="14190" Count="0" />
+      <LineId Id="12889" Count="8" />
+      <LineId Id="14548" Count="0" />
+      <LineId Id="12898" Count="0" />
+      <LineId Id="14351" Count="0" />
+      <LineId Id="12899" Count="0" />
+      <LineId Id="14353" Count="0" />
+      <LineId Id="12900" Count="1" />
+      <LineId Id="14361" Count="0" />
+      <LineId Id="14363" Count="5" />
+      <LineId Id="14362" Count="0" />
+      <LineId Id="14371" Count="0" />
+      <LineId Id="14369" Count="0" />
+      <LineId Id="14352" Count="0" />
+      <LineId Id="12902" Count="0" />
+      <LineId Id="12904" Count="1" />
+      <LineId Id="14576" Count="0" />
+      <LineId Id="12909" Count="0" />
+      <LineId Id="14549" Count="0" />
+      <LineId Id="14564" Count="11" />
+      <LineId Id="12910" Count="0" />
+      <LineId Id="12940" Count="4" />
+      <LineId Id="14583" Count="0" />
+      <LineId Id="14581" Count="0" />
+      <LineId Id="12946" Count="0" />
+      <LineId Id="14582" Count="0" />
+      <LineId Id="14585" Count="1" />
+      <LineId Id="13928" Count="0" />
+      <LineId Id="13932" Count="0" />
+      <LineId Id="13935" Count="0" />
+      <LineId Id="13941" Count="0" />
+      <LineId Id="13936" Count="0" />
+      <LineId Id="13938" Count="2" />
+      <LineId Id="13942" Count="4" />
+      <LineId Id="13975" Count="0" />
+      <LineId Id="13948" Count="4" />
+      <LineId Id="13930" Count="0" />
+      <LineId Id="13954" Count="1" />
+      <LineId Id="13960" Count="0" />
+      <LineId Id="14845" Count="0" />
+      <LineId Id="13959" Count="0" />
+      <LineId Id="13961" Count="0" />
+      <LineId Id="13931" Count="0" />
+      <LineId Id="12947" Count="6" />
+      <LineId Id="14536" Count="0" />
+      <LineId Id="12954" Count="1" />
+      <LineId Id="14537" Count="2" />
+      <LineId Id="12956" Count="23" />
+      <LineId Id="14515" Count="0" />
+      <LineId Id="14518" Count="1" />
+      <LineId Id="14516" Count="0" />
+      <LineId Id="14766" Count="5" />
+      <LineId Id="14765" Count="0" />
+      <LineId Id="14517" Count="0" />
+      <LineId Id="12980" Count="41" />
+      <LineId Id="13029" Count="16" />
+      <LineId Id="14775" Count="1" />
+      <LineId Id="13046" Count="3" />
+      <LineId Id="14118" Count="0" />
+      <LineId Id="13050" Count="0" />
+      <LineId Id="14119" Count="0" />
+      <LineId Id="13051" Count="7" />
+      <LineId Id="13060" Count="1" />
+      <LineId Id="14047" Count="5" />
+      <LineId Id="14046" Count="0" />
+      <LineId Id="13062" Count="4" />
+      <LineId Id="14053" Count="0" />
+      <LineId Id="13067" Count="24" />
+      <LineId Id="14195" Count="0" />
+      <LineId Id="13092" Count="25" />
+      <LineId Id="14762" Count="2" />
+      <LineId Id="13118" Count="14" />
+      <LineId Id="13134" Count="2" />
+      <LineId Id="14847" Count="0" />
+      <LineId Id="14849" Count="1" />
+      <LineId Id="14848" Count="0" />
+      <LineId Id="14851" Count="0" />
+      <LineId Id="14846" Count="0" />
+      <LineId Id="13137" Count="4" />
+      <LineId Id="14268" Count="0" />
+      <LineId Id="13142" Count="8" />
+      <LineId Id="13968" Count="3" />
+      <LineId Id="13967" Count="0" />
+      <LineId Id="13972" Count="0" />
+      <LineId Id="13175" Count="0" />
+      <LineId Id="13973" Count="0" />
+      <LineId Id="13176" Count="17" />
+      <LineId Id="13195" Count="0" />
+      <LineId Id="14376" Count="0" />
+      <LineId Id="14375" Count="0" />
+      <LineId Id="14374" Count="0" />
+      <LineId Id="14381" Count="0" />
+      <LineId Id="14378" Count="0" />
+      <LineId Id="14380" Count="0" />
+      <LineId Id="14379" Count="0" />
+      <LineId Id="13196" Count="29" />
+      <LineId Id="14285" Count="0" />
+      <LineId Id="13226" Count="15" />
+      <LineId Id="13243" Count="20" />
+      <LineId Id="14525" Count="1" />
+      <LineId Id="13264" Count="8" />
+      <LineId Id="13274" Count="0" />
+      <LineId Id="14528" Count="0" />
+      <LineId Id="13284" Count="0" />
+      <LineId Id="14531" Count="0" />
+      <LineId Id="14529" Count="0" />
+      <LineId Id="14535" Count="0" />
+      <LineId Id="13285" Count="4" />
+      <LineId Id="13291" Count="47" />
+      <LineId Id="14677" Count="0" />
+      <LineId Id="14680" Count="0" />
+      <LineId Id="14679" Count="0" />
+      <LineId Id="14681" Count="0" />
+      <LineId Id="14658" Count="0" />
+      <LineId Id="14660" Count="0" />
+      <LineId Id="14664" Count="0" />
+      <LineId Id="14674" Count="0" />
+      <LineId Id="14659" Count="0" />
+      <LineId Id="13342" Count="5" />
+      <LineId Id="13349" Count="235" />
+      <LineId Id="14653" Count="0" />
+      <LineId Id="13586" Count="13" />
+      <LineId Id="14665" Count="1" />
+      <LineId Id="14668" Count="0" />
+      <LineId Id="14667" Count="0" />
+      <LineId Id="13601" Count="42" />
+      <LineId Id="13645" Count="2" />
+      <LineId Id="14859" Count="0" />
+      <LineId Id="14862" Count="0" />
+      <LineId Id="14864" Count="0" />
+      <LineId Id="14861" Count="0" />
+      <LineId Id="14867" Count="0" />
+      <LineId Id="14865" Count="0" />
+      <LineId Id="13648" Count="54" />
+      <LineId Id="14655" Count="0" />
+      <LineId Id="14657" Count="0" />
+      <LineId Id="13704" Count="27" />
+      <LineId Id="13733" Count="5" />
+      <LineId Id="14869" Count="2" />
+      <LineId Id="14868" Count="0" />
+      <LineId Id="14873" Count="0" />
+      <LineId Id="14872" Count="0" />
+      <LineId Id="13739" Count="104" />
+      <LineId Id="14542" Count="2" />
+      <LineId Id="14540" Count="1" />
+      <LineId Id="13844" Count="4" />
+      <LineId Id="14448" Count="1" />
+      <LineId Id="13849" Count="9" />
+      <LineId Id="4534" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

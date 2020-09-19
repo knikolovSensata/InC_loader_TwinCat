@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="controlCommands" Id="{547dc515-945c-45fa-b4e7-0a730d22b29b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+// Команди който идват от I&C
+
+TYPE controlCommands :
+(
+	null		:= 0,
+	stop,
+	start
+	
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

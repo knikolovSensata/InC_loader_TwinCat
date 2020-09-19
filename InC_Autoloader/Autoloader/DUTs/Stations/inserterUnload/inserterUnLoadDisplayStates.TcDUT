@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterUnLoadDisplayStates" Id="{f51d7071-508d-495d-8053-f32657da31cd}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE inserterUnLoadDisplayStates :
+(
+	dStStartUp,
+	dStStandBy,
+	dStStationIsStopped,
+	dStStationIsReseting,
+	dStWorking,
+	dStStationReady,
+	dStWaitForNextStep,
+
+	dStGripperDidNotClose,
+	dStGripperDidNotOpen,
+	dStInserterDidNotMoveDown,
+	dStInserterDidNotMoveUp,
+	dStDriveDidNotHome,
+	dStDriveTimeOutMove,
+	dStDriveError,
+	dStCameraTimeOut,
+	dStCameraError,
+	dStCameraBadResult,
+	dStInitSensorGripError,
+	dStNoSensorInNest
+	
+	
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

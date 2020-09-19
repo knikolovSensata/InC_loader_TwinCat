@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="roboArmsRecipe" Id="{92be77a0-ff3f-47b1-9b6c-71037a04ef8e}">
+    <Declaration><![CDATA[TYPE roboArmsRecipe :
+STRUCT
+	
+	fixtureNum     : INT    := 40;                    // Брой сензори в тара
+	waitPos24      : BOOL   := FALSE;                 // Чакащата позиция е HEX24
+	waitPos27      : BOOL   := TRUE;                  // Чакащата позиция е HEX27
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

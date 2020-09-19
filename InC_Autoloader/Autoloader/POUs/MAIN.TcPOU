@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="MAIN" Id="{94112693-1b8c-4bf4-89c4-cc50028acf18}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	
+	machineCycle        : machineStation;
+	incCommCycle		: incCommStation;
+	stackerLoadCycle    : stackerLoadStation;
+	stackerUnloadCycle  : stackerUnloadStation;
+	insertLoadCycle     : insertLoadStation;
+	insertUnloadCycle   : insertUnloadStation;
+	roboArmCycle        : roboArmStation;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+
+	machineCycle	   (stBase := Stations.machineStBase,      activeEMG := FALSE,                ioImage := Stations.machineImageIO,
+				  		depClear:= DEBUG.machinedClearDep,     syncClear := DEBUG.machinedClearSync);
+				
+	incCommCycle	   (stBase := Stations.incCommStBase,      activeEMG := Global.emgStopSignal, ioImage := Stations.incCommImageIO,
+				        depClear:= DEBUG.incCommClearDep,      syncClear := DEBUG.incCommClearSync);
+				 
+	stackerLoadCycle   (stBase := Stations.sLoadStBase,        activeEMG := Global.emgStopSignal, ioImage := Stations.sLoadImageIO,
+				        depClear:= DEBUG.sLoadClearDep,        syncClear := DEBUG.sLoadClearSync);
+				  
+	stackerUnloadCycle (stBase := Stations.sUnloadStBase,      activeEMG := Global.emgStopSignal, ioImage := Stations.sUnloadImageIO,
+				        depClear:= DEBUG.sUnloadClearDep,      syncClear := DEBUG.sUnloadClearSync);
+					
+	insertLoadCycle    (stBase := Stations.insertLoadStBase,   activeEMG := Global.emgStopSignal, ioImage := Stations.insertLoadImageIO,
+				        depClear:= DEBUG.insertLoadClearDep,   syncClear := DEBUG.insertLoadClearSync);
+					
+	insertUnloadCycle  (stBase := Stations.insertUnloadStBase, activeEMG := Global.emgStopSignal, ioImage := Stations.insertUnLoadImageIO,
+				        depClear:= DEBUG.insertUnloadClearDep, syncClear := DEBUG.insertUnloadClearSync);
+					
+	roboArmCycle       (stBase := Stations.roboStBase,         activeEMG := Global.emgStopSignal, ioImage := Stations.roboImageIO,
+				       depClear:= DEBUG.roboClearDep,          syncClear := DEBUG.roboClearSync);
+					   
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="139" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="125" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

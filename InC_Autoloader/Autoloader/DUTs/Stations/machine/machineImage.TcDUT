@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="machineImage" Id="{44477160-4e02-4d3f-85ef-28b04e3c7bc7}">
+    <Declaration><![CDATA[TYPE machineImage :
+STRUCT
+	
+   xDoors 	        	: imageIO := ( stIO   := Stations.machineHmiIO.x_DoorsOK,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 1 );	
+									   
+   xEmgBnt				: imageIO := ( stIO   := Stations.machineHmiIO.x_EmgOK,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 2 );
+
+    xAirOk 				: imageIO := ( stIO   := Stations.machineHmiIO.x_AirOk,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );
+									   									   
+    yZumer 				: imageIO := ( stIO   := Stations.machineHmiIO.y_Zumer,
+									   image  		  := Global.OUTPUT_IMAGE,
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 ); 	
+
+	
+  
+END_STRUCT
+END_TYPE
+
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

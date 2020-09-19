@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ioType" Id="{c6b59351-eb38-4b96-9c28-768b15b9baf9}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+// Опеределя вида на перифериятя - за сега е само входе и изходен бит
+
+TYPE ioType :
+(
+	INPUT_BIT   := 1,
+	OUTPUT_BIT
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

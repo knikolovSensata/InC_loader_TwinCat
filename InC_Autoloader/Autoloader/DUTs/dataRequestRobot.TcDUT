@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="dataRequestRobot" Id="{a536e752-6cb6-4780-b60e-5e93ce5198c0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+
+TYPE dataRequestRobot :
+(
+// Програмите са спрямо InC_Autoloader_RobotMives_v02.docx 	
+
+	done       := Consts.NO_REQUEST,
+	error      := Consts.REQUEST_ERROR,
+	
+	roboRecipe     := 99,               // Заражда репта на робота - номера и се намира в TagsHMI.RoboRecipeNum (1-15)
+
+	roboPrg_Home   := 1,
+	roboPrg_SensorLoad,
+	roboPrg_SensorUnload,
+	roboPrg_SensorDown,
+	roboPrg_PreLoad,
+	roboPrg_Load,
+	roboPrg_PreUnload,
+	roboPrg_Unload,
+	roboPrg_LoadStacker,
+	roboPrg_UnloadStacker,
+	roboPrg_EmptyPlace,
+	roboPrg_LoadToEmptyPlace,
+	roboPrg_EmptyPlaceToUnload,
+	roboPrg_LoadToUnload
+	
+	
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="roboArmStates" Id="{c0416ce8-c209-4725-95fd-eb517cb05b81}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE roboArmStates :
+(
+		stNull      :=    Consts.ST_NULL,
+		stStartUp   :=    Consts.ST_START_UP,
+		stInit      :=    Consts.ST_INIT,
+		stReady     :=    Consts.ST_READY,
+		stStop      :=    Consts.ST_STOP,
+		stStepBlock :=    Consts.ST_STEP_BLOCK,	
+		stEMG		:=    Consts.ST_EMG,
+		
+		
+		
+		stPowerUp    :=    1000,
+		stInitDone,
+		stStationStop,
+		stNextRobotState,
+		
+		stPurgeStart,
+		stPurgeMove,
+		stPurgeMoveCheck,
+		stPurgeSync,
+		stPurgeMoveDone,
+		
+		stInitStart,
+		stInitMoveHome,
+		stInitMoveCheck,
+		stInitToolCheck,
+		stInitLoadRecipe,
+		stInitRecipeCheck,
+		stInitSyncStations,
+		stInitWaitLoadStacker,
+		stInitReady,
+		
+		stResetStart, 
+		stResetSlider,
+		stResetSliderCheck,
+		stResetGrip,
+		stResetGripCheck,
+		stResetMoveCheck,
+		stResetRotCheck,
+		stResetSync,
+		stResetDone, 
+		
+		stMoveToEmptyStart,
+		stMoveToEmptyCheck,
+		stMoveToEmptyMoveCheck,
+		stMoveToEmptySliderDown,
+		stMoveToEmptySliderCheck,
+		stMoveToEmptyDone,
+		
+		stEmptyToUnloadStart,
+		stMoveToUnloadSync, 
+		stEmptyToUnloadMove,
+		stEmptyToUnloadMoveCheck, 
+		stEmptyToUnloadDone,
+		
+		stUnloadPalletStart,
+		stUnloadPalletSyncStacker,
+		stUnlodPalletRelease, 
+		stUnloadPalletSlideCheck,
+		stUnloadPalletSync,
+		stUnloadPalletDone,
+		
+		stLoadPalletStart, 
+		stLoadPalletSlideDown,
+		stLoadPalletSliderCheck,
+		stLoadPalletSignal,
+		stLoadPalletSync,
+		stLoadPalletDone,
+		
+		stEmptyPosStart, 
+		stEmptyPosMove,
+		stEmptyPosMoveCheck,
+		stEmptyPosRelease,
+		stEmptyPosSlideCheck,
+		stEmptyPosSync,
+		stEmptyPosDone,
+		
+		stLoadStart, 
+		stLoadMove1,
+		stLoadMoveCheck1,
+		stLoadWaitCommand,
+		stLoadMove2,
+		stLoadMoveCheck2,
+		stLoadGripCheck,
+		stLoadDone,
+		
+		stUnloadStart, 
+		stUnloadMove1,
+		stUnloadMoveCheck1,
+		stUnloadRotCheck,
+		stUnloadMoveCheck2,
+		stUnloadGripCheck,
+		stUnloadDone, 
+		
+		stLInsertStart,
+		stLInsertMove1,
+		stLInsertMoveCheck1,
+		stLInsertRotCheck,
+		stLInsertMoveCheck2,
+		stLInsertMoveDone,
+		
+		stLInsertLockStart,
+		stLInsertLockSync,
+		stLInsertLockGripOpen,
+		stLInsertLockGripCheck,
+		stLInsertLockDone,
+		
+		stLInsertBackStart,
+		stLInsertBackMove,
+		stLInsertBackMoveCheck,
+		stLInsertBackDone,
+		
+		stUInsertStart, 
+		stUInsertMove1,
+		stUInsertMoveCheck1,
+		stUInsertRotCheck,
+		stUInsertSync,
+		stUInsertMove2,
+		stUInsertMoveCheck2,
+		stUInsertMoveDone,
+		
+		stUInsertLockStart,
+		stUInsertLockGripClose,
+		stUInsertLockGripCheck,
+		stUInsertLockSync,
+		stUInsertLockDone,	
+			
+        stUInsertBackStart, 
+		stUInsertBackMove,
+		stUInsertBackMoveCheck,
+		stUInsertBackSync,
+		stUInsertBackDone,		
+		
+		stNextMoveStart, 
+		stNextMoveWaitLStacker,
+		stNextMovePalletCheck,
+		stNextMoveSync,
+		stNextMoveCheck1,
+		stNextMovePass,
+		stNextMoveUnlodeFull,
+		stNextMoveEmptyCheck,
+		stNextMovePalletOnUload,
+		stNextMoveLoadMove,
+		stNextMoveLoadMoveCheck,
+		stNextMoveLoadDone,
+		stNextMoveLoadEmpty,
+		stNextMoveCheck2,
+		stNextNewCycle,	
+		
+		stErrGripNotOpen,
+		stErrGripNotClose,
+		stErrRotNotTurn180,
+		stErrRotNotTurn0,
+		stErrSlliderNotDown,
+		stErrSlideNotUp,
+		stErrInitSensor,
+		stErrInitPalletOn24,
+		stErrInitPalletOn27,
+		
+		stErrRobot,
+		stErrRobotReset,
+		stErrRobotTimeOut,
+		stErrRobotRecipeTimeOut,
+		stErrNoPalletWaitPos,
+		stErrPalletOnWaitPos,
+		stErrNoPalletUnload
+
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

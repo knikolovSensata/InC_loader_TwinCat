@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="stackerUnLoadSettings" Id="{e85d8732-ab02-4de7-ab2b-f34358de4d7d}">
+    <Declaration><![CDATA[TYPE stackerUnLoadSettings :
+STRUCT
+	
+	axisLength                :   REAL   := 600; 		   // макс ход на оста на стакера за модел HEX 24
+	axisWorkSpeed             :	  REAL   := 1000.0; 	   // скорост 
+	axisInitSpeed			  :   REAL   := 2000.0; 	   // скорост при движение нагоре (при init)
+	axisAcc					  :   REAL   := 0.2 ;          // ускр.
+	palletSize                :   ARRAY[1..Consts.MAX_RECIPE] OF REAL; 
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

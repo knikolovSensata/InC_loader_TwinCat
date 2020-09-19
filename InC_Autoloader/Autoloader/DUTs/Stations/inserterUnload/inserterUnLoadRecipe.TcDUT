@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterUnLoadRecipe" Id="{4a5e6962-9fca-45bd-9515-a99eebf9903d}">
+    <Declaration><![CDATA[TYPE inserterUnLoadRecipe :
+STRUCT
+	
+
+	initRot               :   REAL   := 10;        // начало ротиране на грипера
+	workRot 	          :   REAL   := 10;        // позиция на вземане от робота
+ 
+
+
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <GVL Name="DEBUG" Id="{55e242f6-f595-4a15-a50b-3280e4692d52}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+    ioDebugActive          : BOOL := FALSE;
+	noErrors               : BOOL := FALSE;
+ 
+	machinedClearDep   	   : BOOL := FALSE;
+	machinedClearSync      : BOOL := FALSE;
+	
+	sLoadClearDep          : BOOL := FALSE;
+	sLoadClearSync         : BOOL := FALSE;
+	
+	sUnloadClearDep        : BOOL := FALSE;
+	sUnloadClearSync       : BOOL := FALSE;
+
+    incCommClearDep   	   : BOOL := FALSE;
+	incCommClearSync       : BOOL := FALSE;
+	
+	insertLoadClearDep     : BOOL := FALSE;
+	insertLoadClearSync    : BOOL := FALSE;
+	
+	insertUnloadClearDep   : BOOL := FALSE;
+	insertUnloadClearSync  : BOOL := FALSE;
+
+	roboClearDep           : BOOL := FALSE;
+	roboClearSync          : BOOL := FALSE;
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

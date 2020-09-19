@@ -1,0 +1,376 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="incCommStation" Id="{f8d89e25-5a94-45c9-b947-3d59a5402ec4}" SpecialFunc="None">
+    <Declaration><![CDATA[  FUNCTION_BLOCK incCommStation EXTENDS stateMachine
+VAR_INPUT
+	
+	ioImage      		  : incCommImage;
+
+END_VAR
+
+VAR
+	
+	activeState            : incCommStates;	
+	
+	recipeTemp			   : DINT := 0;                       // Битова маска за рецепта на работа
+	
+	startPuls              	: R_TRIG;                         // Пулсов сигнал за START бутона
+	stopPuls			   	: R_TRIG;                         // Пулсов сигнал за STOP бутона
+
+	waitStationsReady       : BOOL := FALSE;                 // Изчаква станцийте са си завършат работата
+	waitIndexReady		    : BOOL := FALSE; 				 // Изчаква индексирането на масата да завърши
+	
+	setModeDone			    : BOOL := FALSE; 				 // Има избран режим на работа
+	purgeActive			    : BOOL := FALSE; 				 // PURGE процедурате е преключила
+	purgeCycleCount		    : INT;                           // Брой завъртания при PURGE
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+// Натискането на бутони START и STOP на InC са извън цикъла на станицята.
+// След натискането на бутон се сетва и съответната команда. Тя се изтрива при 
+// аварийна ситуация или след като се изпълни в machine Station
+
+startPuls(CLK := io.getX(ioImage.xSignalStart));
+stopPuls (CLK := io.getX(ioImage.xSignalStop));	
+
+IF Global.commands = controlCommands.null THEN
+	
+	IF startPuls.Q AND NOT stopPuls.Q THEN
+		IF TagsHMI.startPurge THEN
+			Global.commands     := controlCommands.start;
+			Global.purgeActive  := TRUE;
+		ELSE
+			Global.commands     := controlCommands.start;				
+		END_IF
+	ELSIF stopPuls.Q  THEN 
+		Global.commands    := controlCommands.stop;		
+	END_IF
+	
+END_IF
+
+// Има аларма в машината
+IF Global.machError THEN
+	io.setY(ioImage.yAlarm);
+ELSE
+	io.rstY(ioImage.yAlarm);	
+END_IF
+
+
+setStateVars(ioImage, activeState);
+
+CASE activeState OF 
+	
+// *** Start Up 
+
+	incCommStates.stStartUp:
+		setDisplayState(incCommDisplayStates.dStStartingUp);
+		Global.commands     := controlCommands.null;
+		Global.sensorStatus := FALSE;
+		setModeDone         := FALSE;
+		purgeActive 	    := FALSE;
+		waitIndexReady      := FALSE;
+		waitStationsReady   := FALSE;
+		recipeTemp          := 0;
+		Global.recipe       := 0;
+		io.rstY(ioImage.yDailIndex);
+		io.setY(ioImage.yProductChange);                   // Разрешава избора на нов режим и лот в InC MMI		
+		nextState(incCommStates.stInit);
+
+// *** Init  
+
+	incCommStates.stInit:
+
+		IF NOT setModeDone AND NOT Global.purgeActive THEN
+			nextState(incCommStates.stSetMode);
+		ELSE
+			nextState(incCommStates.stReady);
+		END_IF
+	
+// *** Set Mode  - Тук се избира вида на режима на работа: HEX24 или HEX27
+
+	incCommStates.stSetMode:	
+    	setDisplayState(incCommDisplayStates.dStStandBy);	
+		io.setY(ioImage.yProductChange);                   // Разрешава избора на нов режим и лот в InC MMI
+	
+		IF Global.commands = controlCommands.start THEN
+			
+			IF io.getX(ioImage.xRecipeBit0) THEN
+				recipeTemp.0 := TRUE;
+			ELSE
+				recipeTemp.0 := FALSE;
+			END_IF	
+			
+			IF io.getX(ioImage.xRecipeBit1) THEN
+				recipeTemp.1 := TRUE;
+			ELSE
+				recipeTemp.1 := FALSE;
+			END_IF	
+	
+			IF io.getX(ioImage.xRecipeBit2) THEN
+				recipeTemp.2 := TRUE;
+			ELSE
+				recipeTemp.2 := FALSE;
+			END_IF		
+		
+			IF io.getX(ioImage.xRecipeBit3) THEN
+				recipeTemp.3 := TRUE;
+			ELSE
+				recipeTemp.3 := FALSE;
+			END_IF		
+				
+			IF recipeTemp > 0 AND recipeTemp <= Consts.MAX_RECIPE THEN 
+				Global.recipe   := recipeTemp;
+				recipeTemp      := 0;
+				setModeDone     := TRUE;
+				nextState(incCommStates.stReady);
+			ELSE
+				setError(incCommStates.stErrCommFault);	
+				recipeTemp      := 0;				
+			END_IF			
+		
+		END_IF	
+		
+// *** Ready - Има избран режим и станцията се sync с machine station
+
+	incCommStates.stReady:
+		io.rstY(ioImage.yProductChange);
+		depNextState(stations.machineStBase, GlobalDeps.depMachineStop,     incCommStates.stStationStop);	
+		depNextState(stations.machineStBase, GlobalDeps.depMachineStopping, incCommStates.stStationStop);	
+		depWait(globalDeps.depIncCommModeDone);
+		
+		IF Global.purgeActive AND NOT purgeActive THEN
+			nextState(incCommStates.stStationStop);		
+		END_IF
+		
+		IF NOT waitStationsReady THEN
+			nextState(incCommStates.stIndexStart);
+		END_IF
+		
+		IF NOT waitIndexReady THEN
+			nextState(incCommStates.stIndexStationsReady);
+		END_IF
+		
+// *** Stopped
+// Станцията е спряна - може да с стартира или да се избере PURGE 
+
+	incCommStates.stStationStop:
+        setDisplayState(incCommDisplayStates.dStStationIsStopped);	
+		io.rstY(ioImage.yDailIndex);
+		io.rstY(ioImage.yProductChange);
+		depWait(GlobalDeps.depIncStop);	
+		depNextState(stations.machineStBase, GlobalDeps.depMachineAuto,       incCommStates.stIndexStart);
+		depNextState(stations.machineStBase, GlobalDeps.depMachinePurgeStart, incCommStates.stPurgeStart);		
+
+// *** Index - Start 
+
+	incCommStates.stIndexStart:
+		depNextState(stations.machineStBase, GlobalDeps.depMachineStop,     incCommStates.stStationStop);	
+		depNextState(stations.machineStBase, GlobalDeps.depMachineStopping, incCommStates.stStationStop);
+		IF NOT setModeDone THEN               // След PURGE трябва да се зададе нова рецепта
+			setError(incCommStates.stErrCommFault);	
+		ELSE
+			waitStationsReady := FALSE;
+			setDisplayState(incCommDisplayStates.dStWaitForAllStatinsReady);
+			nextState(incCommStates.stIndexEnableStations);
+	    END_IF		
+						
+// *** Index -  Enable Stations
+// Дава се разрешение на всики станий да започнат работа
+
+	incCommStates.stIndexEnableStations:
+		IF io.getX(ioImage.xPickNestLoaded) THEN
+			Global.sensorStatus := TRUE;
+		ELSE
+			Global.sensorStatus := FALSE;
+		END_IF	
+		IF NOT Global.robotSafe OR Global.commands = controlCommands.stop THEN  // Спира масата да се завърти при първо пускане на машината
+			depSync(Stations.insertLoadStBase,   globalDeps.depILoadWaitIndex);
+			depSync(Stations.insertUnloadStBase, globalDeps.depULoadWaitIndex);
+			nextState(incCommStates.stIndexStationsReady);
+		END_IF
+		
+// *** Index - Stations Ready
+// Всички стаций който зависят от масата трябва да са готови преди тя да направи ход
+
+	incCommStates.stIndexStationsReady:		
+		waitStationsReady := TRUE;
+		waitIndexReady    := FALSE;	
+		depSync(Stations.insertLoadStBase,   globalDeps.depILoadDone);
+		depSync(Stations.insertUnloadStBase, globalDeps.depULoadDone);		
+		nextState(incCommStates.stSignalStations);
+		
+// *** Index - Singla Stations
+// Цъкъла е завършен - може да се върти масата
+
+	incCommStates.stSignalStations:	
+		depSignal(globalDeps.depIncCycleDone);
+		nextState(incCommStates.stIndexEnable);	
+		
+// *** Index -  Enable
+// Дава се разрешение InC да завърди масата си
+
+	incCommStates.stIndexEnable:		
+		setDisplayState(incCommDisplayStates.dStDialTableIndexPermition);
+		io.setY(ioImage.yDailIndex);
+		IF NOT io.getX(ioImage.x_DailIndexDone) THEN
+			nextState(incCommStates.stIndexReady);
+		END_IF
+		
+// *** Index -  Ready
+// Масата се е завъртяла с 1 ход и е приключила хода си
+
+	incCommStates.stIndexReady:	
+		IF io.getX(ioImage.x_DailIndexDone) THEN
+			io.rstY(ioImage.yDailIndex);
+			nextState(incCommStates.stIndexCheck);
+			IF purgeActive THEN
+				purgeCycleCount := purgeCycleCount + 1;
+			END_IF
+		END_IF	
+
+// *** Index - Check
+// Проверка дали цикъла е завършил или е активка PURGE процедура
+
+	incCommStates.stIndexCheck:
+		IF purgeActive AND purgeCycleCount = Consts.PURGE_CYCLES THEN
+			nextState(incCommStates.stPurgeFinish);
+		ELSE
+			nextState(incCommStates.stIndexDone);
+		END_IF			
+	
+// *** Index - Done
+
+	incCommStates.stIndexDone:	
+		waitIndexReady := TRUE;
+		setDisplayState(incCommDisplayStates.dStDialTableIndexReady);
+		nextState(incCommStates.stIndexStart);
+		
+// *** Purge - Start
+// Стартира процедура PURGE като започва да брой колко завъртания е направила масата
+
+	incCommStates.stPurgeStart:			
+		purgeCycleCount := 0;
+		purgeActive     := TRUE;
+		nextState(incCommStates.stIndexStart);
+		
+// *** Purge - Finish
+// Масата е направила необходимияят брой завъртания, сега се изчакват и другите 
+// станций на машината да приключат с PURGE
+
+	incCommStates.stPurgeFinish:	
+		depWait(globalDeps.depIncPurgeDone);
+		nextState(incCommStates.stPurgeDone);
+
+// *** Purge - Done
+
+	incCommStates.stPurgeDone:
+		purgeActive        := FALSE;
+		waitIndexReady     := FALSE;
+		waitStationsReady  := FALSE;
+		setModeDone        := FALSE;
+		Global.purgeDoneIL := TRUE;
+		Global.purgeDoneIU := TRUE;		
+		Global.recipe      := 0;		
+		nextState(incCommStates.stStationStop);
+
+// *** ERROR  -  Има проблем със сигналите за избор на режим от InC
+	
+	incCommStates.stErrCommFault:
+		setDisplayState(incCommDisplayStates.dStIncModeSignalsError);
+		io.rstY(ioImage.yProductChange);
+		io.rstY(ioImage.yDailIndex);
+
+// *** EMG state - реално тук EMG стате не прави нищо освен да изчисти текущата команда
+
+	incCommStates.stEMG:
+		io.rstY(ioImage.yDailIndex);
+		nextState(incCommStates.stInit);
+		
+// *** STOP
+// Станцията е деактивирана
+
+	incCommStates.stStop:
+		waitStationsReady := FALSE;
+		waitIndexReady    := FALSE;
+	
+// *** Step mode
+// Скъпков режим на станцията
+
+	incCommStates.stStepBlock:
+		setDisplayState(incCommDisplayStates.dStWaitForNextStep);	
+	
+
+END_CASE
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="incCommStation">
+      <LineId Id="771" Count="40" />
+      <LineId Id="1133" Count="0" />
+      <LineId Id="813" Count="3" />
+      <LineId Id="1075" Count="0" />
+      <LineId Id="1083" Count="0" />
+      <LineId Id="817" Count="6" />
+      <LineId Id="1290" Count="0" />
+      <LineId Id="824" Count="4" />
+      <LineId Id="830" Count="7" />
+      <LineId Id="1076" Count="1" />
+      <LineId Id="1084" Count="3" />
+      <LineId Id="1096" Count="0" />
+      <LineId Id="1088" Count="3" />
+      <LineId Id="1078" Count="0" />
+      <LineId Id="1097" Count="0" />
+      <LineId Id="1092" Count="3" />
+      <LineId Id="1079" Count="1" />
+      <LineId Id="1098" Count="3" />
+      <LineId Id="1081" Count="1" />
+      <LineId Id="839" Count="0" />
+      <LineId Id="1102" Count="0" />
+      <LineId Id="1106" Count="0" />
+      <LineId Id="844" Count="1" />
+      <LineId Id="1103" Count="0" />
+      <LineId Id="1105" Count="0" />
+      <LineId Id="1107" Count="0" />
+      <LineId Id="851" Count="8" />
+      <LineId Id="1177" Count="0" />
+      <LineId Id="860" Count="15" />
+      <LineId Id="1204" Count="0" />
+      <LineId Id="876" Count="10" />
+      <LineId Id="1318" Count="1" />
+      <LineId Id="1205" Count="2" />
+      <LineId Id="887" Count="2" />
+      <LineId Id="1210" Count="0" />
+      <LineId Id="890" Count="4" />
+      <LineId Id="1134" Count="2" />
+      <LineId Id="1139" Count="0" />
+      <LineId Id="1138" Count="0" />
+      <LineId Id="1263" Count="0" />
+      <LineId Id="897" Count="1" />
+      <LineId Id="900" Count="0" />
+      <LineId Id="1264" Count="0" />
+      <LineId Id="1315" Count="0" />
+      <LineId Id="902" Count="3" />
+      <LineId Id="1048" Count="1" />
+      <LineId Id="906" Count="2" />
+      <LineId Id="1169" Count="0" />
+      <LineId Id="1171" Count="2" />
+      <LineId Id="1170" Count="0" />
+      <LineId Id="1176" Count="0" />
+      <LineId Id="1174" Count="0" />
+      <LineId Id="909" Count="10" />
+      <LineId Id="1208" Count="0" />
+      <LineId Id="921" Count="47" />
+      <LineId Id="1316" Count="1" />
+      <LineId Id="969" Count="0" />
+      <LineId Id="1212" Count="1" />
+      <LineId Id="1108" Count="0" />
+      <LineId Id="970" Count="19" />
+      <LineId Id="1238" Count="0" />
+      <LineId Id="990" Count="9" />
+      <LineId Id="70" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

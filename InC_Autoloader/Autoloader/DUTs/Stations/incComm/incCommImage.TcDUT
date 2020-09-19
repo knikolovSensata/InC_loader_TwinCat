@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="incCommImage" Id="{e5a11283-f562-452e-85cd-73699b36b2bc}">
+    <Declaration><![CDATA[TYPE incCommImage :
+STRUCT
+	
+	// Входове
+    xSignalStop 		: imageIO := ( stIO   := Stations.incCommHmiIO.x_SignalStop,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 1 );	
+									   
+    xSignalStart 		: imageIO := ( stIO   := Stations.incCommHmiIO.x_SignalStart,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 2 );
+
+    xPickNestLoaded 	: imageIO := ( stIO   := Stations.incCommHmiIO.x_pickNestLoaded,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );
+
+    xRecipeBit0 	    : imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit0,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);
+
+    xRecipeBit1 	    : imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit1,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);	
+									   
+   xRecipeBit2 	    	: imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit2,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);
+
+   xRecipeBit3 	    	: imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit3,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);									   
+									   
+    x_DailIndexDone 	: imageIO := ( stIO   := Stations.incCommHmiIO.x_DailIndexDone,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);									   
+
+	// Изходи
+    yProductChange 		: imageIO := ( stIO   := Stations.incCommHmiIO.y_productChange,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 1 );
+
+    yAlarm 		        : imageIO := ( stIO   := Stations.incCommHmiIO.y_alarm,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 2 );
+
+    yDailIndex 		    : imageIO := ( stIO   := Stations.incCommHmiIO.y_dailIndex,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );	
+					   	
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

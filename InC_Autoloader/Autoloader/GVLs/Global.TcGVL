@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <GVL Name="Global" Id="{47b2b604-92a0-4732-8f26-3248f143a765}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	// Входен и изходен масив за IO Image
+	
+//	INPUT_IMAGE   	    AT %I* : ARRAY[0..Consts.MAX_IO_POINTS] OF BYTE;
+//  OUTPUT_IMAGE   	    AT %Q* : ARRAY[0..Consts.MAX_IO_POINTS] OF BYTE;
+
+	commands         : controlCommands;       // главни команди
+	purgeActive      : BOOL; 				  // има започнала purge процедура
+	openDoors        : BOOL;                  // има отворени врети
+	emgStop	         : BOOL; 				  // има натиснат EMG Stop
+	emgStopSignal	 : BOOL; 				  // сингнал за EMG  Stop към всички станций
+	machError	     : BOOL; 				  // в някоя станция има грешка
+	startZumer       : BOOL;				  // звукова сигнализация
+	recipe           : DINT;                  // избраната рецепта за работа
+	sensorStatus     : BOOL;                  // в гнездото под инсъртър 2 има сензор за разтоварване  
+	palletFail       : BOOL;                  // робота не е могъл да вземе или е изпуснал тара
+	lStackerEmpty    : BOOL; 				  // входният стакер няма повече палети
+	uStackerFull     : BOOL;                  // изх. стакер няма място за повече палети
+	robotSafe        : BOOL;                  // робота е на безопастно място при инициализация
+	sensorOnIUnload  : BOOL;                  // има сензор в гнездото под изх. инсъртър
+	purgeDoneIL      : BOOL;                  // PURGE процедурата е завършила - сигнализира вх. инсъртър
+	purgeDoneIU      : BOOL;                  // PURGE процедурата е завършила - сигнализира изх. инсъртър
+	
+	
+	
+
+    INPUT_IMAGE   : ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE; 
+	OUTPUT_IMAGE  : ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE;
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

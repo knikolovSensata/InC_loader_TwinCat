@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterUnLoadSettings" Id="{93b8cc9d-9f9a-44aa-bffd-2ab1b5c1bbd4}">
+    <Declaration><![CDATA[TYPE inserterUnLoadSettings :
+STRUCT
+	
+	axisWorkSpeed             :	  REAL   := 500.0; 	   // скорост 
+	axisAcc					  :   REAL   := 0.1;       // ускр.
+	axisPres                  :   REAL   := 0.1;       // точност на позициониране
+	rotParams                 :   ARRAY[1..Consts.MAX_RECIPE] OF inserterUnLoadRecipe; 
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

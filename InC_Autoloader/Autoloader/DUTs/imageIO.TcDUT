@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="imageIO" Id="{735dbe9a-e28f-4335-aec9-ab00365e483e}">
+    <Declaration><![CDATA[TYPE imageIO :
+STRUCT
+	
+	// Това е структура която "вързва" даден сигнал от stataionIO с опеделен такъв от В/И image на TC
+	// Идеята е да не се мисли за обновяване на сигналите, т.е. да няма копиране на няколко места за да се обнови статуса им.
+	// TO DO -> да се реализира подхода и за аналогови сигнали 
+	
+	stIO			: REFERENCE TO BOOL; 						                // име на сигнал от stationIO
+	image			: REFERENCE TO ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE;     // масив на IO image
+	iType           : ioType; 													// тип
+	iByte 			: UINT;                                                     // номер на байт от масива
+	iBit			: UINT; 									                // номер на бит от байта
+	 
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="machineIO" Id="{927428f9-e102-4985-b476-4657ea519342}">
+    <Declaration><![CDATA[TYPE machineIO :
+STRUCT
+	
+	// Входове
+	x_DoorsOK		: BOOL;					    // Вратите са затворени 
+	x_EmgOK			: BOOL;					    // Систама за безопасност е активна
+	x_AirOk 		: BOOL;						// Има налягане на въздуха
+	
+	// Изходи
+	y_Zumer					    : BOOL;        // Звуков сигнал
+	
+
+
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

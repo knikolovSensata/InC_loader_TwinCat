@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="roboArmSettings" Id="{3213ec40-0897-4238-a53a-63ee3247f082}">
+    <Declaration><![CDATA[TYPE roboArmSettings :
+STRUCT
+	
+	roboArmParams         : ARRAY[1..Consts.MAX_RECIPE] OF RoboArmsRecipe;
+
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

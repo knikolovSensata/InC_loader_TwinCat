@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="stackerUnLoadDisplayStates" Id="{9876841b-d8d6-4294-9b8f-fdf81d1fff66}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE stackerUnLoadDisplayStates :
+(
+	dStStartingUp 			:= 1000,
+	dStStandBy,
+	dStStackerIsReseting,
+	dStPalletReady,
+    dStAxisNotConfigured,	
+	dStRemotePalletManually,
+	dStLock1CylinderDidNotOpen,
+    dStLock1CylinderDidNotClose,
+	dStLock2CylinderDidNotOpen,
+	dStLock2CylinderDidNotClose,
+    dStFixerCylinderDidNotOpen,	
+    dStFixerCylinderDidNotClose,
+    dStFestoDriveError,	
+    dStAxisInitMoveTakesTooLong,	
+	dStPalletMoveTakesTooLong,
+    dStPalletIsDetectedFault,
+    dStThereIsNoPalletOnTop,	
+	dStWaitForNextStep,
+	dStStationIsStopped
+	
+	
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

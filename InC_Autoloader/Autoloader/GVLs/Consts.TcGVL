@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <GVL Name="Consts" Id="{3b8d4d37-1a35-431b-b603-330799965235}" ParameterList="True">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	
+        // Общи	константии за машината
+
+		MAX_IO_POINTS 		: INT     := 512;          // Максимален брой на IO image 
+		MAX_SYNC_STATIONS   : DINT    := 64;		   // Максимален брой на dependancy-та едновремено
+		DEP_PASS            : INT     := 1;            // Използват се в dependencySync - чрез тези променливи
+		SYNC_CONFIRM        : INT     := 2;            // се реализира възможността да има мн. sync-кове в един state
+		NO_ERROR       		: DINT    := 0;			   // Станцията няма грешка
+		MIN_AXIS_LEN		: REAL    := 500;          // Мин. дългина на оста на стакерите
+		MIN_PALLET_SIZE     : REAL    := 10;           // Мин. дебелина на тара
+		MAX_AXIS_POS        : INT     := 20;           // Макс. брой позиция за оста на стакер
+		LOAD_PALLETS_STEP   : INT     := 4; 		   // По колко тари да местят при зареждане стакерите наведнъж
+		PURGE_CYCLES        : INT     := 32;           // Макс. брой завъртания на масата на InC при PURGE 
+		MAX_RECIPE          : DINT    := 15;           // Макс. брой рецепти с който може да се работи
+		
+		// Констанити за станцийте - всяка едана state машина трябва да ги има
+		
+		ST_NULL			    : DINT    := 0;            // Това състояние да НЕ се дефинира в стъпковите машини - презен цикъл		
+		ST_START_UP        	: DINT    := 1;            // Състояние на старт - влиза се за един цикъл в него при старт
+		ST_INIT			   	: DINT	  := 10;           // Първо състояние за инициализация
+        ST_READY 		   	: DINT    := 20;           // Станцията е готова за работа - от тук започва работния цикъл
+		ST_STOP				: DINT    := 30;           // Станцията е спряна
+        ST_STEP_BLOCK      	: DINT    := 40;           // Състояние за стъпков режим 
+		ST_EMG				: DINT	  := 50;           // Има активен safety стоп
+
+		
+		// Константи за dependensy
+		
+		NO_DEPENDENCY      : DINT     := 0;            //  Няма dependency към друга станция
+		
+		// Кoнстанти за data requests
+		
+        NO_REQUEST         : DINT      := 0;            // Текущият data request е изпълнен
+		REQUEST_ERROR      : DINT      := 1337;         // Има някаква грешка с текущият data request
+			
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

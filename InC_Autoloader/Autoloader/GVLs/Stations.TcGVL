@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <GVL Name="Stations" Id="{c28fbdb4-ccbc-4098-b20d-34aad10e393b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+    
+	sLoadImageIO    			 : stackerLoadImage;
+	sLoadHmiIO      		 	 : stackerLoadIO;
+	sLoadStBase      		     : stationBase  := (ToggleEnable := TRUE, AutoMode := TRUE);
+	sLoadSettings				 : stackerLoadSettings;
+	sLoadDrive 					 : ST_MotorBase := (TargetPrecision := 0.01);
+	sLoadAxis                    : AXIS_REF_CiA402_ETC_CMMT_AS;
+	
+	sUnloadImageIO       		 : stackerUnLoadImage;
+	sUnloadHmiIO           		 : stackerUnLoadIO;
+	sUnloadStBase         		 : stationBase  := (ToggleEnable := TRUE, AutoMode := TRUE);
+	sUnloadSettings				 : stackerUnloadSettings;
+	sUnloadDrive  				 : ST_MotorBase := (TargetPrecision := 0.01);
+	sUnloadAxis                  : AXIS_REF_CiA402_ETC_CMMT_AS;
+	
+    insertLoadImageIO     		 : inserterLoadImage;
+	insertLoadHmiIO       		 : inserterLoadIO;
+	insertLoadStBase      		 : stationBase  := (ToggleEnable := TRUE, AutoMode := TRUE);
+	insertLoadData               : dataRequestCam;
+	insertLoadSetting            : inserterLoadSettings;
+	insertLoadDrive				 : ST_MotorBase := (TargetPrecision := 0.01);
+	insertLoadAxis               : T_LM_Axis; 
+	
+	insertUnLoadImageIO     	 : inserterUnLoadImage;
+	insertUnLoadHmiIO       	 : inserterUnLoadIO;
+	insertUnLoadStBase      	 : stationBase  := (ToggleEnable := TRUE, AutoMode := TRUE);
+	insertUnloadSetting          : inserterUnloadSettings;
+	insertUnLoadDrive			 : ST_MotorBase := (TargetPrecision := 0.01);
+	insertUnLoadAxis             : T_LM_Axis; 
+	
+	roboImageIO         		 : roboArmImage;
+	roboHmiIO                    : roboArmIO;
+	roboStBase                   : stationBase := (ToggleEnable := TRUE, AutoMode := TRUE);
+	roboSetings                  : roboArmSettings;
+	roboData                     : dataRequestRobot;
+	
+	incCommImageIO         		 : incCommImage;
+	incCommHmiIO                 : incCommIO;
+	incCommStBase                : stationBase := (ToggleEnable := TRUE, AutoMode := TRUE);
+	
+	machineImageIO         		 : machineImage;
+	machineHmiIO	             : machineIO;
+	machineStBase                : stationBase := (ToggleEnable := TRUE, AutoMode := TRUE);	
+    
+	
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

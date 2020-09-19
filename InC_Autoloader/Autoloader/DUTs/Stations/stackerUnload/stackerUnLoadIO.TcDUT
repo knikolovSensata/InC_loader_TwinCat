@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="stackerUnLoadIO" Id="{f8523635-2775-4658-9a83-db4b984d1c59}">
+    <Declaration><![CDATA[TYPE stackerUnLoadIO :
+STRUCT
+	
+	// Входове
+	x_Lock1_lock				: BOOL;        // Сензор цилиндър на заключалка 1 на тара - тарата е ЗАКЛЮЧЕНА
+	x_Lock1_unlock				: BOOL;        // Сензор цилиндър на заключалка 1 на тара - тарата е ОТКЛЮЧЕНА
+	x_Lock2_lock				: BOOL;        // Сензор цилиндър на заключалка 2 на тара - тарата е ЗАКЛЮЧЕНА
+	x_Lock2_unlock				: BOOL;        // Сензор цилиндър на заключалка 2 на тара - тарата е ОТКЛЮЧЕНА
+	x_PalletOnTop				: BOOL;        // Дифузен сензор на върха на стакера - ИМА тара за заключване
+	x_PalletFix_lock			: BOOL; 	   // Сензор цилиндър за фиксиране на тарата - тарата е ЗАКЛЮЧЕНА
+	x_PalletFix_unlock			: BOOL; 	   // Сензор цилиндър за фиксиране на тарата - тарата e ОТКЛЮЧЕНА
+	
+	// Изходи
+	y_Lock1_lock				: BOOL;        // Пневно сигнал на заключалка 1 на тара - ЗАКЛЮЧВАНЕ
+	y_Lock1_unlock				: BOOL;        // Пневно сигнал на заключалка 1 на тара - ОТКЛЮЧВАНЕ
+	y_Lock2_lock				: BOOL;        // Пневно сигнал на заключалка 2 на тара - ЗАКЛЮЧВАНЕ
+	y_Lock2_unlock				: BOOL;        // Пневно сигнал на заключалка 2 на тара - ОТКЛЮЧВАНЕ
+	y_PalletFix_lock            : BOOL; 	   // Пневно сигнал за фиксиране на тара - ЗАКЛЮЧВАНЕ
+    y_PalletFix_unlock          : BOOL; 	   // Пневно сигнал за фиксиране на тара - ОТКЛЮЧЕНА
+
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

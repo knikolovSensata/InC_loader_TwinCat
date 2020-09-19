@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="stackerUnLoadStates" Id="{39b8355b-32cc-4a2f-8546-280e2c46d7ae}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE stackerUnLoadStates :
+(
+		stNull      :=    Consts.ST_NULL,
+		stStartUp   :=    Consts.ST_START_UP,
+		stInit      :=    Consts.ST_INIT,
+		stReady     :=    Consts.ST_READY,
+		stStop      :=    Consts.ST_STOP,
+		stStepBlock :=    Consts.ST_STEP_BLOCK,	
+		stEMG		:=    Consts.ST_EMG,
+		 
+		stPowerUp    :=    1000,
+		stStackerStopped,
+		stInitDone,
+		
+		stResetStart,
+		stResetOpenLocks,
+		stResetCheckLocks,
+		stResetEnableDrive,
+		stResetDriveMove,
+		stResetCheckDrive,
+		stResetDone,
+		
+		stPrepareStart,
+		stPreparaCheckTop,
+		stPrepareLimitCheck,
+		stPrepareCalcAxis,
+		stPrepareOpenLocks,
+		stPrepareCheckLocks,
+		stPrepareDriveOn,
+		stPrepareDriveMove,
+		stPrepareCheckDrive,
+		stPrepareSync,
+		stPrepareDone,
+		
+		stMoveUpStart,
+		stMoveUpDriveOn,
+		stMoveUpDriveMove,
+		stMoveUpCkeckDrive,
+		stMoveUpDone,
+		
+		stUnlockPalletStart,
+		stUnlockPalletRelease,
+		stUnlockPalletCheck,
+		stUnlockPalletDriveOn,
+		stUnlockPalletDriveMove,
+		stUnlockPalletCkeckDrive,   
+		stUnlockPalletSync,
+		stUnlockPalletDone,
+		
+		stLockPalletStart,
+		stLockPalletLocking,
+		stLockPalletCheckLocks,
+		stLockPalletSyncRobot,
+		stLockPalletLockFix,
+		stLockPalletCheckFix,
+		stLockPalletDone,
+		
+		stUnloadPurgeStart,
+		stUnloadPurgeCheck,
+		stUnloadPurgeDriveOn,
+		stUnloadPurgeMove,
+		stUnloadPurgeMoveCheck,
+		stUnloadPurgeDone,
+		stUnloadPurgeConfirm,
+		
+		
+		stErrNoProperSettings,
+		stErrRemovePallet,
+		stErrFixerNotOpen,
+		stErrFixerNotClose,
+		stErrLock1NotClose,
+		stErrLock1NotOpen,
+		stErrLock2NotClose,
+		stErrLock2NotOpen,
+		stErrAxis,
+		stInitMoveErr,
+		stErrPalletDetected,
+		stErrPalletMove,
+		stErrNoPallet
+
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

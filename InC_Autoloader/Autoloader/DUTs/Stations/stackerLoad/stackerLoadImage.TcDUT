@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="stackerLoadImage" Id="{06bea332-50a7-41de-94d1-58601c14a517}">
+    <Declaration><![CDATA[TYPE stackerLoadImage :
+STRUCT
+	
+  xLock1_lock 	        	   : imageIO := ( stIO  := Stations.sLoadHmiIO.x_Lock1_lock,
+									   image  		:= Global.INPUT_IMAGE,
+									   iType  		:= ioType.INPUT_BIT,
+									   iByte 		:= 0,
+									   iBit  		:= 1 );	
+									   
+   xLock1_unlock				: imageIO := ( stIO   := Stations.sLoadHmiIO.x_Lock1_unlock,
+									   image 		  := Global.INPUT_IMAGE,
+									   iType  		  := ioType.INPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 2 );
+
+    xLock2_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.x_Lock2_lock,
+									   image  		  := Global.INPUT_IMAGE,
+									   iType  		  := ioType.INPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 );
+									  
+    xLock2_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.x_Lock2_unlock,
+									   image  		  := Global.INPUT_IMAGE,
+									   iType  		  := ioType.INPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 );
+
+    xPalletOnTop 				: imageIO := ( stIO   := Stations.sLoadHmiIO.x_PalletOnTop,
+									   image  		  := Global.INPUT_IMAGE,
+									   iType  		  := ioType.INPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 );
+
+    xPalletFix_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.x_PalletFix_lock,
+									   image  		  := Global.INPUT_IMAGE,
+									   iType  		  := ioType.INPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 );
+
+    xPalletFix_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.x_PalletFix_unlock,
+									   image  		  := Global.INPUT_IMAGE,
+									   iType  		  := ioType.INPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 );
+
+    yLock1_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock1_lock,
+									   image  		  := Global.OUTPUT_IMAGE,
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 ); 
+
+    yLock1_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock1_unlock,
+									   image  		  := Global.OUTPUT_IMAGE,
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 ); 
+
+    yLock2_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock2_lock,
+									   image  		  := Global.OUTPUT_IMAGE,
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 ); 
+
+    yLock2_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock2_unlock,
+									   image  		  := Global.OUTPUT_IMAGE,
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 ); 
+    yPalletFix_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_PalletFix_lock,
+									   image  		  := Global.OUTPUT_IMAGE,
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 ); 
+									   
+    yPalletFix_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_PalletFix_unlock,
+									   image  		  := Global.OUTPUT_IMAGE,
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 0,
+									   iBit   		  := 3 ); 							    
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

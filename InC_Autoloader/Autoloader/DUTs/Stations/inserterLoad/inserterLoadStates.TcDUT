@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterLoadStates" Id="{4d0d5c06-f0ae-4746-8b45-9ff03b590b3c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE inserterLoadStates :
+(
+		stNull      :=    Consts.ST_NULL,
+		stStartUp   :=    Consts.ST_START_UP,
+		stInit      :=    Consts.ST_INIT,
+		stReady     :=    Consts.ST_READY,
+		stStop      :=    Consts.ST_STOP,
+		stStepBlock :=    Consts.ST_STEP_BLOCK,	
+		stEMG		:=    Consts.ST_EMG,
+		
+		
+		stPowerUp    :=    1000,
+		stInitDone,
+		stInserterLoadStopped,
+		
+		stResetStart,
+		stResetSyncRobot,
+		stResetGripOpen,
+		stResetGripCheck,
+		stResetMoveUpCheck,
+		stResetLimitsCalc,		
+		stResetDriveHome,
+		stResetDriveCheck1,
+		stResetDriveMove,
+		stResetDriveCheck2,
+		stResetDone,
+		
+		stPrepareStart,
+		stPrepareNestCheck,
+		stPrepareRobotWait,
+		stPrepareDone,
+		
+		stLoadStart,
+		stLoadGripCheck,
+		stLoadRobotSync,
+		stLoadDone,
+		
+		stRotStart,
+		stRotGripCheck,
+		stRotDriveOn,
+		stRotDriveMove,
+		stRotDriveCheck,
+		stRotCamShot,
+		stRotCamCheck,
+		stRotDone,
+		
+		stPosStart,
+		stPosGripCheck,
+		stPosDriveOn,
+		stPosDriveMove,
+		stPosDriveCheck,		
+		stPosDone,
+		
+		stInsertStart,
+		stInsertGripCheck,
+		stInsertNestCheck,
+		stInsertMoveDownCheck,
+		stInsetDone,
+		
+		stReleaseStart,
+		stReleaseGripCheck,
+		stReleaseMoveUpCheck,
+		stReleaseDriveOn,
+		stReleaseDriveMove,
+		stReleaseDriveCheck,
+		stReleaseDone,
+		
+		stSyncIndexStart,
+		stSyncIndexDone,
+		
+		
+		stErrGripNotOpen,
+		stErrGripNotClose,
+		stErrInsertNotDown,
+		stErrInsertNotUp,
+		stErrDriveErr,
+		stErrDriveTimeOut,
+		stErrDriveHome,
+		stErrCamTimeout,
+		stErrCamErr,
+		stErrCamBadResult,
+		stErrInitSensor
+
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

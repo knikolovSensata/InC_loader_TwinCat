@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterLoadIO" Id="{29659f7b-40cc-4dfb-96f5-b6f6b0dada21}">
+    <Declaration><![CDATA[TYPE inserterLoadIO :
+STRUCT
+	
+	// Входове
+	x_Grip_open				: BOOL;           // Грипера е отворен - сензор на цилиндър
+    x_Grip_close            : BOOL;           // Грипера е затворен - сензор на цилиндър
+	x_Insert_up             : BOOL;           // Инсъртъра е вдигнат - сензор на цилиндър
+	x_Insert_down           : BOOL;           // Инсъртъра е свален	- сензор на цилиндър
+	x_Nest                  : BOOL;           // Лазърен сензор - детектва имали продукт в гнездото под инсъртъра
+	
+	// Изходи
+	y_Grip_open				: BOOL;           // Грипера е отворен -  цилиндър
+    y_Grip_close            : BOOL;           // Грипера е затворен -  цилиндър
+	y_Insert_up             : BOOL;           // Инсъртъра е вдигнат - цилиндър
+	y_Insert_down           : BOOL;           // Инсъртъра е свален	-  цилиндър
+
+
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

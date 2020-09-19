@@ -1,0 +1,475 @@
+<?xml version="1.0"?>
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.7">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-000000000041}" TcBaseType="true" HideSubItems="true" CName="AmsNetId">AMSNETID</Name>
+			<BitSize>48</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+			<Format>
+				<Printf>%d.%d.%d.%d.%d.%d</Printf>
+				<Parameter>[0]</Parameter>
+				<Parameter>[1]</Parameter>
+				<Parameter>[2]</Parameter>
+				<Parameter>[3]</Parameter>
+				<Parameter>[4]</Parameter>
+				<Parameter>[5]</Parameter>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-000000000042}" TcBaseType="true" CName="AmsAddr">AMSADDR</Name>
+			<BitSize>64</BitSize>
+			<SubItem>
+				<Name>netId</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000041}">AMSNETID</Type>
+				<BitSize>48</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>port</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000004}">WORD</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>48</BitOffs>
+			</SubItem>
+			<Format>
+				<Printf>%d.%d.%d.%d.%d.%d:%d</Printf>
+				<Parameter>.netId[0]</Parameter>
+				<Parameter>.netId[1]</Parameter>
+				<Parameter>.netId[2]</Parameter>
+				<Parameter>.netId[3]</Parameter>
+				<Parameter>.netId[4]</Parameter>
+				<Parameter>.netId[5]</Parameter>
+				<Parameter>.port</Parameter>
+			</Format>
+			<Format Name="Iec">
+				<Printf>(netId:=[%d.%d.%d.%d.%d.%d], port :=%d)</Printf>
+				<Parameter>.netId[0]</Parameter>
+				<Parameter>.netId[1]</Parameter>
+				<Parameter>.netId[2]</Parameter>
+				<Parameter>.netId[3]</Parameter>
+				<Parameter>.netId[4]</Parameter>
+				<Parameter>.netId[5]</Parameter>
+				<Parameter>.port</Parameter>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{B489D8E3-F467-D3DA-DB4A-EC2F9F573846}" Namespace="Motors_AFAG_CoE" AutoDeleteType="true">T_LM_DrvToPlc</Name>
+			<BitSize>256</BitSize>
+			<SubItem>
+				<Name>StateVar</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[StateVar of the drive]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>StatusWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Statusword of the drive]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>16</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>WarnWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Warnword of the drive]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ComDemandPosition</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[32Bit demand position]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ComDemandVelocity</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ComActualPosition</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[32Bit actual position]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ComActualVelocity</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>160</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CfgStatusWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Config Channel Status]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>192</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CfgIndexIn</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Argument (meaning depends on Cmd ID]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>208</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CfgValueIn</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Argument (meaning depends on Cmd ID]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>224</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{A86C63A6-0569-77A4-FB26-ED8E955AF07E}" Namespace="Tc3_LinMot" AutoDeleteType="true">tstLM_PlcToDrv</Name>
+			<BitSize>544</BitSize>
+			<SubItem>
+				<Name>ControlWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[ControlWord of the drive]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCHeader</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command header]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>16</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord0</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 0]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord1</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 1]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>48</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord2</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 2]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord3</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 3]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>80</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord4</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 4]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord5</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 5]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>112</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord6</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 6]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord7</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 7]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>144</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord8</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 8]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>160</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord9</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 9]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>176</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord10</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 10]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>192</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord11</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 11]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>208</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord12</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 12]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>224</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaWord13</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Motion command parameter word 13]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>240</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaDWord_00_03</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Motion command parameter bytes 0-3 (used for E12X0 series drives)]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>256</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaDWord_04_07</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Motion command parameter bytes 4-7 (used for E12X0 series drives)]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>288</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaDWord_08_11</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Motion command parameter bytes 8-11 (used for E12X0 series drives)]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>320</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaDWord_12_15</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Motion command parameter bytes 12-15 (used for E12X0 series drives)]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>352</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaDWord_16_19</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Motion command parameter bytes 16-19 (used for E12X0 series drives)]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>384</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaDWord_20_23</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Motion command parameter bytes 20-23 (used for E12X0 series drives)]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>416</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MCParaDWord_24_27</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Motion command parameter bytes 24-27 (used for E12X0 series drives)]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>448</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CfgControlWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Config Channel Control]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>480</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CfgIndexOut</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[Argument (meaning depends on Cmd ID]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>496</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CfgValueOut</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Argument (meaning depends on Cmd ID]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>512</BitOffs>
+			</SubItem>
+		</DataType>
+	</DataTypes>
+	<Project ProjectGUID="{DE05A637-3AA8-4885-9616-7915B0F8DDF4}" Target64Bit="true" ShowHideConfigurations="#x106">
+		<System>
+			<Tasks>
+				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
+					<Name>PlcTask</Name>
+				</Task>
+			</Tasks>
+		</System>
+		<Plc>
+			<Project GUID="{A15EC9CB-FED8-4F50-A070-78811C7D401F}" Name="Autoloader" PrjFilePath="Autoloader\Autoloader.plcproj" TmcFilePath="Autoloader\Autoloader.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Autoloader\Autoloader.tmc">
+					<Name>Autoloader Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<Vars VarGrpType="1">
+						<Name>PlcTask Inputs</Name>
+						<Var>
+							<Name>Stations.sLoadAxis.WcState_In</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.SlaveState_In</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.AdsAddr_In</Name>
+							<Type GUID="{18071995-0000-0000-0000-000000000042}">AMSADDR</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.Statusword_In</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.ModesOfOperationDisplay_In</Name>
+							<Type>SINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.PositionActualValue_In</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.VelocityActualValue_In</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.TorqueActualValue_In</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.WcState_In</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.SlaveState_In</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.AdsAddr_In</Name>
+							<Type GUID="{18071995-0000-0000-0000-000000000042}">AMSADDR</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.Statusword_In</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.ModesOfOperationDisplay_In</Name>
+							<Type>SINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.PositionActualValue_In</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.VelocityActualValue_In</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.TorqueActualValue_In</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.insertLoadAxis.DrvToPlc</Name>
+							<Comment><![CDATA[Drive to PLC struct]]></Comment>
+							<Type GUID="{B489D8E3-F467-D3DA-DB4A-EC2F9F573846}" Namespace="Motors_AFAG_CoE">T_LM_DrvToPlc</Type>
+						</Var>
+						<Var>
+							<Name>Stations.insertUnLoadAxis.DrvToPlc</Name>
+							<Comment><![CDATA[Drive to PLC struct]]></Comment>
+							<Type GUID="{B489D8E3-F467-D3DA-DB4A-EC2F9F573846}" Namespace="Motors_AFAG_CoE">T_LM_DrvToPlc</Type>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2">
+						<Name>PlcTask Outputs</Name>
+						<Var>
+							<Name>Stations.sLoadAxis.Controlword_Out</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.ModesOfOperation_Out</Name>
+							<Type>SINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.TargetPosition_Out</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.ProfileVelocity_Out</Name>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.TargetVelocity_Out</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sLoadAxis.TargetTorque_Out</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.Controlword_Out</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.ModesOfOperation_Out</Name>
+							<Type>SINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.TargetPosition_Out</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.ProfileVelocity_Out</Name>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.TargetVelocity_Out</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.sUnloadAxis.TargetTorque_Out</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>Stations.insertLoadAxis.PlcToDrv</Name>
+							<Comment><![CDATA[PLC to Drive struct]]></Comment>
+							<Type GUID="{A86C63A6-0569-77A4-FB26-ED8E955AF07E}" Namespace="Tc3_LinMot">tstLM_PlcToDrv</Type>
+						</Var>
+						<Var>
+							<Name>Stations.insertUnLoadAxis.PlcToDrv</Name>
+							<Comment><![CDATA[PLC to Drive struct]]></Comment>
+							<Type GUID="{A86C63A6-0569-77A4-FB26-ED8E955AF07E}" Namespace="Tc3_LinMot">tstLM_PlcToDrv</Type>
+						</Var>
+					</Vars>
+					<TaskPouOids>
+						<TaskPouOid Prio="20" OTCID="#x08502001"/>
+					</TaskPouOids>
+				</Instance>
+			</Project>
+		</Plc>
+	</Project>
+</TcSmProject>

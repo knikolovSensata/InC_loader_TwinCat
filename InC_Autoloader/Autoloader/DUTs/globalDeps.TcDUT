@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="globalDeps" Id="{bc1b69cf-5e80-47af-a5a0-245136784e92}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE globalDeps :
+(
+	
+	// За machine station
+	depMachineInitDone 			:=    10,
+	depMachineAuto,
+	depMachineStopping, 
+	depMachineStop,
+	depMachinePurgeStart,
+	depMachinePurgeRobot,
+	depMacinePurgeStackers,
+
+	// За staker load station
+	depSLoadInit,
+	depSLoadWaitRobotReady,
+	depSLoadRobotOutOfReach,
+	depSLoadStop,
+	depSLoadPurgeDone,
+	depSLoadRobotLoadGrip,
+	depSLoadStationReady,
+	depSLoadStationDone,
+	
+	// За staker unload station
+	depSUnloadInit,
+	depSUnloadStop,
+	depSUnloadWaitRobotReady,
+	depSUnloadRobotUnloadGrip,
+	depSUnloadRobotOutOfReach,	
+	depSUnloadPurgeDone,
+	depSUnloadStationReady,
+	
+	// За Inc Comm station
+	depIncCommModeDone,
+	depIncIncComm,
+	depIncCycleDone,
+	depIncStop,
+	depIncPurgeDone,
+	
+	// За RoboArm station
+	depRoboInitDone,
+	depRoboStop,
+	depRoboLoadPalletUnlock,
+	depRoboUnLoadPalletLock,
+	depRoboUnLodPalletFull,
+	depRoboPurgeDone,
+	depRoboGripOpen,
+	depRoboGripClose,
+	depRoboILoadOnPos,
+	depRoboULoadOnPos,
+	depRoboLoadSensor,
+	depRoboStartLoadStacker,
+	
+	// За inserter load station
+	depILoadInitDone,
+    depILoadWaitRobotReady,	
+	depILoadRobotBack,
+	depILoadSignalForLoad,
+	depILoadWaitIndex,
+	depILoadDone,
+	depILoadStop,
+	
+	// За inserter unload station
+	depULoadInitDone,
+    depULoadWaitRobotReady,	
+	depULoadWaitIndex,
+	depULoadDone,
+	depULoadRobotOutOfRich,	
+	depULoadStop
+	
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

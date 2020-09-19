@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterLoadSettings" Id="{dd3edc0a-2cec-4808-b42e-e5abaed07431}">
+    <Declaration><![CDATA[TYPE inserterLoadSettings :
+STRUCT
+	
+	axisWorkSpeed             :	  REAL   := 500.0; 	   // скорост 
+	axisAcc					  :   REAL   := 0.1;       // ускр.
+	axisPres                  :   REAL   := 0.1;       // точност на позициониране
+	rotParams                 :   ARRAY[1..Consts.MAX_RECIPE] OF inserterLoadRecipe; 	
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

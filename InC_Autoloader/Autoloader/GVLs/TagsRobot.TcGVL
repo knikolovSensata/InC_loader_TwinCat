@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <GVL Name="TagsRobot" Id="{9a456c0b-7b8a-4a9c-b0d2-b7276ef06f04}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+        // Параметри за работа на робота
+		
+		roboRecipeNum               : DINT;             // Текущата рецепта с която роботa трябва да работи
+		loadPalletPos				: DINT;             // Гнездо във входата тара над което трябва да иде робота
+		unLoadPalletPos				: DINT;             // Гнездо в изходната тара над което трябва да иде робота	
+
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

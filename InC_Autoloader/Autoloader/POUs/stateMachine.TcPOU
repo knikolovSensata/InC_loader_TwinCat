@@ -1,0 +1,887 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="stateMachine" Id="{cf3e709c-ead8-4319-8a8c-bafc90188536}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK stateMachine
+VAR_INPUT
+
+	stBase             : REFERENCE TO stationBase;	// Базова структура на станция  
+	activeEMG          : BOOL;                      // Има активен safety стоп
+	
+	depClear           : BOOL;
+	syncClear          : BOOL;
+
+	
+	
+END_VAR
+VAR_OUTPUT
+END_VAR
+
+
+VAR
+	stCurrentState     : DINT;  			        // Текущо състояние на станцията
+	startUp            : BOOL := FALSE;    		    // Флаг който се сетва за 1 цикъл при първо извикване 
+	statePass		   : BOOL; 						// Вече има избран следващ state
+	depPass            : BOOL; 						// Depandancy е било изпълнено за даденият state
+	depSyncPass		   : BOOL;                    // Всички завицещи от текущият state, други станций са били sync-нати
+	stationStop		   : BOOL; 				        // Станцията е спряна
+	depActive          : BOOL;                      // Станцията изчаква друга
+	syncActive         : BOOL;                      // Станцията sync-ва друга
+	syncArr            : ARRAY [0..Consts.MAX_SYNC_STATIONS] OF INT; 
+	depCount           : INT;                       // Общ брой на dependency-ta към други станий в текущият state
+	depIndex           : INT;                       // Индек за адресиране на dependency в syncArr
+	stTimer		       : TON;						// Всяки state има по един таймер
+	stErrTimer         : TON;                       // И по един за генериране на грешка 
+	startTimer         : BOOL;                      // Битове за старт на таймерите
+	startErrTimer      : BOOL;
+	stTime             : TIME;                      // Време на stTimer-a - задава се от stаteDalay
+	stErrTime          : TIME;                      // Време за stErrТimer-a - задава се от timeOutError
+	io				   : ioControl;                 // Дефинира няколко метода за работа с IO
+	tempState          : DINT;                      // Запазва некущото състояни за step mode
+	stepModeActive     : BOOL; 						// Активен е стъпков режим
+	debugTimer         : TON;
+	debugTImerIN       : BOOL;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// Тази част на FB-то никога няма да се изпълни (и кода в нея)]]></ST>
+    </Implementation>
+    <Method Name="cycle" Id="{05fb74c1-c6fb-48aa-97e1-fcb7c37d362f}">
+      <Declaration><![CDATA[METHOD PRIVATE cycle
+VAR_INPUT
+	
+	ioImage            : ANY;                           // ioImage за станцията 
+	
+END_VAR
+
+VAR 
+	ioImageIndex    : POINTER TO DINT;                 // показва началото на IO Image структурата
+	ioStruct		: POINTER TO imageIO;              // текуща структура - една IO точка (DI или DO)
+	points 			: DINT;							   // брой на входове и изходи в дадената стация
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Служи за упр. на стъпковата машина (в случея Switch Case блок)
+// Грижи се за правилното упр. на сигнали от Staion Base
+
+// Станцията е на автоматичен режим и е активна
+IF stBase.AutoMode AND stBase.ToggleEnable THEN
+	
+	stBase.Disabled := FALSE;
+	
+	// Индекса за dependency-та се нулара всеки цикъл (изпползва се в dependencySync)
+	depIndex        := 0;
+		
+	// При първо извикване станцията преминава в стартово състояние
+	IF NOT startUp THEN
+		startUp 			 	   	 := TRUE;
+		stBase.Busy 	      	 	 := FALSE;
+		stBase.Ready		 	 	 := FALSE;
+		stBase.Error    	  		 := FALSE;
+		stBase.LastState      		 := Consts.ST_START_UP;
+		stBase.CurrentState   		 := Consts.ST_START_UP;
+		stBase.Error          		 := FALSE;
+		stBase.LastErrorState        := Consts.ST_NULL;
+		stBase.DoInit         		 := FALSE;
+		stBase.DoStart        		 := FALSE;
+		stBase.DoStop        		 := FALSE;
+		stBase.DependencyState       := Consts.NO_DEPENDENCY;	
+		stCurrentState 				 := Consts.ST_START_UP;
+		tempState 				     := Consts.ST_NULL;
+		depCount 				     := 0;
+		depActive                    := FALSE;
+		syncActive                   := FALSE;
+		statePass 			   		 := FALSE;
+		depPass 				     := FALSE;
+		depSyncPass 			     := FALSE;
+		MEMSET(ADR(syncArr), 0, SIZEOF(syncArr));
+
+	END_IF
+	
+	// Без оглед на текущото състояние се задава състояние на стоп
+    // Ако има започанала някаква манупулация тя ще завърши 
+
+	IF stBase.DoStop THEN
+	
+		stBase.DoStop             := FALSE;
+		stationStop               := TRUE; 
+		stBase.Busy 	      	  := FALSE;
+		stBase.Ready		 	  := FALSE;
+		stBase.Error              := FALSE;
+		stepModeActive            := FALSE;
+		depCount 				  := 0;
+		depActive                 := FALSE;
+		syncActive                := FALSE;
+		statePass 			      := FALSE;
+		depPass 				  := FALSE;
+		depSyncPass 			  := FALSE;		
+		stBase.CurrentState       := Consts.ST_STOP;
+		tempState 				  := Consts.ST_NULL;
+	
+	END_IF
+	
+	// Когато станцията е спряла или е имало грешка при командта RESTART от HMI (DoInt)
+	// станцията се инициализира
+	IF  stBase.DoInit THEN
+		
+	    stBase.DoInit                := FALSE;
+		stBase.Error                 := FALSE;
+		stationStop    			     := FALSE;
+		statePass 			   		 := FALSE;
+		stBase.DoConfirmDependency   := FALSE;
+		depCount 				     := 0;
+		depActive                    := FALSE;
+		syncActive                   := FALSE;
+		statePass 			   		 := FALSE;
+		depPass 				     := FALSE;
+		depSyncPass 			     := FALSE;		
+		stBase.DependencyState       := Consts.NO_DEPENDENCY;	
+		stBase.LastErrorState        := Consts.ST_NULL;
+		stBase.CurrentState          := Consts.ST_INIT;
+        MEMSET(ADR(syncArr), 0, SIZEOF(syncArr));
+	ELSE
+		stBase.DoInit                := FALSE;
+	END_IF
+	
+	// Има активен safety предпазен стоп
+	IF activeEMG THEN
+			
+		stBase.DoConfirmDependency   := FALSE;
+		statePass 			   		 := FALSE;
+		depPass 				     := FALSE;
+		depSyncPass 			     := FALSE;		
+		depCount 				     := 0;
+		depActive                    := FALSE;
+		syncActive                   := FALSE;
+		stBase.DependencyState       := Consts.NO_DEPENDENCY;
+		stepModeActive     		     := FALSE;
+		tempState 				     := Consts.ST_NULL;
+		startTimer       		     := FALSE;
+		startErrTimer                := FALSE;
+		stBase.CurrentState          := Consts.ST_EMG;
+		stCurrentState               := Consts.ST_EMG;
+		MEMSET(ADR(syncArr), 0, SIZEOF(syncArr));
+	
+	END_IF
+	
+	IF NOT stBase.Error AND NOT stationStop THEN
+		IF stCurrentState = Consts.ST_READY OR stCurrentState = Consts.ST_STEP_BLOCK THEN	
+			stBase.Ready := TRUE;
+			stBase.Busy  := FALSE;	
+		ELSE
+			stBase.Ready := FALSE;
+			stBase.Busy  := TRUE;			
+		END_IF
+	ELSE
+		stBase.Ready := FALSE;
+		stBase.Busy  := FALSE;
+	END_IF
+	
+	// Правене на преход от към ново състояние
+	IF stCurrentState <> stBase.CurrentState THEN
+		
+		startTimer       := FALSE;
+		startErrTimer    := FALSE;
+		statePass 		 := FALSE;
+		depPass 		 := FALSE;
+		depSyncPass 	 := FALSE;
+		
+		stBase.DependencyState       := Consts.NO_DEPENDENCY;
+		
+		IF stBase.NextStep or stepModeActive THEN
+			IF  stBase.CurrentState <> Consts.ST_STEP_BLOCK THEN
+				stepModeActive       := TRUE;                 // Активен е спъпков режим
+				stBase.NextStep      := FALSE;
+				tempState            := stBase.CurrentState;
+				stBase.CurrentState  := Consts.ST_STEP_BLOCK;
+				stCurrentState       := Consts.ST_STEP_BLOCK;
+			END_IF
+		ELSE
+			stBase.LastState := stCurrentState;
+			stCurrentState   := stBase.CurrentState;        // Следващ state при автоматичрн режим
+		END_IF
+		
+	END_IF
+	
+	IF stCurrentState = Consts.ST_STEP_BLOCK AND stBase.NextStep THEN
+		stBase.CurrentState  := tempState; 	
+		stCurrentState       := tempState;
+		stBase.NextStep      := FALSE;	
+		statePass 			 := FALSE;
+		depPass 			 := FALSE;
+		depSyncPass 	     := FALSE;		
+	END_IF
+	
+	// При активен съпков режим може да се продължи към автоматичен
+	IF stepModeActive AND stBase.DoStart THEN
+		 stBase.CurrentState  := tempState; 	
+		 stCurrentState       := tempState;
+		 stBase.DoStart       := FALSE;
+		 stepModeActive       := FALSE;	
+		 statePass 			  := FALSE;	
+		 depPass 			  := FALSE;
+		 depSyncPass 		  := FALSE;		 
+	END_IF
+
+	
+	// Таймери за state-та - един за общо ползване и един за ген. на грешка
+	stTimer   (IN := startTimer,    PT := stTime);
+	stErrTimer(IN := startErrTimer, PT := stErrTime);
+	
+
+    // Когато станцията е спяла тогава може да се сетват и ресетват входове и изходи
+	// Чрез ANY pointer и малко аритметика се адресира структура по структура и се проверява
+	// дали трябва да се сетне дадено IO 
+	IF stationStop THEN
+
+		points         := ioImage.diSize / SIZEOF(imageIO);     // брой IO points за станция
+		ioImageIndex   := ioImage.pValue;                       // стартов адрес на структурата
+	
+		WHILE points > 0 DO                                     // адрес на imageIO 
+			
+			ioStruct := ioImageIndex;  
+                         
+			IF ioStruct^.iType = ioType.INPUT_BIT THEN          // updata на pointa ако е вход
+				ioStruct^.stIO := io.getX(ioStruct^);
+		
+			ELSIF ioStruct^.iType = ioType.OUTPUT_BIT THEN	
+				IF ioStruct^.stIO THEN
+					io.setY(ioStruct^);
+				ELSE 
+					io.rstY(ioStruct^);
+				END_IF
+			END_IF
+		
+			ioImageIndex := ioImageIndex + SIZEOF(imageIO);      // dec -  следващ IO point
+			points       := points - 1;
+		END_WHILE
+	END_IF
+			
+ELSE
+	// Станцията е изключена
+	stBase.Disabled := TRUE;	
+	startUp         := TRUE;
+	
+END_IF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="depNextState" Id="{7cd1e24c-6af1-42e7-84f0-771d8a513191}">
+      <Declaration><![CDATA[METHOD PROTECTED depNextState
+VAR_INPUT
+	
+	station			: REFERENCE TO stationBase;       
+	dep 			: DINT;  
+    newState 		: DINT;                                             
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+// Ако има сигнализарано dependency от depSignal, веднага се прави преход
+// към зададеният state. Всички останли dependency-та, (ако имa) се изчистват
+// Тоест тази метод е с по-висок приоритет от depSync и depWait
+
+IF  station.DependencyState = dep AND stCurrentState = stBase.CurrentState THEN
+	
+	MEMSET(ADR(syncArr), 0, SIZEOF(syncArr));
+	syncActive       := FALSE;
+	depActive        := FALSE;
+	nextState(newState);
+
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="depSignal" Id="{2573fba1-3e06-4376-bb55-5f33c87a4f12}">
+      <Declaration><![CDATA[METHOD PROTECTED depSignal
+VAR_INPUT
+		
+	dep 		: DINT;	
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Сетва dependency, но не блокира на него какво в depWait.
+// Отново има място само за едно на state.
+// Изчиства се автоматично при преминаване в следващият state
+
+IF stBase.DependencyState = Consts.NO_DEPENDENCY AND stCurrentState = stBase.CurrentState THEN
+	stBase.DependencyState      := dep;
+END_IF
+
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="depSync" Id="{f01e89e7-9750-4444-9e99-be7ba4e68ec9}">
+      <Declaration><![CDATA[METHOD PROTECTED depSync
+VAR_INPUT
+	
+	station			: REFERENCE TO stationBase;       // станция от която е извикан dependencyWait
+	dep 			: DINT;                           // какво dependency е сетнато
+
+// Трябва dependency-то което се очаква и това което sync-ва да са еднакви!
+// Иначе ще има dead-lock в текущите състояние и на двете станций.                         
+
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Метода потвърждата дадето dependency от друга станция.
+// В един state може да има до 64 Sync извиквания - докато всичките
+// такива не се изпълнят станцията няма да мине в следващ state.
+
+IF stCurrentState = stBase.CurrentState AND NOT depSyncPass THEN
+	syncActive    := TRUE;                        // спира се възможноста за преход в друг state
+	
+	// Когато за първи път извика метода даденото dependency се макрира като вече отчетено
+	// Брояча на dependency-та се увеличава. Така се знае колко трябва да се изпълнят за дадения state
+	// и чак след като всички се sync-ват и може да се премине в следващ state
+	IF syncArr[depIndex] = 0 THEN
+	
+		syncArr[depIndex] := Consts.DEP_PASS;
+		depCount          := depCount + 1;
+
+	// Има маркирано dependency и на него се чака в друга станция
+	// Другата станция се "освобождава" а тук брояча на dependency-та се намалява - има sync-нато dependency
+	ELSIF (syncArr[depIndex] = Consts.DEP_PASS AND station.DependencyState = dep) OR syncClear THEN
+	
+		syncArr[depIndex]       := Consts.SYNC_CONFIRM;
+		station.DependencyState := Consts.NO_DEPENDENCY;
+		depCount 		        := depCount - 1;
+	
+	END_IF
+	
+		depIndex          := depIndex + 1;
+	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="depWait" Id="{c80b042d-6ec4-4378-ab99-f053f7ac1503}">
+      <Declaration><![CDATA[METHOD PROTECTED depWait
+
+VAR_INPUT
+	
+     dep			: DINT;          // dependency което трябва да се Sync-не от друга станция
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Сетва определено dependency в stationBase
+// Станцията не може да премине в друг state докато това dependency 
+// не се потвърди от depenencySync ф-я.
+// В един state може да има само едно извикване на dependencyWait, защото
+// в stationBase има място само за едно.
+
+
+IF stBase.DependencyState = Consts.NO_DEPENDENCY AND NOT depActive AND stCurrentState = stBase.CurrentState AND NOT depPass THEN
+	stBase.DependencyState      := dep;
+	depActive                   := TRUE;
+ELSIF (stBase.DependencyState = Consts.NO_DEPENDENCY AND depActive) OR depClear THEN
+	depActive 					:= FALSE;
+	depClear                    := FALSE;
+	depPass                     := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="nextState" Id="{b075e5c8-0934-491b-949f-0a60771edadc}">
+      <Declaration><![CDATA[METHOD PROTECTED nextState
+VAR_INPUT
+	
+	nextState 		:DINT;                     // Следващо състояние
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+debugTimer(IN := debugTimerIN, PT := T#2S);
+
+// Ако няма грешка или активно dependency или ако няма sync-ване
+
+IF NOT stBase.Error AND NOT stationStop AND NOT depActive AND NOT syncActive AND NOT activeEMG AND NOT statePass THEN 
+
+	IF DEBUG.noErrors THEN
+		debugTimerIN := TRUE;
+		IF debugTimer.Q THEN
+		    stBase.CurrentState    := nextState;
+			statePass 			   := TRUE;	
+			debugTimerIN           := FALSE;
+		END_IF	
+	ELSE
+  	    stBase.CurrentState    := nextState;
+	    statePass 			   := TRUE;
+	END_IF
+	
+END_IF
+	
+
+// При активно dependency, може да се премине в следващ state
+// само ако брояча на dependency-та за дадения state e нула
+// Това значи че те всички са sync-нати
+
+IF syncActive AND depCount = 0  AND NOT depActive THEN
+
+// Изчиства се масива в който е бил "маркиран" статута на 
+// dependency-та в stata-та	
+
+    MEMSET(ADR(syncArr), 0, SIZEOF(syncArr));
+	
+	syncActive             := FALSE;
+    stBase.CurrentState    := nextState;
+	statePass 			   := TRUE;
+	depSyncPass            := TRUE;
+		
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setDisplayState" Id="{1e5fce71-9784-4cc8-8d2f-af555a57ce71}">
+      <Declaration><![CDATA[METHOD PROTECTED setDisplayState
+VAR_INPUT
+	
+	displayState		: DINT;         // състояние за виз. на HMI
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Просто актуализира променлива за displayState
+
+IF displayState <> Consts.ST_NULL THEN
+	stBase.DisplayState    := displayState;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setError" Id="{ad1afc0c-b58e-47c1-bd8e-0ba96e2df6a6}">
+      <Declaration><![CDATA[METHOD PROTECTED setError
+VAR_INPUT
+		
+	errState    :   DINT;       // състоянието за дадената грешка
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Този метод всъщност просто преминава към зададеното му състояние
+// Разликата от nextState е че сетва и бит Error в stationBase
+// Прехода се прави веднаги без да се отчита dependency 
+IF NOT stBase.Error AND NOT stationStop AND stCurrentState = stBase.CurrentState AND NOT DEBUG.noErrors THEN 
+	stBase.CurrentState    := errState;
+	stBase.LastErrorState  := errState;
+	stBase.Error           := TRUE;
+    Global.machError       := TRUE;    
+
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setStateVars" Id="{63224c19-553c-4b8c-8137-1d45bca60bd0}">
+      <Declaration><![CDATA[METHOD PROTECTED setStateVars
+VAR_INPUT
+	
+    img            : ANY;       // ioImage за станцията 	
+
+END_VAR
+VAR_IN_OUT
+	sv			: DINT; 		 // state var - текущо състояние
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Текущото състояние на станцията се записва като променлива 
+// в stateMachine, за да могат всички методи да имат достъп до нея
+// Изпълнява се упр. цикъл, update-ва се stateVar и се изпълнява главния switch case
+// на станцията.
+
+THIS^.stCurrentState := sv;
+
+cycle(img);
+
+sv := This^.stCurrentState;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stateDelay" Id="{240fde62-c5f9-4152-9a0d-553b967184eb}">
+      <Declaration><![CDATA[METHOD PROTECTED stateDelay : BOOL
+VAR_INPUT
+
+	t       : TIME;         // време на stTimer-a	
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Когато се извика тази ф-я стартира таймер
+// Той е един за всяки state и е ощо ползване
+// Min. времето е поне 10ms
+// Ресетва се при преминаване в следващ state
+
+IF t > T#10MS AND NOT startTimer THEN
+	stTime     := t;
+	startTimer := TRUE;	
+END_IF
+
+
+IF stTimer.Q THEN
+	stateDelay   := TRUE;
+ELSE
+	stateDelay   := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="timeOutError" Id="{686753c6-058e-408e-84a2-c5394200967e}">
+      <Declaration><![CDATA[METHOD PROTECTED timeOutError
+VAR_INPUT
+	
+	t				: TIME;      // време след което се ген. преминава в грешка
+	stErr           : DINT;      // сътояние на грешката 
+
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Когато се извика тази ф-я стартира таймер
+// След изтичането му се преминава в състояние не грешка
+// Min. времето е поне 10ms
+// Ресетва се при преминаване в следващ state
+
+IF t > T#10MS AND NOT startErrTimer AND NOT DEBUG.noErrors THEN
+	stErrTime       := t;
+	startErrTimer   := TRUE;	
+END_IF
+
+
+IF stErrTimer.Q THEN
+	setError(stErr);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="stateMachine">
+      <LineId Id="100" Count="0" />
+      <LineId Id="71" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.cycle">
+      <LineId Id="6" Count="7" />
+      <LineId Id="156" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="15" Count="12" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="393" Count="1" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="31" Count="5" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="376" Count="1" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="396" Count="0" />
+      <LineId Id="395" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="363" Count="1" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="378" Count="1" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="398" Count="0" />
+      <LineId Id="397" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="125" Count="1" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="314" Count="0" />
+      <LineId Id="302" Count="1" />
+      <LineId Id="310" Count="0" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="400" Count="0" />
+      <LineId Id="399" Count="0" />
+      <LineId Id="311" Count="0" />
+      <LineId Id="380" Count="1" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="316" Count="5" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="304" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="141" Count="1" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="228" Count="1" />
+      <LineId Id="401" Count="0" />
+      <LineId Id="403" Count="1" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="350" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="277" Count="2" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="280" Count="1" />
+      <LineId Id="286" Count="1" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="407" Count="0" />
+      <LineId Id="406" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="235" Count="1" />
+      <LineId Id="252" Count="3" />
+      <LineId Id="338" Count="0" />
+      <LineId Id="409" Count="0" />
+      <LineId Id="408" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="127" Count="2" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="207" Count="3" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="179" Count="1" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="198" Count="3" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="204" Count="1" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="211" Count="1" />
+      <LineId Id="60" Count="2" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="63" Count="4" />
+      <LineId Id="70" Count="11" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.depNextState">
+      <LineId Id="11" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.depSignal">
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.depSync">
+      <LineId Id="20" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="74" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.depWait">
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="25" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.nextState">
+      <LineId Id="172" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="179" Count="1" />
+      <LineId Id="182" Count="1" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="52" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.setDisplayState">
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.setError">
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="19" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.setStateVars">
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.stateDelay">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="24" Count="3" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="stateMachine.timeOutError">
+      <LineId Id="6" Count="12" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

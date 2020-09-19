@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="roboArmIO" Id="{0ca6925a-9818-4853-aeb7-ad311095defe}">
+    <Declaration><![CDATA[TYPE roboArmIO :
+STRUCT
+	
+	// Входове
+	x_Grip_open				: BOOL;        //  Грипера на робота е отворен
+	x_Grip_close			: BOOL;        //  Грипера на робота е затворен
+	x_Rot_home				: BOOL;        //  Ротатора е в home (прав)
+	x_Rot_back				: BOOL;        //  Ротатора е завъртян (обърнал е сензор на 180 град.)
+	x_Slide_up				: BOOL;        //  Грипера за тара е свален
+	x_Slide_down            : BOOL;        //  Грипера за тара е вдигнат
+	x_Laser                 : BOOL;        //  Сигнал от лазерната ролетка
+	x_waitPos24             : BOOL;        //  Сензор на чакаща поз. HEX24
+	x_waitPos27             : BOOL;        //  Сензор на чакаща поз. HEX27
+	
+	// Изходи
+	y_Grip_open				: BOOL;        //  
+	y_Grip_close			: BOOL;        //  
+	y_Rot_home				: BOOL;        //  
+	y_Rot_back				: BOOL;        //  
+	y_Slide_up				: BOOL;        //  
+	y_Slide_down            : BOOL;        // 
+	y_PalletLoad            : BOOL;        //  Сигнал за захващане/пускане на тара
+	y_signalLamp24          : BOOL;        //  Сигнална лампа за чакаща поз. HEX24
+	y_signalLamp27          : BOOL;        //  Сигнална лампа за чакаща поз. HEX27	
+	
+
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

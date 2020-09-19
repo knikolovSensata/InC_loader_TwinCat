@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="stackerLoadStates" Id="{f2ad55ca-f231-4c7b-92c3-2ce218b6eb1c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE stackerLoadStates :
+(
+		stNull      :=    Consts.ST_NULL,
+		stStartUp   :=    Consts.ST_START_UP,
+		stInit      :=    Consts.ST_INIT,
+		stReady     :=    Consts.ST_READY,
+		stStop      :=    Consts.ST_STOP,
+		stStepBlock :=    Consts.ST_STEP_BLOCK,	
+		stEMG		:=    Consts.ST_EMG,
+		 
+		stPowerUp    :=    1000,
+		stStackerStopped,
+		stInitDone,
+		
+		stResetStart,
+		stResetCheckLocks,
+		stResetUnlockPallet,
+		stResetEnableDrive,
+		stResetDriveMove,
+		stResetCheckDrive,
+		stResetDone,
+		
+		stLoadPalletsStart, 
+		stPalletsLoadLimitCheck,
+		stPalletsLoadCalcAxis,
+		stPalletsLoadCheckTop,
+		stPalletsLoadCheckLocks,
+		stLoadPalletsDriveOn,
+		stLoadPalletsCalcPos,
+		stLoadPalletsMoveDone,
+		stLoadPalletsMoveAgain,
+		stLoadPalletsDone, 
+		
+		stPreparePalletStart,
+		stPreparePalletCheckTop,
+		stPreparePalletCheckLocks1,
+		stPreparePalletSyncRobot,
+		stPrepareDriveOn,
+		stPreparePalletMove,
+		stPreparePalletMoveCheck,
+		stPreparePalletLock,
+		stPreparePalletDone,
+		
+		stMoveDownStart,
+		stMoveDownCkeckTop,
+		stMoveDownCheckLocks,
+		stMoveDownCheckFix, 
+		stMoveSync,
+		stMoveDownDriveOn,
+		stMoveDownMove,
+		stMoveDownMoveCheck,
+		stMoveDownDone,
+		
+		stReleasePalletStart, 
+		stReleasePalletUnlock,
+		stReleasePalletUnlockCheck,
+		stReleasePalletSignalRobot,
+		stReleasePalletDone, 
+		
+		stRoboOutStart,
+		stRoboOutDone,
+		
+		stLoadPurgeStart,
+		stLoadPurgeCheck,
+		stLoadPurgeDriveOn,
+		stLoadPurgeMove,
+		stLoadPurgeMoveCheck,
+		stLoadPurgeDone,
+		stLoadPurgeConfirm,
+		
+		
+		stErrNoProperSettings,
+		stErrRemovePallet,
+		stErrFixerNotOpen,
+		stErrFixerNotClose,
+		stErrLock1NotClose,
+		stErrLock1NotOpen,
+		stErrLock2NotClose,
+		stErrLock2NotOpen,
+		stErrAxis,
+		stInitMoveErr,
+		stErrPalletLoad,
+		stErrPalletMove,
+		stErrNoPallet
+
+
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

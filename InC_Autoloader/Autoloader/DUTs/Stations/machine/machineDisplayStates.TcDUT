@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="machineDisplayStates" Id="{aa42c474-de05-4380-aed2-5dd31752712f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE machineDisplayStates :
+(
+	dStStartUp             := 10,
+	dStEMGButtonDown,
+	dStOpenDoors,
+	dStNoAirSupplay,
+	dStStationError,
+	dStMachineIsStopping,
+	dStMachineIsStopped,
+	dStAutoRun,
+	dStMachineStandBy,
+	dStMachinePurgeActive
+	
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

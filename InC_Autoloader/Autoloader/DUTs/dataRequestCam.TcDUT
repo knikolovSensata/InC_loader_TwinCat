@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="dataRequestCam" Id="{6a62f852-ec12-4771-96b4-687a1ff3dfe0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+
+
+
+TYPE dataRequestCam :
+(
+	done               := Consts.NO_REQUEST,
+	error              := Consts.REQUEST_ERROR,
+	
+	camShotRecipe1     := 1,           // Тази стойност НЕ трябва да се променя - винаги е 1 !
+	camShotRecipe2,
+	camShotRecipe3,
+	camShotRecipe4,
+	camShotRecipe5,
+	camShotRecipe6,
+	camShotRecipe7,
+	camShotRecipe8,
+	camShotRecipe9,
+	camShotRecipe10,
+	camShotRecipe11,
+	camShotRecipe12,
+	camShotRecipe13,
+	camShotRecipe14,
+	camShotRecipe15
+	
+	
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

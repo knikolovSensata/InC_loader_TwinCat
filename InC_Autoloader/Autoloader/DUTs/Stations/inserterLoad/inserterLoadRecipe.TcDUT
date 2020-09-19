@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="inserterLoadRecipe" Id="{49371cf5-92af-47b7-aa33-0b85e382f711}">
+    <Declaration><![CDATA[TYPE inserterLoadRecipe :
+STRUCT
+	
+
+	initRot               :   REAL   := 10;        // начало ротиране на грипера
+	camRot 	              :   REAL   := 10;        // позиция на снимане
+	cwRot                 :   REAL   := 10;        // завъртане на ccw след команда от камерата 
+	ccwRot                :   REAL   := 10;        // завъртане на ccw след команда от камерата 
+
+
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

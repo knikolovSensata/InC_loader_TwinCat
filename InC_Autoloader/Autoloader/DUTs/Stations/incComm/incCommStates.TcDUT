@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="incCommStates" Id="{e605bfa2-28b8-491d-a5cc-4fd2d16c884a}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+
+TYPE incCommStates :
+(
+		stNull      :=    Consts.ST_NULL,
+		stStartUp   :=    Consts.ST_START_UP,
+		stInit      :=    Consts.ST_INIT,
+		stReady     :=    Consts.ST_READY,
+		stStop      :=    Consts.ST_STOP,
+		stStepBlock :=    Consts.ST_STEP_BLOCK,	
+		stEMG		:=    Consts.ST_EMG,
+		
+		
+		stSetMode                := 1000,
+		stStationStop,
+		
+		stIndexStart,
+		stIndexEnableStations,
+		stIndexStationsReady,
+		stSignalStations,		
+		stIndexEnable, 
+		stIndexReady,
+		stIndexCheck, 
+		stIndexDone,
+		
+		stPurgeStart,
+		stPurgeFinish,
+		stPurgeDone,
+
+		stErrCommFault
+
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

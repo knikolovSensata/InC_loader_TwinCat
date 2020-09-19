@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="stationBase" Id="{14e7f66a-6827-4355-ad36-925e3a4a4e92}">
+    <Declaration><![CDATA[TYPE stationBase :
+STRUCT
+	
+	StationID						: DINT;
+	StationType						: DINT;
+	Ready							: BOOL;
+	Busy							: BOOL;
+	Error							: BOOL;
+	Disabled						: BOOL;
+	CurrentState					: DINT;
+	LastState						: DINT;
+	LastErrorState					: DINT;
+	DisplayState					: DINT;
+	DependencyState					: DINT;	     
+	DoInit							: BOOL;       // това е бутона RESET на HMI - да се добави
+	DoStart							: BOOL;       // след като е бил в StepMode с този бутон продължава на AutoMode
+	DoEnd							: BOOL;       // не се ползва - да не се добавя бутона на HMI
+	DoStop							: BOOL;
+	DoRetry							: BOOL;       // не се ползва - да не се добавя бутона на HMI
+	DoConfirmDependency				: BOOL;       
+	ToggleEnable					: BOOL;
+	AutoMode						: BOOL;
+	NextStep						: BOOL;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

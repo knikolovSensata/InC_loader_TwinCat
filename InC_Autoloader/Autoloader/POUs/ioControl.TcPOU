@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="ioControl" Id="{045ac296-4cd6-48ab-b1e4-b4c57de1a0b8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK ioControl
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// Този блок има няколко метода който помагат за по-лесна работа на стъпковата машина
+// 1. Метод за преминаване от състояние в състояние
+// 2. Конфигурация на самата стъпкова машина
+// 3. Няколко метода за четене и завпис на IO сигнали
+// 4. State Taimer на базата на който да се генерира аларма
+
+]]></ST>
+    </Implementation>
+    <Method Name="getSR" Id="{115e0f62-28bd-4ce6-b217-e508967feb4c}">
+      <Declaration><![CDATA[METHOD getSR : BOOL
+VAR_INPUT
+
+	xOn:  imageIO;      // Сигнал който трябва да е ON
+    XOff: imageIO;      // Сигла който трябва да е OFF	
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Резултата се връща когато единият сигнал е ON, a другият ОFF
+// Основно при друпозиционни устр.
+
+IF getX(xOn) AND NOT getX(xOff) THEN
+	getSR := TRUE;
+ELSE
+	getSR := FALSE;	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="getX" Id="{74f1d238-8bc5-48a2-91e8-a504e608b903}">
+      <Declaration><![CDATA[METHOD getX : BOOL
+
+VAR_INPUT
+	
+		x	   : imageIO; 		// IO поле
+		
+END_VAR
+
+VAR
+	
+		tempByte  : BYTE;
+		mask      : BYTE;
+		res       : BYTE;
+		
+END_VAR
+
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Прочита даден IO сигнал 
+
+IF x.iType = ioType.INPUT_BIT THEN
+
+	IF NOT DEBUG.ioDebugActive THEN	
+
+		tempByte 		 := x.image[x.iByte];       // Взима байта от IO Image
+		mask     		 := SHL(1, x.iBit);         // Подготвя маската
+  	 	 res              := tempByte AND mask;
+		IF (res = 0) THEN
+			getX   := FALSE;
+			x.stIO := FALSE; 
+		ELSE
+			getX   := TRUE;
+			x.stIO := TRUE; 
+		END_IF
+	ELSE	
+		IF x.stIO THEN
+			getX := TRUE;
+		ELSE
+			getX := FALSE;
+		END_IF
+	
+	END_IF
+	
+END_IF
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="rstY" Id="{ad0d7e10-2bf5-40c0-8317-1fa0931fa315}">
+      <Declaration><![CDATA[METHOD rstY
+VAR_INPUT
+	
+	y		: imageIO; 		// поле с IO изходен сигнал
+
+END_VAR
+
+VAR 
+	  
+	tempByte  : BYTE;
+	mask      : BYTE;       // маска за сетване на опредене бит от байта
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ // Ресетва изходен сигнал в периферията и в Station IO
+
+ IF y.iType = ioType.OUTPUT_BIT THEN
+	 
+	IF NOT DEBUG.ioDebugActive THEN
+	 
+		y.stIO   		 := FALSE;         			//  Задава стойността в Station IO
+
+		tempByte 		 := y.image[y.iByte];       // Взима байта от IO Image
+		mask     		 := SHL(1, y.iBit);         // Подготвя маската
+		mask             := NOT mask; 				// Инвертирая
+		y.image[y.iByte] := tempByte AND mask;      // Ресетване на желаният бит
+		
+	ELSE
+		y.stIO   		 := FALSE;         			//  Задава стойността в Station IO
+END_IF
+	
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setSR" Id="{f0c1418b-ecec-4c47-a3b6-2e0ad3ddde83}">
+      <Declaration><![CDATA[METHOD setSR
+VAR_INPUT
+	
+	yOn:  imageIO;      // Изход който трябва да се сетне
+    yOff: imageIO;      // Изход който трябва да се ресетне	
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Сетва първия и ресетва втория сигнал 
+// За цилиндри основно
+
+setY(yOn);
+rstY(yOff);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setY" Id="{1e0eccc8-1a2f-4bfd-84dc-bf38688e25f5}">
+      <Declaration><![CDATA[METHOD setY
+VAR_INPUT
+	
+	y		: imageIO; 		// поле с IO изходен сигнал
+
+END_VAR
+
+VAR 
+	  
+	tempByte  : BYTE;
+	mask      : BYTE;       // маска за сетване на опредене бит от байта
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Сетва изходен сигнал в периферията и в Station IO
+
+IF y.iType = ioType.OUTPUT_BIT THEN
+	
+	IF NOT DEBUG.ioDebugActive THEN
+
+		y.stIO           := TRUE;         			//  Задава стойността в Station IO
+	
+		tempByte 		 := y.image[y.iByte];       // Взима байта от IO Image
+		mask     		 := SHL(1, y.iBit);         // Подготвя маската
+		y.image[y.iByte] := tempByte OR mask;       // Сетване на желаният бит
+		
+	ELSE
+		y.stIO           := TRUE;         			//  Задава стойността в Station IO
+END_IF
+	
+END_IF
+	]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="ioControl">
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="3" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="ioControl.getSR">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="ioControl.getX">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="94" Count="4" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="57" Count="1" />
+    </LineIds>
+    <LineIds Name="ioControl.rstY">
+      <LineId Id="6" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="55" Count="3" />
+      <LineId Id="37" Count="2" />
+    </LineIds>
+    <LineIds Name="ioControl.setSR">
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="ioControl.setY">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="73" Count="3" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="45" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

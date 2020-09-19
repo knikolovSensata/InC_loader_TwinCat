@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="roboArmImage" Id="{0f7bc6e0-e6ba-4ac4-9bd5-0da87e1b5235}">
+    <Declaration><![CDATA[TYPE roboArmImage :
+STRUCT
+	
+    xGrip_open 	    	: imageIO := ( stIO   := Stations.roboHmiIO.x_Grip_open,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 1 );	
+									   
+    xGrip_close 		: imageIO := ( stIO   := Stations.roboHmiIO.x_Grip_close,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 2 );
+
+    xRot_home 	    	: imageIO := ( stIO   := Stations.roboHmiIO.x_Rot_home,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );
+
+    xRot_back 		    : imageIO := ( stIO   := Stations.roboHmiIO.x_Rot_back,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 4 );	
+
+    xSlide_up 	       : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide_up,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);	
+
+    xSlide_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide_down,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);					   
+
+    xLaser 	           : imageIO := ( stIO   := Stations.roboHmiIO.x_Laser,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);	
+
+    xWaitPos24 	        : imageIO := ( stIO   := Stations.roboHmiIO.x_waitPos24,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);
+
+    xWaitPos27 	        : imageIO := ( stIO   := Stations.roboHmiIO.x_waitPos27,
+									   image  := Global.INPUT_IMAGE,
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 5);								   			   							   
+									   
+	// Изходи
+    yGrip_open 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Grip_open,
+					 				   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 1 );
+
+    yGrip_close 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_Grip_close,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 2 );
+
+    yRot_home 		   : imageIO := ( stIO   := Stations.roboHmiIO.y_Rot_home,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 );	
+
+    yRot_back 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Rot_back,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 4 );	
+
+    ySlide_up 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide_up,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 4 );
+
+    ySlide_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide_down,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 4 );
+
+    yPalletLoad 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_PalletLoad,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 4 );
+									  						   
+    ySignalLamp24 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_signalLamp24,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 4 );	
+
+    ySignalLamp27	   : imageIO := ( stIO   := Stations.roboHmiIO.y_signalLamp27,
+									   image  := Global.OUTPUT_IMAGE,
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 4 );								   
+				   	
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

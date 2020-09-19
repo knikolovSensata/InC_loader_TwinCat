@@ -1,0 +1,832 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="insertLoadStation" Id="{6268782d-4abc-4a81-9966-96c42ef0fea5}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK insertLoadStation EXTENDS stateMachine
+VAR_INPUT
+	
+	ioImage                : inserterLoadImage;
+
+END_VAR
+
+VAR
+
+	activeState            : inserterLoadStates;	
+	axisLinMot             : fakeDriveLinMot; //FB_ServoAxis_LinMot; 
+	
+	resetDone			   : BOOL := FALSE; 						   // Инсъртъра е ресетнат
+	prepareStart           : BOOL := FALSE; 						   // Изчаква синхронизация с индекс масата
+	loadStart              : BOOL := FALSE; 						   // Робота е донесъл нов сензор
+	rotStart               : BOOL := FALSE; 						   // Начално поз. на ротатора
+	posStart               : BOOL := FALSE; 						   // Ротира сензора на позиция, спрямо команда от камерата
+	insertStart            : BOOL := FALSE;							   // Поставяне на сензора в гнездото на масата
+	releaseStart           : BOOL := FALSE; 						   // Връщане на инсъртъра в начлана поз.
+	syncStart			   : BOOL := FALSE; 						   // Sync с индекс масата, че работа е завършена
+
+	
+	initRotPos			   : REAL; 									   // Начално завъртане
+	camRotPos              : REAL;                                     // Завъртане за снимка
+	workRotPos             : REAL;                                     // Завъртане след снимка - cw ии ccw
+	cwRotPos               : REAL;
+    ccwRotPos              : REAL;                                      
+	
+	gripTime			   : TIME := T#250MS;                          // Време за ход на грипера
+	gripTimeOut            : TIME := T#2S;                             // Време за отваряне/затваряне на гриперите
+	insertTimeOut          : TIME := T#3S;                             // Време за движене нагоре/надолу на inserter 
+    driveMoveTimeOut	   : TIME := T#4S;                             // Време за ход на мотора
+	driveHomeTimeOut       : TIME := T#10S;                            // Време за home на мотора
+	camTimeOut             : TIME := T#2S; 							   // Време за 1 снимка от камерата
+	driveEnTime            : TIME := T#1S;                             // Време за ресет на инвертора на мотора
+	drivePosTime           : TIME := T#100MS;                          // Време за задаване на задание за позициониране	
+
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+drivesControl();          // Упр. на ЛинМот мотора 
+
+setStateVars(ioImage, activeState);
+
+
+CASE activeState OF
+
+
+//  *** Start Up
+//  Старт на станцията след подаване на захр.	
+
+	inserterLoadStates.stStartUp:
+		setDisplayState(inserterLoadDisplayStates.dStStartUp);
+		Stations.insertLoadDrive.DoEnable   := FALSE;
+		Stations.insertLoadDrive.DoMove     := FALSE;	
+		Stations.insertLoadDrive.DoHome     := FALSE;					   						   
+		nextState(inserterLoadStates.stPowerUp);
+
+//  *** Power Up - Start
+//  Инициализация след подaване на захранване
+
+	inserterLoadStates.stPowerUp:
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			setError(inserterLoadStates.stErrInitSensor);
+		END_IF
+		nextState(inserterLoadStates.stInit);
+
+//  *** Init 
+//  Инициализация на станцията
+	
+	inserterLoadStates.stInit:
+	
+		depWait(globalDeps.depILoadInitDone);		
+		
+		IF NOT resetDone THEN
+			nextState(inserterLoadStates.stResetStart);
+		END_IF
+		
+		IF prepareStart THEN
+			nextState(inserterLoadStates.stPrepareStart);
+		END_IF
+		
+		IF loadStart THEN
+			nextState(inserterLoadStates.stLoadStart);
+		END_IF		
+		
+		IF rotStart THEN
+			nextState(inserterLoadStates.stRotStart);
+		END_IF
+
+		IF posStart THEN
+			nextState(inserterLoadStates.stPosStart);
+		END_IF
+
+		IF insertStart THEN
+			nextState(inserterLoadStates.stInsertStart);		
+		END_IF	
+
+		IF releaseStart THEN
+			nextState(inserterLoadStates.stReleaseStart);
+		END_IF	
+
+		IF syncStart THEN
+			nextState(inserterLoadStates.stSyncIndexStart);
+		END_IF		
+			
+		nextState(inserterLoadStates.stInitDone);
+		
+// *** Init Done
+
+	inserterLoadStates.stInitDone:
+		nextState(inserterLoadStates.stReady);
+	
+// *** Ready
+
+	inserterLoadStates.stReady:	
+		setDisplayState(inserterLoadDisplayStates.dStStandBy);	
+		IF Global.purgeDoneIL THEN
+			resetDone          := FALSE;		
+			Global.purgeDoneIL := FALSE;
+		END_IF
+		depNextState(Stations.machineStBase, GlobalDeps.depMachineStopping,  inserterLoadStates.stInserterLoadStopped);
+		depNextState(Stations.machineStBase, GlobalDeps.depMachineStop,      inserterLoadStates.stInserterLoadStopped);	
+		depWait(globalDeps.depILoadWaitIndex);
+		nextState(inserterLoadStates.stPrepareStart);
+
+// *** Inserter is Stopped
+
+	inserterLoadStates.stInserterLoadStopped:
+		setDisplayState(inserterLoadDisplayStates.dStStationIsStopped);	
+		depWait(globalDeps.depILoadStop);
+		depNextState(stations.machineStBase, GlobalDeps.depMachineAuto,       inserterLoadStates.stReady);
+	    depNextState(Stations.machineStBase, GlobalDeps.depMachinePurgeStart, inserterLoadStates.stReady);			
+		Stations.insertLoadDrive.DoEnable   := FALSE;
+		Stations.insertLoadDrive.DoMove     := FALSE;	
+		Stations.insertLoadDrive.DoHome     := FALSE;		
+
+// *** Reset - Start
+// Ресетиране на inserter
+
+	inserterLoadStates.stResetStart:
+		setDisplayState(inserterLoadDisplayStates.dStStationIsReseting);		
+		resetDone := FALSE;		
+		nextState(inserterLoadStates.stResetSyncRobot);
+		
+// *** Reset - Robot Sync
+// Робота трябва да е на безопастно растояние
+
+	inserterLoadStates.stResetSyncRobot:
+		IF NOT GLobal.robotSafe THEN	
+			depWait(globalDeps.depILoadWaitRobotReady);
+			nextState(inserterLoadStates.stResetGripOpen);	
+		ELSE
+			nextState(inserterLoadStates.stResetGripOpen);	
+		END_IF			
+
+// *** Reset - Grip Open
+// Отваряне на грипера
+
+	inserterLoadStates.stResetGripOpen:
+		io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
+		nextState(inserterLoadStates.stResetGripCheck);	
+
+// *** Reset - Grip Check
+// Проверка дали грипера се е отворил
+// Движение на гора на инсертъра
+
+	inserterLoadStates.stResetGripCheck:		
+ 		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
+			io.setSR(ioImage.yInsert_up, ioImage.yInsert_down);
+			nextState(inserterLoadStates.stResetMoveUpCheck);	
+		END_IF
+		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotOpen);
+		
+// *** Reset - Move Up Check
+// Проверка дали инсертъра е горе
+
+	inserterLoadStates.stResetMoveUpCheck:		
+		IF io.getSR(ioImage.xInsert_up, ioImage.xInsert_down) THEN
+			nextState(inserterLoadStates.stResetLimitsCalc);			
+		END_IF
+		timeOutError(insertTimeOut, inserterLoadStates.stErrInsertNotUp);	
+			
+// *** Reset - Limit Check
+// В зависимост от избраният модел на продукт се зараждат настойки в инвертора на мотора
+
+	inserterLoadStates.stResetLimitsCalc:
+			
+		initRotPos    := Stations.insertLoadSetting.rotParams[Global.recipe].initRot;
+		camRotPos     := Stations.insertLoadSetting.rotParams[Global.recipe].camRot;
+		cwRotPos      := Stations.insertLoadSetting.rotParams[Global.recipe].cwRot;
+		ccwRotPos     := Stations.insertLoadSetting.rotParams[Global.recipe].ccwRot;
+		
+		IF Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoReset  := TRUE;
+		ELSE
+			Stations.insertLoadDrive.DoReset  := FALSE;
+			Stations.insertLoadDrive.DoEnable := TRUE;
+			IF stateDelay(driveEnTime) THEN
+				nextState(inserterLoadStates.stResetDriveHome);
+			END_IF
+		END_IF
+		timeOutError(driveEnTime*2, inserterLoadStates.stErrDriveErr);
+		
+// *** Reset - Drive Home
+// Рефериране на мотора
+
+	inserterLoadStates.stResetDriveHome:		
+		IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN	
+			Stations.insertLoadDrive.DoHome := TRUE;
+			IF stateDelay(driveEnTime) THEN
+				nextState(inserterLoadStates.stResetDriveCheck1);	
+			END_IF
+		ELSE
+			setError(inserterLoadStates.stErrDriveErr);
+	   END_IF	
+		
+// *** Reset - Drive Check
+// Проверка дали реферирането на мотора е завършено
+
+	inserterLoadStates.stResetDriveCheck1:		
+		IF Stations.insertLoadDrive.Refferenced AND NOT Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoHome := FALSE;
+			nextState(inserterLoadStates.stResetDriveMove);	
+		END_IF
+		timeOutError(driveHomeTimeOut, inserterLoadStates.stErrDriveHome);	
+
+// *** Reset - Drive Move
+// Ротатора застава на начална позиция
+
+	inserterLoadStates.stResetDriveMove:
+		IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN	
+			Stations.insertLoadDrive.TargetVelocity      := Stations.insertLoadSetting.axisWorkSpeed;
+			Stations.insertLoadDrive.TargetAcceleration  := Stations.insertLoadSetting.axisAcc;
+			Stations.insertLoadDrive.TargetPrecision     := Stations.insertLoadSetting.axisPres;
+			Stations.insertLoadDrive.TargetPosition      := initRotPos;
+		    Stations.insertLoadDrive.DoMove              := TRUE;
+			IF stateDelay(driveEnTime) THEN			
+				nextState(inserterLoadStates.stResetDriveCheck2);	
+			END_IF
+		ELSE
+			setError(inserterLoadStates.stErrDriveErr);
+	   END_IF	
+	   
+// *** Reset - Drive Check2
+// Проверка дали реферирането на мотора е завършено
+
+	inserterLoadStates.stResetDriveCheck2:		
+		IF Stations.insertLoadDrive.TargetReached AND NOT Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoMove := FALSE;
+			nextState(inserterLoadStates.stResetDone);	
+		ELSIF NOT Stations.insertLoadDrive.TargetReached AND Stations.insertLoadDrive.Error THEN
+			setError(inserterLoadStates.stErrDriveErr);
+		END_IF	
+		timeOutError(driveMoveTimeOut, inserterLoadStates.stErrDriveTimeOut);	
+
+// *** Reset - Done
+
+	inserterLoadStates.stResetDone:		
+		resetDone := TRUE;
+	    nextState(inserterLoadStates.stReady);			
+		
+// *** Prepare - Start
+// Индекс масата е завършила ходата си - чака се робота да донесе сензор
+
+	inserterLoadStates.stPrepareStart:
+	   setDisplayState(inserterLoadDisplayStates.dStWorking);
+	   prepareStart := TRUE;
+	   nextState(inserterLoadStates.stPrepareNestCheck);	   
+	   
+// *** Prepare - Nest Check
+// Ако в масата има зареден сенсор - станцията преключва работа
+// Иначе дава сигнал на робота, че очаква от него да донесе сензор
+
+	inserterLoadStates.stPrepareNestCheck:	   
+		IF NOT io.getX(ioImage.xNest) AND NOT Global.purgeActive THEN
+ 	       nextState(inserterLoadStates.stPrepareRobotWait);  
+        ELSE
+	        prepareStart := FALSE;
+ 	        nextState(inserterLoadStates.stSyncIndexStart);  			
+        END_IF	
+	  
+// *** Prepare - Robot Wait
+// Изчаква робота да донесе сензор 
+
+	inserterLoadStates.stPrepareRobotWait:		
+		depSignal(globalDeps.depILoadSignalForLoad);
+		depNextState(Stations.roboStBase, globalDeps.depRoboILoadOnPos, inserterLoadStates.stPrepareDone);
+	
+// *** Prepare - Done 
+
+	inserterLoadStates.stPrepareDone:		
+		prepareStart    := FALSE;
+		nextState(inserterLoadStates.stLoadStart);
+		
+// *** Load - Start
+// Сензора трябва да се прехвърли от робота в грипера на инсъртъра
+
+	inserterLoadStates.stLoadStart:			
+		loadStart   := TRUE;
+		io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
+		IF stateDelay(gripTime) THEN
+			nextState(inserterLoadStates.stLoadGripCheck);	
+		END_IF
+	
+// *** Load - Gripper Check
+// Проверява се дали се е затворил грипера на инсъртъра
+
+	inserterLoadStates.stLoadGripCheck:		
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			nextState(inserterLoadStates.stLoadRobotSync);	
+		END_IF	
+		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);		
+		
+// *** Load - Robo Sync
+// Дава се сигнал робота да си отвори грипера
+
+	inserterLoadStates.stLoadRobotSync:			
+		depWait(globalDeps.depRoboGripOpen);
+		depNextState(Stations.roboStBase, GlobalDeps.depILoadRobotBack, inserterLoadStates.stLoadDone);
+
+// *** Load - Done
+
+	inserterLoadStates.stLoadDone:			
+		loadStart  := FALSE;
+		nextState(inserterLoadStates.stRotStart);		
+
+// *** Rot - Start
+// Започва ротиране на сензора, за да може да бъде сниман
+
+	inserterLoadStates.stRotStart:	
+		rotStart    := TRUE;
+		io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
+		nextState(inserterLoadStates.stRotGripCheck);
+
+// *** Rot - Grip Check
+// Ако е затворен грипера, пуска мотора 
+
+	inserterLoadStates.stRotGripCheck:
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN
+				nextState(inserterLoadStates.stRotDriveMove);	
+			ELSE
+			    nextState(inserterLoadStates.stRotDriveOn);			
+			END_IF
+		END_IF	
+		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);
+		
+// *** Rot - Drive On
+// Ако е затворен грипера, пуска мотора 
+
+	inserterLoadStates.stRotDriveOn:
+		IF Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoReset  := TRUE;
+		ELSE
+			Stations.insertLoadDrive.DoReset  := FALSE;
+			Stations.insertLoadDrive.DoEnable := TRUE;
+			IF stateDelay(driveEnTime) THEN
+				nextState(inserterLoadStates.stRotDriveMove);
+			END_IF
+		END_IF
+		timeOutError(driveEnTime*2, inserterLoadStates.stErrDriveErr);
+
+// *** Rot - Drive Move
+// Завърта мотора на поз. за снимане
+
+	inserterLoadStates.stRotDriveMove:
+		IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN	
+			Stations.insertLoadDrive.TargetVelocity      := Stations.insertLoadSetting.axisWorkSpeed;
+			Stations.insertLoadDrive.TargetAcceleration  := Stations.insertLoadSetting.axisAcc;
+			Stations.insertLoadDrive.TargetPrecision     := Stations.insertLoadSetting.axisPres;
+			Stations.insertLoadDrive.TargetPosition      := camRotPos;
+		    Stations.insertLoadDrive.DoMove              := TRUE;	
+			IF stateDelay(driveEnTime) THEN		
+				nextState(inserterLoadStates.stRotDriveCheck);	
+			END_IF
+		ELSE
+			setError(inserterLoadStates.stErrDriveErr);
+	   END_IF	
+
+// *** Rot - Drive Check
+// Проверка дали мотора си е завършил хода
+
+	inserterLoadStates.stRotDriveCheck:
+		IF Stations.insertLoadDrive.TargetReached AND NOT Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoMove := FALSE;
+			nextState(inserterLoadStates.stRotCamShot);	
+		ELSIF NOT Stations.insertLoadDrive.TargetReached AND Stations.insertLoadDrive.Error THEN
+			setError(inserterLoadStates.stErrDriveErr);
+		END_IF	
+		timeOutError(driveMoveTimeOut, inserterLoadStates.stErrDriveTimeOut);
+
+// *** Rot - Cam Shot
+// Прави се снимка на сензора
+
+	inserterLoadStates.stRotCamShot:
+		Stations.insertLoadData := Global.recipe;
+		nextState(inserterLoadStates.stRotCamCheck);
+
+// *** Rot - Cam Check
+// Проверява се дали има успешна снимка и върнат резултат
+
+	inserterLoadStates.stRotCamCheck:
+		IF Stations.insertLoadData = dataRequestCam.done THEN 
+			
+			IF TagsHMI.camResult <> camResult.null THEN
+				
+				CASE TagsHMI.camResult OF 
+						camResult.turnCCW : workRotPos := ccwRotPos;
+						camResult.turnCW  : workRotPos := cwRotPos;
+				END_CASE
+				nextState(inserterLoadStates.stRotDone);
+				
+			ELSE
+				setError(inserterLoadStates.stErrCamBadResult);				
+			END_IF
+		
+		ELSIF Stations.insertLoadData = dataRequestCam.error THEN
+			setError(inserterLoadStates.stErrCamErr);			
+		END_IF
+		timeOutError(camTimeOut, inserterLoadStates.stErrCamTimeout);		
+		
+// *** Rot - Done
+
+	inserterLoadStates.stRotDone:		
+		rotStart   := FALSE;
+		nextState(inserterLoadStates.stPosStart);		
+		
+// *** Pos  - Start
+// Трябва да се завърти сензора на базата на резултата от камерата
+
+	inserterLoadStates.stPosStart:		
+		posStart   := TRUE;
+		io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
+		nextState(inserterLoadStates.stPosGripCheck);		
+			
+// *** Pos - Grip Check
+
+	inserterLoadStates.stPosGripCheck:
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN
+				nextState(inserterLoadStates.stPosDriveMove);	
+			ELSE
+			    nextState(inserterLoadStates.stPosDriveOn);			
+			END_IF
+		END_IF	
+		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);	
+		
+// *** Pos - Drive On
+// Ако е затворен грипера, пуска мотора 
+
+	inserterLoadStates.stPosDriveOn:
+		IF Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoReset  := TRUE;
+		ELSE
+			Stations.insertLoadDrive.DoReset  := FALSE;
+			Stations.insertLoadDrive.DoEnable := TRUE;
+			IF stateDelay(driveEnTime) THEN
+				nextState(inserterLoadStates.stPosDriveMove);
+			END_IF
+		END_IF
+		timeOutError(driveEnTime*2, inserterLoadStates.stErrDriveErr);	
+		
+// *** Pos - Drive Move
+// Завърта мотора 
+
+	inserterLoadStates.stPosDriveMove:
+		IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN	
+			Stations.insertLoadDrive.TargetVelocity      := Stations.insertLoadSetting.axisWorkSpeed;
+			Stations.insertLoadDrive.TargetAcceleration  := Stations.insertLoadSetting.axisAcc;
+			Stations.insertLoadDrive.TargetPrecision     := Stations.insertLoadSetting.axisPres;
+			Stations.insertLoadDrive.TargetPosition      := workRotPos;
+		    Stations.insertLoadDrive.DoMove              := TRUE;
+			IF stateDelay(driveEnTime) THEN			
+				nextState(inserterLoadStates.stPosDriveCheck);	
+			END_IF
+		ELSE
+			setError(inserterLoadStates.stErrDriveErr);
+	   END_IF	
+		
+// *** Pos - Drive Check
+// Проверка дали мотора си е завършил хода
+
+	inserterLoadStates.stPosDriveCheck:
+		IF Stations.insertLoadDrive.TargetReached AND NOT Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoMove := FALSE;
+			nextState(inserterLoadStates.stPosDone);	
+		ELSIF NOT Stations.insertLoadDrive.TargetReached AND Stations.insertLoadDrive.Error THEN
+			setError(inserterLoadStates.stErrDriveErr);
+		END_IF	
+		timeOutError(driveMoveTimeOut, inserterLoadStates.stErrDriveTimeOut);			   
+	   
+// *** Pos - Done
+
+	inserterLoadStates.stPosDone:
+		posStart   := FALSE;
+		nextState(inserterLoadStates.stInsertStart);	  
+
+// *** Insert - Start
+// Поставя сензора на в гнездото на индекс масата
+
+	inserterLoadStates.stInsertStart:
+		insertStart := TRUE;
+		io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
+		nextState(inserterLoadStates.stInsertGripCheck);	
+
+// *** Insert - Grip Check
+// Проверява се дали грипера е затворен
+
+	inserterLoadStates.stInsertGripCheck:
+		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+			nextState(inserterLoadStates.stInsertNestCheck);		
+		END_IF
+		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);
+		
+// *** Insert - Nest Check
+// Сензор се поставя само ако на масата няма
+
+	inserterLoadStates.stInsertNestCheck:
+		IF NOT io.getX(ioImage.xNest) THEN
+			io.setSR(ioImage.yInsert_down, ioImage.yInsert_up);
+			nextState(inserterLoadStates.stInsertMoveDownCheck);			
+		ELSE
+			setError(inserterLoadStates.stErrInitSensor);
+		END_IF
+		
+// *** Insert - Insert Move Down Check
+// Проверява се дали е инсъртъра е долу
+
+	inserterLoadStates.stInsertMoveDownCheck:		
+		IF io.getSR(ioImage.xInsert_down, ioImage.xInsert_up) THEN
+			nextState(inserterLoadStates.stInsetDone);			
+		END_IF	
+		timeOutError(insertTimeOut, inserterLoadStates.stErrInsertNotDown);
+
+// *** Insert - Done
+
+	inserterLoadStates.stInsetDone:	 
+		insertStart := FALSE;
+		nextState(inserterLoadStates.stReleaseStart);		
+	   
+// *** Release - Start
+// Оставяне на сензора в гнездота и връщата в начална поз.
+
+	inserterLoadStates.stReleaseStart:	   
+		releaseStart := TRUE;
+		io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
+		nextState(inserterLoadStates.stReleaseGripCheck);	
+
+// *** Release - Grip Check
+// Проверка дали грипера се е отворил
+
+	inserterLoadStates.stReleaseGripCheck:	   
+		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
+			io.setSR(ioImage.yInsert_up, ioImage.yInsert_down);
+			nextState(inserterLoadStates.stReleaseMoveUpCheck);			
+		END_IF	
+		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotOpen);				   
+	
+// *** Release - Move Up Check
+// Проверка дали инсъртъра е горе
+
+	inserterLoadStates.stReleaseMoveUpCheck:
+		IF io.getSR(ioImage.xInsert_up, ioImage.xInsert_down) THEN
+			IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN
+				nextState(inserterLoadStates.stReleaseDriveMove);	
+			ELSE
+			    nextState(inserterLoadStates.stReleaseDriveOn);			
+			END_IF			
+		END_IF
+		timeOutError(insertTimeOut, inserterLoadStates.stErrInsertNotUp);	
+
+// *** Release - Drive On
+// Ако инсъртъра е горе , пуска мотора 
+
+	inserterLoadStates.stReleaseDriveOn:
+		IF Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoReset  := TRUE;
+		ELSE
+			Stations.insertLoadDrive.DoReset  := FALSE;
+			Stations.insertLoadDrive.DoEnable := TRUE;
+			IF stateDelay(driveEnTime) THEN
+				nextState(inserterLoadStates.stReleaseDriveMove);
+			END_IF
+		END_IF
+		timeOutError(driveEnTime*2, inserterLoadStates.stErrDriveErr);	
+		
+// *** Release - Drive Move
+// Завърта мотора 
+
+	inserterLoadStates.stReleaseDriveMove:
+		IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN	
+			Stations.insertLoadDrive.TargetVelocity      := Stations.insertLoadSetting.axisWorkSpeed;
+			Stations.insertLoadDrive.TargetAcceleration  := Stations.insertLoadSetting.axisAcc;
+			Stations.insertLoadDrive.TargetPrecision     := Stations.insertLoadSetting.axisPres;
+			Stations.insertLoadDrive.TargetPosition      := initRotPos;
+		    Stations.insertLoadDrive.DoMove              := TRUE;
+			IF stateDelay(driveEnTime) THEN			
+				nextState(inserterLoadStates.stReleaseDriveCheck);	
+			END_IF
+		ELSE
+			setError(inserterLoadStates.stErrDriveErr);
+	   END_IF	
+		
+// *** Release - Drive Check
+// Проверка дали мотора си е завършил хода
+
+	inserterLoadStates.stReleaseDriveCheck:
+		IF Stations.insertLoadDrive.TargetReached AND NOT Stations.insertLoadDrive.Error THEN
+			Stations.insertLoadDrive.DoMove := FALSE;
+			nextState(inserterLoadStates.stReleaseDone);	
+		ELSIF NOT Stations.insertLoadDrive.TargetReached AND Stations.insertLoadDrive.Error THEN
+			setError(inserterLoadStates.stErrDriveErr);
+		END_IF	
+		timeOutError(driveMoveTimeOut, inserterLoadStates.stErrDriveTimeOut);  
+	   
+// *** Release - Done
+
+	inserterLoadStates.stReleaseDone:	
+        setDisplayState(inserterLoadDisplayStates.dStStationReady);	
+		releaseStart  := FALSE;
+		nextState(inserterLoadStates.stSyncIndexStart);
+
+// *** Sync Index - Start
+// Дава се разрешение да се завърти индекс масата
+
+	inserterLoadStates.stSyncIndexStart:
+		syncStart := TRUE;		
+		depWait(globalDeps.depILoadDone);	
+		depNextState(Stations.incCommStBase, globalDeps.depIncCycleDone, inserterLoadStates.stSyncIndexDone); 
+
+// *** Sync Index - Done
+
+	inserterLoadStates.stSyncIndexDone:
+		syncStart := FALSE;
+		nextState(inserterLoadStates.stReady);   
+	        
+// *** Step Block State
+// В този state се влиза винаги след изпълняването на една стъпка при стъпков режим
+	inserterLoadStates.stStepBlock:
+        setDisplayState(inserterLoadDisplayStates.dStWaitForNextStep);	
+		
+// *** Station Stop
+// Станцията е била изключена 
+ 
+	inserterLoadStates.stStop: 	
+		Stations.insertLoadDrive.DoEnable   := FALSE;
+		Stations.insertLoadDrive.DoMove     := FALSE;	
+	    resetDone			                := FALSE; 						   
+	    prepareStart                        := FALSE; 						   
+	    loadStart                           := FALSE; 						   
+	    rotStart                            := FALSE; 						   
+	    posStart                            := FALSE; 						   
+	    insertStart                         := FALSE;							  
+	    releaseStart                        := FALSE; 						   
+	    syncStart			                := FALSE; 
+
+// *** ERROR - Grip Not Open
+// Грипера не се е отворил на време
+
+	inserterLoadStates.stErrGripNotOpen:
+		setDisplayState(inserterLoadDisplayStates.dStGripperDidNotOpen); 
+
+// *** ERROR - Grip Not Close
+// Грипера не се е затворил на време
+
+	inserterLoadStates.stErrGripNotClose:
+		setDisplayState(inserterLoadDisplayStates.dStGripperDidNotClose);
+		
+// *** ERROR - Inserter Not Down
+// Inserter не е стинглал долна позиция на време
+
+	inserterLoadStates.stErrInsertNotDown:
+		setDisplayState(inserterLoadDisplayStates.dStInserterDidNotMoveDown);		
+		
+// *** ERROR - Inserter Not Up
+// Inserter не е стинглал горна позиция на време
+
+	inserterLoadStates.stErrInsertNotUp:
+		setDisplayState(inserterLoadDisplayStates.dStInserterDidNotMoveUp);		
+		
+// *** ERROR - Drive Homming TimeOut
+// ЛинМот мотора не е могъл да се homming както трябва
+
+	inserterLoadStates.stErrDriveHome:
+		setDisplayState(inserterLoadDisplayStates.dStDriveDidNotHome);
+		Stations.insertLoadDrive.DoEnable   := FALSE;
+		Stations.insertLoadDrive.DoMove     := FALSE;	
+		Stations.insertLoadDrive.DoHome     := FALSE;	
+		
+// *** ERROR - Drive Homming TimeOut
+// ЛинМот инвертора е върнал грешка
+
+	inserterLoadStates.stErrDriveErr:
+		setDisplayState(inserterLoadDisplayStates.dStDriveError);	
+		Stations.insertLoadDrive.DoEnable   := FALSE;
+		Stations.insertLoadDrive.DoMove     := FALSE;		
+		
+// *** ERROR - Drive Move TimeOut
+// ЛинМот мотора не е завършил движението си навреме
+
+	inserterLoadStates.stErrDriveTimeOut:
+		setDisplayState(inserterLoadDisplayStates.dStDriveTimeOutMove);	
+		Stations.insertLoadDrive.DoEnable   := FALSE;
+		Stations.insertLoadDrive.DoMove     := FALSE;		
+		
+// *** ERROR - Camera Timeout
+// Камерата се е забавила твърде мн. с връщането на резултат
+
+	inserterLoadStates.stErrCamTimeout:
+		setDisplayState(inserterLoadDisplayStates.dStCameraTimeOut);
+		
+// *** ERROR - Camera Error
+// Камерата се е забавила твърде мн. с връщането на резултат
+
+	inserterLoadStates.stErrCamErr:
+		setDisplayState(inserterLoadDisplayStates.dStCameraError);
+		
+// *** ERROR - Camera Error
+// Камерата е върнала грешен резултат
+
+	inserterLoadStates.stErrCamBadResult:
+		setDisplayState(inserterLoadDisplayStates.dStCameraBadResult);	
+		
+	
+// *** ERROR - Init sensor 
+// При старт на машаината не може да има захванат от грипера сензор
+
+	inserterLoadStates.stErrInitSensor:	
+		setDisplayState(inserterLoadDisplayStates.dStInitSensorGripError);	
+		
+// *** EMG Stop
+// Аварийно спиране при натискане на гъба или отваряне на врата
+
+	inserterLoadStates.stEMG:		
+		Stations.insertLoadDrive.DoEnable   := FALSE;
+		Stations.insertLoadDrive.DoMove     := FALSE;	
+		Stations.insertLoadDrive.DoHome     := FALSE;
+		nextState(inserterLoadStates.stInit);		
+
+
+END_CASE]]></ST>
+    </Implementation>
+    <Action Name="drivesControl" Id="{a98c116b-c2d9-423d-a486-22093ca943a8}">
+      <Implementation>
+        <ST><![CDATA[
+
+axisLinMot       ( TargetPosition 		   := Stations.insertLoadDrive.TargetPosition,
+				   TargetVelocity 		   := Stations.insertLoadDrive.TargetVelocity,
+				   TargetAcceleration	   := Stations.insertLoadDrive.TargetAcceleration,
+				   TargetDeceleration	   := Stations.insertLoadDrive.TargetAcceleration,
+				   TargetPrecision 		   := Stations.insertLoadDrive.TargetPrecision,			
+				   IsAbsolute 			   := FALSE,
+	               OperationMode		   := Stations.insertLoadDrive.OperationMode,     				
+	               Enabled 				   => Stations.insertLoadDrive.Enabled,
+	               Error 				   => Stations.insertLoadDrive.Error,
+	               ErrorID 				   => Stations.insertLoadDrive.ErrorID,
+	               Refferenced 			   => Stations.insertLoadDrive.Refferenced,
+	               Moving 				   => Stations.insertLoadDrive.Moving,
+	               CurrentPosition 		   => Stations.insertLoadDrive.CurrentPosition,
+	               CurrentVelocity		   => Stations.insertLoadDrive.CurrentVelocity,             				
+				   Axis					   := Stations.insertLoadAxis,
+		           DoServoOn 			   := Stations.insertLoadDrive.DoEnable, 
+	               DoHome 				   := Stations.insertLoadDrive.DoHome, 
+	               DoMove 				   := Stations.insertLoadDrive.DoMove, 
+	               DoReset 				   := Stations.insertLoadDrive.DoReset, 
+	               TargetReached 		   := Stations.insertLoadDrive.TargetReached, 
+	               DoStop 				   := Stations.insertLoadDrive.DoStop);]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="insertLoadStation">
+      <LineId Id="1924" Count="77" />
+      <LineId Id="2871" Count="2" />
+      <LineId Id="2870" Count="0" />
+      <LineId Id="2002" Count="10" />
+      <LineId Id="2689" Count="0" />
+      <LineId Id="2013" Count="15" />
+      <LineId Id="2643" Count="0" />
+      <LineId Id="2029" Count="1" />
+      <LineId Id="2644" Count="2" />
+      <LineId Id="2031" Count="54" />
+      <LineId Id="2821" Count="0" />
+      <LineId Id="2086" Count="0" />
+      <LineId Id="2822" Count="0" />
+      <LineId Id="2087" Count="23" />
+      <LineId Id="2823" Count="0" />
+      <LineId Id="2111" Count="0" />
+      <LineId Id="2824" Count="0" />
+      <LineId Id="2112" Count="46" />
+      <LineId Id="2686" Count="0" />
+      <LineId Id="2161" Count="30" />
+      <LineId Id="2687" Count="0" />
+      <LineId Id="2194" Count="13" />
+      <LineId Id="2209" Count="38" />
+      <LineId Id="2825" Count="0" />
+      <LineId Id="2248" Count="0" />
+      <LineId Id="2826" Count="0" />
+      <LineId Id="2249" Count="59" />
+      <LineId Id="2310" Count="0" />
+      <LineId Id="2312" Count="35" />
+      <LineId Id="2827" Count="0" />
+      <LineId Id="2348" Count="0" />
+      <LineId Id="2828" Count="0" />
+      <LineId Id="2349" Count="44" />
+      <LineId Id="2685" Count="0" />
+      <LineId Id="2394" Count="48" />
+      <LineId Id="2444" Count="25" />
+      <LineId Id="2829" Count="0" />
+      <LineId Id="2470" Count="0" />
+      <LineId Id="2830" Count="0" />
+      <LineId Id="2471" Count="28" />
+      <LineId Id="2688" Count="0" />
+      <LineId Id="2501" Count="6" />
+      <LineId Id="2509" Count="10" />
+      <LineId Id="2772" Count="4" />
+      <LineId Id="2779" Count="1" />
+      <LineId Id="2771" Count="0" />
+      <LineId Id="2520" Count="84" />
+      <LineId Id="96" Count="0" />
+    </LineIds>
+    <LineIds Name="insertLoadStation.drivesControl">
+      <LineId Id="2" Count="1" />
+      <LineId Id="121" Count="19" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="incCommIO" Id="{fdf3f1fe-065d-4d99-ae6e-511678a8d8a4}">
+    <Declaration><![CDATA[TYPE incCommIO :
+STRUCT
+	
+	// Входове
+	x_SignalStop			: BOOL; 						// Стоп бутон на InC
+	x_SignalStart			: BOOL; 						// Старт бутон на InC
+	x_pickNestLoaded        : BOOL; 						// Има готова бройка за взимане 						// Може да се остави бройка - гнездото е празно
+	x_recipeBit0			: BOOL; 						// Режим на работа HEX24
+    x_recipeBit1			: BOOL;							// Режим на работа HEX27
+	x_recipeBit2            : BOOL;
+	x_recipeBit3            : BOOL;
+	x_dailIndexDone			: BOOL;							// Индекс масата е направила един ход - движението е завършено       
+	
+	// Изходи
+	y_productChange			: BOOL;                         // InC има разрешение да стартира нов лот (и да смени продукта HEX24 или HEX27)
+	y_alarm					: BOOL; 						// Има активна аларма
+	y_dailIndex				: BOOL; 						// InC е безопастно да завърти индекс масата с един ход
+
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>
