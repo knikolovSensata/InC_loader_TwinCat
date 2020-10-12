@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Misubishi_Packet_Manager" Id="{76346b38-c560-4f6e-9241-562f25e165e3}">
+    <Declaration><![CDATA[TYPE ST_Robot_Misubishi_Packet_Manager :
+STRUCT
+	StatusPacket					: ST_Robot_Mitsubishi_Packet_1000;								// Robot status packet structure.
+	RobotBaseForStationPacket		: ST_Robot_Mitsubishi_Packet_1100;
+	PacketConfirmationPacket		: ST_Robot_Mitsubishi_Packet_1101;	
+	ProgramCompletedPacket			: ST_Robot_Mitsubishi_Packet_1102;	
+	DependencyConfirmedPacket		: ST_Robot_Mitsubishi_Packet_1103;
+	
+	SettingsPacket					: ST_Robot_Mitsubishi_Packet_2000;								// Robot control packet structure.
+	ControlPacket					: ST_Robot_Mitsubishi_Packet_2010;
+	StateConfirmationPacket				:ST_Robot_Mitsubishi_Packet_2018;								
+END_STRUCT
+END_TYPE
+
+// NB!!!
+// Use these directly - 
+// case receivedPacket.0 OF
+//		1000 : MEMSET(StatusPacket, receivedPacket, LEN(StatusPacket));
+//		.
+//		.
+//		.
+// endCase
+//]]></Declaration>
+  </DUT>
+</TcPlcObject>

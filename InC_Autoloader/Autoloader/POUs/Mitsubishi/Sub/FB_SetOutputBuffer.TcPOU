@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <POU Name="FB_SetOutputBuffer" Id="{5aa13791-2dd5-4225-91b0-8b40f46058f0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SetOutputBuffer
+VAR_INPUT
+	OutputBufferAddress				: PVOID;
+	PacketAddress					: PVOID;
+	SizeOfPacket					: UDINT;
+END_VAR
+VAR_OUTPUT
+	nPacketLenght					: UDINT;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nPacketLenght := SizeOfPacket;
+MEMCPY(OutputBufferAddress, 
+		PacketAddress, 
+		SizeOfPacket);
+		
+(*nPacketLenght := nPacketLenght + 1;
+MEMSET(OutputBufferAddress + nPacketLenght,
+	13,
+	1);
+	
+nPacketLenght := nPacketLenght + 1;
+MEMSET(OutputBufferAddress + nPacketLenght,
+	10,
+	1);
+	*)]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SetOutputBuffer">
+      <LineId Id="10" Count="2" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedType>
+      <Type guid="977d8176-e4bf-4762-b202-d956adcb651c">E_ROBOTSTATIONSTATES</Type>
+      <From>E_RobotStationStates</From>
+      <To>E_RobotStates</To>
+    </RenamedType>
+  </Renames>
+</Refactors>

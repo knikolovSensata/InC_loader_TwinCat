@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Mitsubishi_Packet_1000" Id="{946f7ff7-c764-449a-800c-b66bef71f143}">
+    <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_1000 :
+STRUCT	
+	// Packet number - 1000.
+	// From robot.
+	// Main robot status packet.
+	// Cyclic.
+	
+	Header							: DINT := 1000;													// Packet header.
+	
+	Ready							: BIT;															// Is the robot ready for operation.
+	Busy							: BIT;															// Is the robot operating.
+	Error							: BIT;															// Is the robot in an error state.
+	PoweredOn						: BIT;															// Is the robot in a powered on state.
+	
+	// Not avalable - fillers.
+	AutomaticMode					: BIT;
+	Executing						: BIT;
+	Ending							: BIT;
+	ProgramCompleted				: BIT;															// Is the last started program completed.
+	GripperA_Present				: BIT;
+	GripperB_Present				: BIT;
+	GripperA_Open					: BIT;
+	GripperB_Open					: BIT;
+	NA13							: BIT;
+	NA14							: BIT;
+	NA15							: BIT;
+	NA16							: BIT;
+	NA17							: BIT;	
+	NA18							: BIT;	
+	NA19							: BIT;	
+	NA20							: BIT;	
+	NA21							: BIT;	
+	NA22							: BIT;	
+	NA23							: BIT;	
+	NA24							: BIT;	
+	NA25							: BIT;	
+	NA26							: BIT;	
+	NA27							: BIT;	
+	NA28							: BIT;	
+	NA29							: BIT;	
+	NA30							: BIT;	
+	NA31							: BIT;	
+	NA32							: BIT;	
+	
+	CurrentState					: DINT;															// The current robot state ID if defined.
+	CurrentProgram					: DINT;															// The currently selected robot program.
+	CurrentTrayPosition				: DINT;															// The currently selected station to work with.
+	CurrentSpeed					: DINT;															// The current speed overdive.
+	CurrentCorrectionID				: DINT;															// The current correction ID if selected.
+	CurrentProductID				: DINT;															// The current product ID if any.
+	
+	CurrentTargetProgram			: DINT;															// The current target robot program.			// | These could be moved in a separate packet.
+	CurrentTargetTrayPosition		: DINT;															// The current target robot station.			// |
+	CurrentTargetSpeed				: DINT;															// The current target robot speed override.		// |
+	CurrentTargetCorrectionID		: DINT;															// The current target robot correction ID.		// |
+	CurrentTargetProductID			: DINT;															// The current target product ID.
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

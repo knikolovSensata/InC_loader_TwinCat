@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <POU Name="FB_HEXSTR_TO_DINT" Id="{df350655-9620-44a4-863d-d1cd4cd5df8c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION FB_HEXSTR_TO_DINT																			// Converts a STRING hex array to DINT.
+VAR_INPUT
+	in						: STRING;																// The input string.
+END_VAR
+VAR_OUTPUT
+	out						: DINT;																	// The output value.
+	bError					: BOOL;																	// Had any error occured.
+END_VAR
+VAR
+	sSum					: STRING;
+	pVal					: PVOID;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Converts a STRING hex array to DINT.
+IF LEN(in) = 8 THEN
+	sSum := CONCAT('16#', in);
+	pVal := STRING_TO_PVOID(sSum);
+	MEMCPY(ADR(out),
+		ADR(pVal),
+		4);
+ELSE
+	out := 0;
+	bError := TRUE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_HEXSTR_TO_DINT">
+      <LineId Id="24" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="17" Count="3" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

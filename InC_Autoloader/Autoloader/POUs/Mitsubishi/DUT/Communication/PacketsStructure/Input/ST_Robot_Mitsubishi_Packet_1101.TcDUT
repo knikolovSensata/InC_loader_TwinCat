@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Mitsubishi_Packet_1101" Id="{527c77fc-34fb-4217-85d8-ce3bea6cb339}">
+    <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_1101 :
+STRUCT
+	// Packet number - 1100. 8B This is separated due to the need of on trigger confirmation.
+	// From robot.
+	// Robot packet received.
+	// Trigger.
+	
+	Header							: DINT := 1101;													// Packet header.
+	
+	LastReceivedPacketID			: DINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

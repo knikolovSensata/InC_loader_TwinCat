@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Mitsubishi_Packet_2016" Id="{82ff28ef-e2f2-4c48-800c-8ae2eea29316}">
+    <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_2016 :
+STRUCT
+	// Packet number - 2016.
+	// To robot.
+	// Robot change speed override control packet.
+	// Trigger.
+	
+	Header							: DINT := 2016;													// Packet header.
+	
+	TargetSpeed						: DINT;															// The speed overdrive to be set.
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

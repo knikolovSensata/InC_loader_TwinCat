@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
   <GVL Name="Stations" Id="{c28fbdb4-ccbc-4098-b20d-34aad10e393b}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
@@ -47,6 +47,20 @@ VAR_GLOBAL
 	machineImageIO         		 : machineImage;
 	machineHmiIO	             : machineIO;
 	machineStBase                : stationBase := (ToggleEnable := TRUE, AutoMode := TRUE);	
+	
+	//======================================== Robot====================================================
+	gstRobotMitsubishi: ST_Robot_Mitsubishi := (												
+		nRobotPort := 10004,					// nRobotPort := 10004,
+		bToggleEnable := TRUE,
+		bToggleConnect := FALSE,
+		bDoServoOn := FALSE,
+		bDoReset := FALSE,
+		nTargetTrayPosition := 0,
+		nTargetProgram := 1,
+		nTargetSpeed := 90,
+		nTargetCorrectionID := 0,
+		bLastPacketConfirmed := TRUE);																	// Robot Mitsubishi station.	
+	gstRobotMitsubishiPacketManager	: ST_Robot_Misubishi_Packet_Manager;
     
 	
 

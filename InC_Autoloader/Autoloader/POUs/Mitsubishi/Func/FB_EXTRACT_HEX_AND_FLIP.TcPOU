@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <POU Name="FB_EXTRACT_HEX_AND_FLIP" Id="{8c6449e8-2760-4d18-a019-51c11edf98be}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION FB_EXTRACT_HEX_AND_FLIP
+VAR_INPUT
+	pBytes					: PVOID;																// The address of the bytes array.
+	nLenght					: UDINT;																// Number of bytes to be flipped.
+END_VAR
+VAR_OUTPUT
+	sHex					: STRING;																// The value of the extracted and flipped bytes as HEX.
+END_VAR
+VAR
+	sTmpVal					: STRING;																// Medium value.
+	nCounter				: UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[sTmpVal := DATA_TO_HEXSTR(pData := pBytes,
+cbData := nLenght,
+bLoCase := FALSE);
+FOR nCounter := 1 TO nLenght BY 1 DO
+	sHex := CONCAT(LEFT(sTmpVal, 2), sHex);
+	sTmpVal := RIGHT(sTmpVal, LEN(sTmpVal) - 3);
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="FB_EXTRACT_HEX_AND_FLIP">
+      <LineId Id="13" Count="5" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

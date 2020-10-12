@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <POU Name="FB_Robot_Mitsubishi_SendPacket" Id="{ad3044b4-b017-4df9-8da8-c8952ccfa7cc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Robot_Mitsubishi_SendPacket
+VAR_INPUT
+	PacketAddress					: PVOID;
+	SizeOfPacket					: UDINT;
+	bDoSend							: BOOL;
+	ConnectionRef					: FB_ClientServerConnection;
+	nLastReceivedPacketID			: DINT;
+END_VAR
+VAR_OUTPUT
+	bLastPacketConfirmed			: BOOL;
+END_VAR
+VAR_IN_OUT
+
+END_VAR
+VAR
+	fbSend							: FB_SocketSend;// Send data trought TCP IP.
+	fbTimerSend						: TON;								
+	eState							: E_Communication_Send_States;
+	nPacketLenght					: UDINT;
+	
+	sOutputString					: STRING(255);
+	nCounter						: UDINT;
+	nLastSentPacketID				: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// This should all be a state machine.
+fbSend(sSrvNetID 	:= ConnectionRef.sSrvNetID,
+			hSocket		:= ConnectionRef.hSocket);
+			
+IF NOT (bDoSend) THEN
+	bLastPacketConfirmed := FALSE;													// Reset the confirmation flag.
+	nLastReceivedPacketID := 0;
+	sOutputString := '';
+	fbSend(bExecute	:= FALSE);	
+	eState := E_Communication_Send_States.E_COM_SEND_PREPARE;
+ELSE
+	CASE eState OF
+		E_Communication_Send_States.E_COM_SEND_PREPARE:			
+			FOR nCounter := 0 TO SizeOfPacket - 4 BY 4 DO
+				sOutputString := CONCAT(sOutputString, FB_EXTRACT_HEX_AND_FLIP(PacketAddress + nCounter, 4));
+			END_FOR
+			
+			sOutputString := CONCAT(sOutputString, '$0D$0A');
+			
+			MEMCPY(ADR(nLastSentPacketID),													// Record the last sent packet ID.
+				PacketAddress,
+				4);
+				
+			bLastPacketConfirmed := FALSE;																			// Actually packet prepared.
+			eState := E_Communication_Send_States.E_COM_SEND_START_SEND;
+			
+		E_Communication_Send_States.E_COM_SEND_START_SEND:
+			fbSend(	
+			cbLen		:= LEN(sOutputString),				// + 1,(* Send string inclusive string (null) delimiter! *)
+			pSrc		:= ADR(sOutputString),							(* Address of the string variable *)
+			bExecute	:= TRUE);	
+			fbTimerSend(IN:=TRUE,PT:=T#500MS);
+			IF NOT (fbSend.bBusy) OR fbTimerSend.Q THEN	
+				fbTimerSend(IN:=FALSE);
+				fbSend(bExecute	:= FALSE);															// Handle errors too.
+				eState := E_Communication_Send_States.E_COM_SEND_WAIT_SENT;
+			END_IF
+			
+		E_Communication_Send_States.E_COM_SEND_WAIT_SENT:
+			IF nLastReceivedPacketID = nLastSentPacketID THEN
+				eState := E_Communication_Send_States.E_COM_SEND_FINALIZE;
+			END_IF
+			
+		E_Communication_Send_States.E_COM_SEND_FINALIZE:	
+			bLastPacketConfirmed := TRUE;
+																				// Actually packet prepared
+	END_CASE
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Robot_Mitsubishi_SendPacket">
+      <LineId Id="64" Count="0" />
+      <LineId Id="462" Count="0" />
+      <LineId Id="461" Count="0" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="425" Count="1" />
+      <LineId Id="424" Count="0" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="427" Count="0" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="332" Count="0" />
+      <LineId Id="347" Count="1" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="352" Count="3" />
+      <LineId Id="235" Count="1" />
+      <LineId Id="238" Count="2" />
+      <LineId Id="460" Count="0" />
+      <LineId Id="243" Count="1" />
+      <LineId Id="287" Count="0" />
+      <LineId Id="465" Count="0" />
+      <LineId Id="290" Count="0" />
+      <LineId Id="467" Count="0" />
+      <LineId Id="464" Count="0" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="246" Count="1" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="251" Count="2" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="451" Count="0" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -29,6 +29,9 @@
     <Compile Include="DUTs\dataRequestRobot.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\E_RobotStates.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\imageIO.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -191,6 +194,96 @@
     <Compile Include="POUs\MAIN.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Input\ST_Robot_Mitsubishi_Packet_1000.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Input\ST_Robot_Mitsubishi_Packet_1100.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Input\ST_Robot_Mitsubishi_Packet_1101.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Input\ST_Robot_Mitsubishi_Packet_1102.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Input\ST_Robot_Mitsubishi_Packet_1103.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2000.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2010.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2011.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2012.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2013.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2014.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2015.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2016.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2017.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2018.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2019.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2100.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output\ST_Robot_Mitsubishi_Packet_2101.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\Communication\ST_Robot_Misubishi_Packet_Manager.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\E_Communication_Send_States.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\E_Robot_Mitsubishi_States.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\DUT\ST_Robot_Mitsubishi.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\FB_Robot_Mitsubishi.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\FB_Robot_Mitsubishi_ReceivePacket.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\FB_Robot_Mitsubishi_SendPacket.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\Func\FB_EXTRACT_HEX_AND_FLIP.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\Func\FB_HEXSTR_TO_DINT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\Sub\FB_ClearOutputBuffer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Mitsubishi\Sub\FB_SetOutputBuffer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\ROBOT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\stateMachine.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -218,6 +311,9 @@
     <Compile Include="POUs\Stations\stackerUnloadStation.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RobotTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DUTs" />
@@ -230,6 +326,14 @@
     <Folder Include="DUTs\Stations\stackerUnload" />
     <Folder Include="DUTs\Stations\stackerLoad" />
     <Folder Include="GVLs" />
+    <Folder Include="POUs\Mitsubishi" />
+    <Folder Include="POUs\Mitsubishi\DUT" />
+    <Folder Include="POUs\Mitsubishi\DUT\Communication" />
+    <Folder Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure" />
+    <Folder Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Input" />
+    <Folder Include="POUs\Mitsubishi\DUT\Communication\PacketsStructure\Output" />
+    <Folder Include="POUs\Mitsubishi\Func" />
+    <Folder Include="POUs\Mitsubishi\Sub" />
     <Folder Include="POUs\Stations" />
     <Folder Include="VISUs" />
     <Folder Include="POUs" />

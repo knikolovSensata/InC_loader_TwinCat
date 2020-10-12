@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Mitsubishi_Packet_2000" Id="{23c9b91d-6e88-4c67-a34a-95356a3ab8c1}">
+    <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_2000 :
+STRUCT
+	// Packet number - 2000. 48B
+	// To robot.
+	// Robot Settings packet.
+	// Trigger.
+	
+	Header							: DINT := 2000;													// Packet header.
+	
+	StartProgram					: BIT;
+	// Not avalable - fillers.															// Change the selected station to the target station if possible.
+	NA2								: BIT;	
+	NA3								: BIT;	
+	NA4								: BIT;	
+	NA5								: BIT;	
+	NA6								: BIT;	
+	NA7								: BIT;	
+	NA8								: BIT;	
+	NA9								: BIT;	
+	NA10							: BIT;	
+	NA11							: BIT;	
+	NA12							: BIT;		
+	NA13							: BIT;	
+	NA14							: BIT;	
+	NA15							: BIT;	
+	NA16							: BIT;	
+	NA17							: BIT;	
+	NA18							: BIT;	
+	NA19							: BIT;	
+	NA20							: BIT;	
+	NA21							: BIT;	
+	NA22							: BIT;	
+	NA23							: BIT;	
+	NA24							: BIT;	
+	NA25							: BIT;	
+	NA26							: BIT;	
+	NA27							: BIT;	
+	NA28							: BIT;	
+	NA29							: BIT;	
+	NA30							: BIT;	
+	NA31							: BIT;	
+	NA32							: BIT;	
+	
+	TargetTrayPosition				: DINT;															// The station of interest to be worked with.
+	TargetProgram					: DINT;															// The program to be executed.
+	TargetSpeed						: DINT;															// The speed overdrive to be set.
+	TargetProductID					: DINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

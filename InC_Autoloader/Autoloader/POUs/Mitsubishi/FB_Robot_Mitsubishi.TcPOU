@@ -1,0 +1,1113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <POU Name="FB_Robot_Mitsubishi" Id="{9be6ec0c-b614-4729-b28e-502fb8a369d3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Robot_Mitsubishi
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR_IN_OUT
+	Robot							: ST_Robot_Mitsubishi;											// Robot Mitsubishi station.	
+	PacketManager					: ST_Robot_Misubishi_Packet_Manager;							// Robot Mitsubishi packet manager.
+END_VAR
+VAR
+	nState							: E_Robot_Mitsubishi_States;	
+	fbReceive						: FB_Robot_Mitsubishi_ReceivePacket;
+	fbSend							: FB_Robot_Mitsubishi_SendPacket;	
+	fbTimer							: TON;	
+	fbStop							: R_TRIG;
+	
+	tResetTimeout					: TIME := T#5000MS;
+	tPowerOnTimeout					: TIME := T#5000MS;
+	tProgramStartTimeout			: TIME := T#2000MS;
+	tProgramExecutionTimeout		: TIME := T#20000MS;
+	tDependencyConfirmationTimeout	: TIME := T#20000MS;											// Should there be a timeout at all.
+	tDependencyAcknoledgeTimeout	: TIME := T#5000MS;												//	|
+	tChangeTargetStationTimeout		: TIME := T#5000MS;												//	|	Should be less than a seccond.
+	tChangeTargetProgramTimeout		: TIME := T#5000MS;												//	|
+	tChangeTargetSpeedTimeout		: TIME := T#5000MS;
+	tChangeTargetCorrectionTimeout	: TIME := T#5000MS;
+	tChangeStationTimeout			: TIME := T#2000MS;												//	|	Should be less than a seccond.
+	tChangeProgramTimeout			: TIME := T#2000MS;												//	|
+	tChangeSpeedTimeout				: TIME := T#2000MS;												//	|
+	tChangeCorrectionTimeout		: TIME := T#2000MS;												//	|
+	
+	nDependencyReturnState			: E_Robot_Mitsubishi_States;									// The state to return to after confirming a dependency.
+	
+	bDisableTimeouts				: BOOL := TRUE;
+	bAutoConfirm					: BOOL := FALSE;												// For testing while no connection is avalable.
+	
+	// TCP IP Connection.
+	fbConnect 						: FB_ClientServerConnection;									// TCP IP Connection function block.
+	sSrvNetID						: T_AmsNetID;													// TwinCAT TCP/IP server network address.
+	eState							: E_SocketConnectionState := eSOCKET_DISCONNECTED;				// TCP/IP connection state.
+	bDoConnect						: BOOL := FALSE;												//
+	
+	// CONTROL
+	aOutputBuffer					: ARRAY[0..255] OF BYTE;										// The output command string sent to the robot.
+	aInputBuffer					: ARRAY[0..255] OF BYTE;										// The output command string sent to the robot.
+	fbSetOutputBuffer				: FB_SetOutputBuffer();											// Use to control the output buffer.
+	fbClearOutputBuffer				: FB_ClearOutputBuffer();										// Use to cleanup the output buffer.	
+	nLastRecPacketID				: DINT;
+	sLastRecPacket					: STRING(255);	
+	bBypassPacketSize				: BOOL := TRUE;	
+	nRobotStateHolder				: DINT;	
+	fbCompleted						: R_Trig;	
+	wasFalse						: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[A_MonitorStop();
+A_Connection();
+
+fbSend( 
+	ConnectionRef:= fbConnect, 
+	nLastReceivedPacketID:= Robot.nLastReceivedPacketID,   
+	bLastPacketConfirmed=> Robot.bLastPacketConfirmed);
+
+//--------------------------------Check if robot is connected---------------------------------------
+IF NOT Robot.bOnline THEN
+	a_ResetAllRequests();
+	fbSend(bDoSend:=FALSE);
+	Robot.bReady := FALSE;
+	Robot.bBusy := FALSE;
+	Robot.bDisabled := TRUE;
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+ELSE	
+	Robot.bDisabled := FALSE;
+	CASE nState OF				
+//----------------------------------OPERATIONAL----------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_OPERATIONAL:							
+			IF Robot.bError THEN
+				a_ResetAllRequests();
+				nState := E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT;
+			ELSE
+				fbSend(bDoSend:=FALSE);
+				IF Robot.bDoStart THEN
+					nState := E_Robot_Mitsubishi_States.STATE_START_PROGRAM;								
+				ELSIF Robot.bDoReset THEN
+					nState := E_Robot_Mitsubishi_States.STATE_START_RESET;
+				END_IF
+				IF Robot.bReady THEN
+					IF Robot.bDoServoOn THEN
+						nState := E_Robot_Mitsubishi_States.STATE_START_POWER_ON;
+					ELSIF Robot.bDoServoOff THEN
+						nState := E_Robot_Mitsubishi_States.STATE_START_POWER_OFF;
+					ELSIF Robot.bDoChangeTargetSpeed THEN
+						nState := E_Robot_Mitsubishi_States.STATE_START_TARGET_SPEED_OVERRIDE_CHANGE;
+					ELSIF Robot.bDoChangeTargetTrayPosition THEN
+						nState := E_Robot_Mitsubishi_States.STATE_START_TARGET_TRAYPOS_CHANGE;					
+					ELSIF Robot.bDoChangeTargetProgram THEN
+						nState := E_Robot_Mitsubishi_States.STATE_START_TARGET_PROGRAM_CHANGE;
+					ELSIF Robot.bDoStartProgram THEN
+						nState := E_Robot_Mitsubishi_States.STATE_START_TARGET_PROGRAM;			
+					ELSIF Robot.bDoOpenGripperA OR Robot.bDoCloseGripperA THEN
+						nState := E_Robot_Mitsubishi_States.STATE_TOGGLE_GRIPERA;
+					ELSIF Robot.bDoOpenGripperB OR Robot.bDoCloseGripperB THEN
+						nState := E_Robot_Mitsubishi_States.STATE_TOGGLE_GRIPERB;
+					END_IF
+				ELSIF Robot.bExecuting THEN
+					IF Robot.bDoStop THEN
+						nState := E_Robot_Mitsubishi_States.STATE_START_STOP;								
+					ELSIF Robot.bDoEnd <> Robot.bEnding THEN
+						nState := E_Robot_Mitsubishi_States.STATE_SET_END;
+					ELSIF Robot.bDoConfirmDependency AND Robot.nDependencyState <> 0 THEN
+						nState := E_Robot_Mitsubishi_States.STATE_REQUEST_DEPENDENCY_CONFIRMATION;					
+					END_IF
+				END_IF
+			END_IF
+//------------------------------ START MAIN PROGRAM------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_START_PROGRAM:
+			A_SendStartProgram();		
+			
+		E_Robot_Mitsubishi_States.STATE_WAIT_PROGRAM_COMPLETED:			
+			
+//----------------------------------STOP-----------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_START_STOP:	
+			A_SendStop();
+			
+		E_Robot_Mitsubishi_States.STATE_WAIT_STOP:
+			IF (NOT Robot.bExecuting) THEN
+				// STOPPED
+				nState := E_Robot_Mitsubishi_States.STATE_STOPPED;
+			END_IF
+		E_Robot_Mitsubishi_States.STATE_STOPPED:
+			IF (NOT Robot.bDoStop) THEN
+				//A_SendStopReset();
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+			ELSE
+				fbTimer(IN := TRUE, PT := tPowerOnTimeout);
+				IF (fbTimer.Q AND (NOT bDisableTimeouts)) THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_STATE_MACHINE;
+				ELSIF Robot.bError THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT;
+				END_IF
+			END_IF
+//----------------------------------END------------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_SET_END:
+			A_SendSetEnd();	
+		
+		E_Robot_Mitsubishi_States.STATE_WAIT_SET_END:
+			IF Robot.bEnding = Robot.bDoEnd THEN
+				A_ResetTimeoutTimer();
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+			ELSE
+				fbTimer(IN := TRUE, PT := tPowerOnTimeout);
+				IF (fbTimer.Q AND (NOT bDisableTimeouts)) THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_STATE_MACHINE;
+				ELSIF Robot.bError THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT;
+				END_IF
+			END_IF
+// ------------------------------ RESET -----------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_WAITING_RESET:
+			IF Robot.bDoReset THEN
+				nState := E_Robot_Mitsubishi_States.STATE_START_RESET;
+			END_IF
+			
+		E_Robot_Mitsubishi_States.STATE_START_RESET:
+			A_SendReset();
+		
+		E_Robot_Mitsubishi_States.STATE_WAITING_RESET_COMPLETED:
+			fbTimer(IN := TRUE, PT := tResetTimeout);
+			IF (NOT Robot.bError) THEN
+				A_ResetTimeoutTimer();
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+			ELSIF (fbTimer.Q ) THEN
+				A_ResetTimeoutTimer();
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+			END_IF
+// ------------------------------ Power ON --------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_START_POWER_ON:
+			A_SendPowerOn();
+			
+		E_Robot_Mitsubishi_States.STATE_WAIT_POWERED_ON:
+			IF Robot.bPoweredOn THEN
+				A_ResetTimeoutTimer();
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+			ELSE
+				fbTimer(IN := TRUE, PT := tPowerOnTimeout);
+				IF (fbTimer.Q AND (NOT bDisableTimeouts)) THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_STATE_MACHINE;
+				ELSIF Robot.bError THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT;
+				END_IF
+			END_IF
+// ------------------------------ Power OFF -------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_START_POWER_OFF:
+			A_SendPowerOff();
+			
+		E_Robot_Mitsubishi_States.STATE_WAIT_POWERED_OFF:
+			IF (NOT Robot.bPoweredOn) THEN
+				A_ResetTimeoutTimer();
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+			ELSE
+				fbTimer(IN := TRUE, PT := tPowerOnTimeout);
+				IF (fbTimer.Q AND (NOT bDisableTimeouts)) THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_STATE_MACHINE;
+				ELSIF Robot.bError THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT;
+				END_IF
+			END_IF
+// ------------------------------ Dependency ------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_REQUEST_DEPENDENCY_CONFIRMATION:
+			A_ResetTimeoutTimer();
+			A_SendDependencyConfirmation();
+			
+		E_Robot_Mitsubishi_States.STATE_WAIT_DEPENDENCY_CONFIRMATION:
+			// Could use the wait program active since it's the same.									// TODO: Probably better to return to the actual program execution monitoring.
+			IF Robot.nDependencyState <> PacketManager.StateConfirmationPacket.StateID OR
+				Robot.nDependencyState = 0 THEN
+				A_ResetTimeoutTimer();
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;												// Return to program execution.
+			ELSE
+				fbTimer(IN := TRUE, PT := tDependencyAcknoledgeTimeout);
+				IF (fbTimer.Q AND (NOT bDisableTimeouts)) THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_STATE_MACHINE;
+				ELSIF Robot.bError THEN
+					A_ResetTimeoutTimer();
+					nState := E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT;
+				END_IF
+			END_IF
+						
+// ------------------------------ Settings --------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_START_TARGET_SPEED_OVERRIDE_CHANGE:
+			a_SendChangeTargetSpeed();			
+
+		E_Robot_Mitsubishi_States.STATE_START_TARGET_TRAYPOS_CHANGE:
+			a_SendChangeCurrentTrayPosition();
+		
+		E_Robot_Mitsubishi_States.STATE_START_TARGET_PROGRAM_CHANGE:
+			a_SendChangeCurrentProgram();
+			
+		E_Robot_Mitsubishi_States.STATE_START_TARGET_PROGRAM:
+			a_SendChangeStartProgram();
+			
+		E_Robot_Mitsubishi_States.STATE_WAIT_PROGRAM_STARTED:
+			IF NOT Robot.bReady THEN
+				Robot.bDoStartProgram := FALSE;
+				nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+			END_IF
+			
+		E_Robot_Mitsubishi_States.STATE_TOGGLE_GRIPERA:
+			A_SendToggleGripperA();
+			
+		E_Robot_Mitsubishi_States.STATE_TOGGLE_GRIPERB:
+			A_SendToggleGripperB();
+// ------------------------------ ERROR -----------------------------------------------------------
+		E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT:
+			// Handle any error???
+			a_ResetAllRequests();
+			nState := E_Robot_Mitsubishi_States.STATE_WAITING_RESET;
+			
+		E_Robot_Mitsubishi_States.STATE_ERROR_STATE_MACHINE:
+			;
+		
+	END_CASE
+	
+END_IF
+IF (nState <> Robot.nCurrentState) THEN
+	Robot.nLastState := Robot.nCurrentState;
+	Robot.nCurrentState := nState;
+	IF ((nState = E_Robot_Mitsubishi_States.STATE_ERROR_ROBOT) OR
+		(nState = E_Robot_Mitsubishi_States.STATE_ERROR_STATE_MACHINE)) THEN
+		Robot.nLastErrorState := Robot.nLastState;
+	END_IF
+END_IF
+A_ParseInput();
+]]></ST>
+    </Implementation>
+    <Action Name="A_Connection" Id="{39ad31b8-6963-4073-a20b-22e0151c9768}">
+      <Implementation>
+        <ST><![CDATA[fbConnect( 	sSrvNetID 		:= sSrvNetID,
+		nMode			:= SEL( TRUE, 0, CONNECT_MODE_ENABLEDBG),
+		sRemoteHost 	:= Robot.sRobotAddress,		
+		nRemotePort 	:= Robot.nRobotPort,
+		bEnable			:= Robot.bToggleConnect,
+		eState			=> eState );
+		
+Robot.bOnline := eState = eSOCKET_CONNECTED;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_MonitorStop" Id="{1772fc74-d8fb-4d3d-9e6f-19d95bf25dd3}">
+      <Implementation>
+        <ST><![CDATA[fbStop(CLK := Robot.bDoStop);
+
+IF fbStop.Q AND Robot.bExecuting THEN
+	nState := E_Robot_Mitsubishi_States.STATE_START_STOP;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_ParseInput" Id="{f7e2b45d-5dbf-47af-86da-15e033043b0c}">
+      <Implementation>
+        <ST><![CDATA[// SWITCH ReceivedPacket.0 AS ID :
+fbReceive(LastReceivedPacket => sLastRecPacket,
+	LastReceivedPacketID => nLastRecPacketID,
+	ConnectionRef := fbConnect);
+IF LEN(sLastRecPacket) > 0 THEN
+	CASE nLastRecPacketID OF
+		1000:
+			// Robot status packet.
+			IF (((SIZEOF(PacketManager.StatusPacket) + 2) = LEN(sLastRecPacket)) OR bBypassPacketSize) THEN
+				A_ParseStatusPacket();			
+			ELSE
+				// ERROR
+				// SIZEOF StatusPacket is wrong.
+			END_IF
+			
+		1100:
+			// Robot correction packet.
+			
+		1101:
+			// Robot packet confirmation packet.
+			IF (((SIZEOF(PacketManager.PacketConfirmationPacket) + 2) = LEN(sLastRecPacket)) OR bBypassPacketSize) THEN
+				A_ParsePacketConfirmationPacket();
+			ELSE
+				// ERROR
+				// SIZEOF StatusPacket is wrong.
+			END_IF		
+		ELSE
+			sLastRecPacket := '';																			// Always cleanup.
+	END_CASE
+	MEMSET(ADR(sLastRecPacket),
+		0,
+		SIZEOF(sLastRecPacket));
+END_IF
+	
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_ParsePacketConfirmationPacket" Id="{52bd726b-59e9-4372-8c06-613ae5d39d74}">
+      <Implementation>
+        <ST><![CDATA[FB_HEXSTR_TO_DINT(in := LEFT(RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8), 8),
+	out => PacketManager.PacketConfirmationPacket.LastReceivedPacketID);
+
+Robot.nLastReceivedPacketID := PacketManager.PacketConfirmationPacket.LastReceivedPacketID;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_ParseStatusPacket" Id="{da18d57f-9f56-4420-afa5-9772c928ac42}">
+      <Implementation>
+        <ST><![CDATA[sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => nRobotStateHolder);
+
+PacketManager.StatusPacket.Ready := nRobotStateHolder.15;
+PacketManager.StatusPacket.Busy := nRobotStateHolder.14;
+PacketManager.StatusPacket.Error := nRobotStateHolder.13;
+PacketManager.StatusPacket.PoweredOn := nRobotStateHolder.12;
+PacketManager.StatusPacket.AutomaticMode := nRobotStateHolder.11;
+PacketManager.StatusPacket.Executing := nRobotStateHolder.10;
+PacketManager.StatusPacket.Ending := nRobotStateHolder.9;
+PacketManager.StatusPacket.ProgramCompleted := nRobotStateHolder.8;
+PacketManager.StatusPacket.GripperA_Present := nRobotStateHolder.7;
+PacketManager.StatusPacket.GripperB_Present := nRobotStateHolder.6;
+PacketManager.StatusPacket.GripperA_Open := nRobotStateHolder.5;
+PacketManager.StatusPacket.GripperB_Open := nRobotStateHolder.4;
+	
+Robot.bReady := (PacketManager.StatusPacket.Ready AND 
+(nState = E_Robot_Mitsubishi_States.STATE_OPERATIONAL));
+Robot.bBusy := PacketManager.StatusPacket.Busy;
+Robot.bError := PacketManager.StatusPacket.Error;
+Robot.bPoweredOn := PacketManager.StatusPacket.PoweredOn;
+//Robot.bAutomaticMode := PacketManager.StatusPacket.AutomaticMode;
+Robot.bExecuting := PacketManager.StatusPacket.Executing;
+Robot.bEnding := PacketManager.StatusPacket.Ending;
+Robot.bProgramCompleted := Robot.nCurrentProgram = Robot.nTargetProgram AND PacketManager.StatusPacket.ProgramCompleted;
+Robot.bGripperAPresent	:= NOT PacketManager.StatusPacket.GripperA_Present;
+Robot.bGripperBPresent	:= NOT PacketManager.StatusPacket.GripperB_Present;
+
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentState);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentProgram);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTrayPosition);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentSpeed);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentCorrectionID);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+//Product ID
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentProductID);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTargetProgram);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTargetTrayPosition);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTargetSpeed);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTargetCorrectionID);
+// Shietfuck bp
+// ----
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTargetProductID);
+
+Robot.nDependencyState := PacketManager.StatusPacket.CurrentState;
+
+Robot.nCurrentProgram := PacketManager.StatusPacket.CurrentProgram;
+Robot.nCurrentTrayPosition := PacketManager.StatusPacket.CurrentTrayPosition;
+Robot.nCurrentSpeed := PacketManager.StatusPacket.CurrentSpeed;
+Robot.nCurrentCorrectionID := PacketManager.StatusPacket.CurrentCorrectionID;
+Robot.nCurrentProductID := PacketManager.StatusPacket.CurrentProductID;
+
+Robot.nCurrentTargetProgram := PacketManager.StatusPacket.CurrentTargetProgram;
+Robot.nCurrentTargetTrayPosition := PacketManager.StatusPacket.CurrentTargetTrayPosition;
+Robot.nCurrentTargetSpeed := PacketManager.StatusPacket.CurrentTargetSpeed;
+Robot.nCurrentTargetCorrectionID := PacketManager.StatusPacket.CurrentTargetCorrectionID;
+Robot.nCurrentTargetProductID := PacketManager.StatusPacket.CurrentTargetProductID;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_ResetAllRequests" Id="{a48c0b22-9cd2-43f3-b1f2-f715fd720300}">
+      <Implementation>
+        <ST><![CDATA[// Robot Requests
+Robot.bDoOpenGripperB := FALSE;
+Robot.bDoCloseGripperB := FALSE;
+Robot.bDoOpenGripperB := FALSE;
+Robot.bDoCloseGripperB := FALSE;
+Robot.bDoServoOn := FALSE;
+Robot.bDoServoOff := FALSE;
+Robot.bDoStart := FALSE;
+Robot.bDoStop := FALSE;
+Robot.bDoEnd := FALSE;
+Robot.bDoReset:=FALSE;
+Robot.bDoStepFwd := FALSE;
+Robot.bDoStepBwd := FALSE;
+Robot.bDoChangeTargetProgram := FALSE;
+Robot.bDoChangeTargetSpeed := FALSE;
+Robot.bDoChangeTargetTrayPosition := FALSE;
+Robot.bDoChangeTargetCorrection := FALSE;
+Robot.bDoOpenGripperA:=FALSE;
+Robot.bDoCloseGripperA:=FALSE;
+Robot.bDoOpenGripperB:=FALSE;
+Robot.bDoCloseGripperB:=FALSE;
+Robot.bDoConfirmDependency := FALSE;
+
+//Control Package bits -! Very important!
+PacketManager.ControlPacket.Reset := FALSE;
+PacketManager.ControlPacket.Start := FALSE;
+PacketManager.ControlPacket.Stop := FALSE;
+PacketManager.ControlPacket.ServoOn := FALSE;
+PacketManager.ControlPacket.ServoOff := FALSE;
+PacketManager.ControlPacket.OpenGripperA := FALSE;
+PacketManager.ControlPacket.CloseGripperA := FALSE;
+PacketManager.ControlPacket.OpenGripperB := FALSE;
+PacketManager.ControlPacket.CloseGripperB := FALSE;
+PacketManager.ControlPacket.End := FALSE;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_ResetTimeoutTimer" Id="{7fa12f97-90f9-43d4-af57-e2fff1612fb5}">
+      <Implementation>
+        <ST><![CDATA[fbTimer(IN := FALSE);]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_SendChangeCurrentProgram" Id="{a10e184c-1ce9-46c8-919e-36a56463d02e}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.SettingsPacket.TargetProgram := Robot.nTargetProgram;
+
+fbSend(PacketAddress := ADR(PacketManager.SettingsPacket),
+	SizeOfPacket := SIZEOF(PacketManager.SettingsPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_SendChangeCurrentTrayPosition" Id="{c77c01e8-febe-41b7-b8d3-e47495756e39}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.SettingsPacket.TargetTrayPosition := Robot.nTargetTrayPosition;
+
+fbSend(PacketAddress := ADR(PacketManager.SettingsPacket),
+	SizeOfPacket := SIZEOF(PacketManager.SettingsPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_SendChangeStartProgram" Id="{22ce1ee8-ee69-41f0-b1c7-fa336b9adf66}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.SettingsPacket.StartProgram := TRUE;
+PacketManager.SettingsPacket.TargetProgram := Robot.nTargetProgram;
+PacketManager.SettingsPacket.TargetTrayPosition := Robot.nTargetTrayPosition;
+PacketManager.SettingsPacket.TargetProductID := Robot.nTargetCorrectionID;
+PacketManager.SettingsPacket.TargetSpeed := Robot.nTargetSpeed;
+
+fbSend(PacketAddress := ADR(PacketManager.SettingsPacket),
+	SizeOfPacket := SIZEOF(PacketManager.SettingsPacket),
+	bDoSend := TRUE);
+	
+fbTimer(IN:=TRUE,PT:=T#1000MS);
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);	
+	fbTimer(IN := FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_WAIT_PROGRAM_STARTED;	
+ELSIF fbTimer.Q AND NOT fbSend.bLastPacketConfirmed THEN
+	fbTimer(IN := FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_SendChangeTargetSpeed" Id="{95dbc82c-3f2c-41ef-930c-c516638442f7}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.SettingsPacket.TargetSpeed := Robot.nTargetSpeed;
+
+fbSend(PacketAddress := ADR(PacketManager.SettingsPacket),
+	SizeOfPacket := SIZEOF(PacketManager.SettingsPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendDependencyConfirmation" Id="{03f0f92f-ed87-41d3-a1f9-c8112aad72f1}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.StateConfirmationPacket.StateID := Robot.nDependencyState;					// TODO: Should be outer set to be properly used.
+
+fbSend(PacketAddress := ADR(PacketManager.StateConfirmationPacket),
+	SizeOfPacket := SIZEOF(PacketManager.StateConfirmationPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+	
+IF fbSend.bLastPacketConfirmed 
+OR (Robot.nDependencyState = 0) THEN
+	fbSend(bDoSend:=FALSE);
+	IF NOT Robot.bDoConfirmDependency THEN
+		gnLostDPPackets := gnLostDPPackets + 1;
+	END_IF
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_WAIT_DEPENDENCY_CONFIRMATION;		// Go to wait confirmation acknowledge.
+	A_ResetTimeoutTimer();
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendPowerOff" Id="{3fc684e9-fb27-4157-a78d-e0c1864bfd02}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.ServoOff := TRUE;
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_WAIT_POWERED_OFF;
+	fbTimer(IN := FALSE);
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendPowerOn" Id="{c77ee79c-f8a8-46d3-9efa-8ee324c8335b}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.ServoOn := TRUE;
+fbTimer(IN := TRUE, PT := tPowerOnTimeout);
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_WAIT_POWERED_ON;
+	fbTimer(IN := FALSE);
+ELSIF fbTimer.Q THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	fbTimer(IN := FALSE);
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendReset" Id="{157c6b0e-8d09-424a-aa22-7e006e4bbf28}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.Reset := TRUE;
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	fbTimer(IN := FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_WAITING_RESET_COMPLETED;	
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendSetEnd" Id="{152b225d-e377-4bbb-a6dc-0be17104bfdd}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.End := TRUE;
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	fbTimer(IN := FALSE);
+	nState := E_Robot_Mitsubishi_States.STATE_WAIT_SET_END;	
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="a_SendStartProgram" Id="{72f9228b-562f-43e1-aeb6-6624252a68ae}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.Start := TRUE;
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+	fbTimer(IN := FALSE);
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendStop" Id="{414f895b-959b-48ee-ab55-3282f5bdb165}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.Stop := TRUE;
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+	
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_WAIT_STOP;
+	fbTimer(IN := FALSE);
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendToggleGripperA" Id="{9c73ef23-f9b1-4fb8-aeff-7f8ac24cd810}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.OpenGripperA := Robot.bDoOpenGripperA;
+PacketManager.ControlPacket.CloseGripperA := Robot.bDoCloseGripperA;
+
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SendToggleGripperB" Id="{b3cd5ee7-33e7-4d2a-b6fc-e6c42df95c07}">
+      <Implementation>
+        <ST><![CDATA[PacketManager.ControlPacket.OpenGripperB := Robot.bDoOpenGripperB;
+PacketManager.ControlPacket.CloseGripperB := Robot.bDoCloseGripperB;
+
+fbSend(PacketAddress := ADR(PacketManager.ControlPacket),
+	SizeOfPacket := SIZEOF(PacketManager.ControlPacket),
+	bDoSend := TRUE);
+
+// ALWAYS CLEANUP IF NECCESSARY
+IF fbSend.bLastPacketConfirmed THEN
+	fbSend(bDoSend:=FALSE);
+	a_ResetAllRequests();
+	nState := E_Robot_Mitsubishi_States.STATE_OPERATIONAL;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="FB_Robot_Mitsubishi">
+      <LineId Id="6251" Count="0" />
+      <LineId Id="6821" Count="0" />
+      <LineId Id="8206" Count="0" />
+      <LineId Id="8210" Count="2" />
+      <LineId Id="8204" Count="0" />
+      <LineId Id="7358" Count="0" />
+      <LineId Id="6253" Count="0" />
+      <LineId Id="6963" Count="0" />
+      <LineId Id="7335" Count="0" />
+      <LineId Id="7618" Count="2" />
+      <LineId Id="7034" Count="0" />
+      <LineId Id="7029" Count="1" />
+      <LineId Id="8331" Count="0" />
+      <LineId Id="7036" Count="0" />
+      <LineId Id="7687" Count="0" />
+      <LineId Id="6254" Count="0" />
+      <LineId Id="7052" Count="0" />
+      <LineId Id="8312" Count="0" />
+      <LineId Id="7053" Count="1" />
+      <LineId Id="7867" Count="0" />
+      <LineId Id="7923" Count="1" />
+      <LineId Id="7062" Count="1" />
+      <LineId Id="8156" Count="0" />
+      <LineId Id="8287" Count="16" />
+      <LineId Id="8286" Count="0" />
+      <LineId Id="8154" Count="0" />
+      <LineId Id="8158" Count="2" />
+      <LineId Id="8157" Count="0" />
+      <LineId Id="7927" Count="1" />
+      <LineId Id="8305" Count="0" />
+      <LineId Id="8155" Count="0" />
+      <LineId Id="7051" Count="0" />
+      <LineId Id="8201" Count="0" />
+      <LineId Id="7094" Count="0" />
+      <LineId Id="7143" Count="0" />
+      <LineId Id="7176" Count="0" />
+      <LineId Id="7152" Count="0" />
+      <LineId Id="7151" Count="0" />
+      <LineId Id="7177" Count="0" />
+      <LineId Id="7179" Count="0" />
+      <LineId Id="7178" Count="0" />
+      <LineId Id="7180" Count="0" />
+      <LineId Id="7182" Count="3" />
+      <LineId Id="7181" Count="0" />
+      <LineId Id="7187" Count="2" />
+      <LineId Id="7552" Count="0" />
+      <LineId Id="8172" Count="0" />
+      <LineId Id="8174" Count="6" />
+      <LineId Id="8173" Count="0" />
+      <LineId Id="7186" Count="0" />
+      <LineId Id="7686" Count="0" />
+      <LineId Id="7193" Count="15" />
+      <LineId Id="7192" Count="0" />
+      <LineId Id="7685" Count="0" />
+      <LineId Id="7212" Count="8" />
+      <LineId Id="8171" Count="0" />
+      <LineId Id="7221" Count="0" />
+      <LineId Id="8163" Count="0" />
+      <LineId Id="8170" Count="0" />
+      <LineId Id="7236" Count="0" />
+      <LineId Id="7238" Count="0" />
+      <LineId Id="7240" Count="0" />
+      <LineId Id="7211" Count="0" />
+      <LineId Id="7683" Count="0" />
+      <LineId Id="7243" Count="15" />
+      <LineId Id="7242" Count="0" />
+      <LineId Id="7682" Count="0" />
+      <LineId Id="7261" Count="15" />
+      <LineId Id="7260" Count="0" />
+      <LineId Id="7680" Count="0" />
+      <LineId Id="7286" Count="0" />
+      <LineId Id="7290" Count="0" />
+      <LineId Id="8314" Count="0" />
+      <LineId Id="7292" Count="1" />
+      <LineId Id="8315" Count="13" />
+      <LineId Id="7307" Count="1" />
+      <LineId Id="7679" Count="0" />
+      <LineId Id="7491" Count="0" />
+      <LineId Id="7985" Count="0" />
+      <LineId Id="7984" Count="0" />
+      <LineId Id="7492" Count="1" />
+      <LineId Id="7549" Count="2" />
+      <LineId Id="7557" Count="0" />
+      <LineId Id="7555" Count="1" />
+      <LineId Id="8040" Count="2" />
+      <LineId Id="8099" Count="0" />
+      <LineId Id="8043" Count="1" />
+      <LineId Id="7808" Count="0" />
+      <LineId Id="7804" Count="1" />
+      <LineId Id="7809" Count="0" />
+      <LineId Id="7806" Count="1" />
+      <LineId Id="7334" Count="0" />
+      <LineId Id="7325" Count="1" />
+      <LineId Id="7617" Count="0" />
+      <LineId Id="7327" Count="2" />
+      <LineId Id="7324" Count="0" />
+      <LineId Id="6758" Count="2" />
+      <LineId Id="7031" Count="0" />
+      <LineId Id="7347" Count="7" />
+      <LineId Id="8205" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_Connection">
+      <LineId Id="26" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_MonitorStop">
+      <LineId Id="6" Count="0" />
+      <LineId Id="3" Count="2" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_ParseInput">
+      <LineId Id="46" Count="0" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="122" Count="12" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="89" Count="2" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_ParsePacketConfirmationPacket">
+      <LineId Id="4" Count="0" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_ParseStatusPacket">
+      <LineId Id="84" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="44" Count="6" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="4" Count="4" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="105" Count="2" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="79" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="10" Count="2" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="14" Count="3" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_ResetAllRequests">
+      <LineId Id="29" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="3" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="10" Count="4" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="25" Count="3" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="36" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_ResetTimeoutTimer">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.a_SendChangeCurrentProgram">
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.a_SendChangeCurrentTrayPosition">
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="18" Count="5" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.a_SendChangeStartProgram">
+      <LineId Id="2" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="27" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.a_SendChangeTargetSpeed">
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="14" Count="5" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendDependencyConfirmation">
+      <LineId Id="5" Count="1" />
+      <LineId Id="22" Count="4" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendPowerOff">
+      <LineId Id="2" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="20" Count="4" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendPowerOn">
+      <LineId Id="13" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="31" Count="4" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendReset">
+      <LineId Id="16" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="4" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendSetEnd">
+      <LineId Id="3" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="4" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.a_SendStartProgram">
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="17" Count="4" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendStop">
+      <LineId Id="2" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="21" Count="4" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendToggleGripperA">
+      <LineId Id="19" Count="1" />
+      <LineId Id="3" Count="2" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="10" Count="2" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot_Mitsubishi.A_SendToggleGripperB">
+      <LineId Id="2" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="10" Count="3" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Mitsubishi_Packet_2100" Id="{78c2e7ca-4533-46c3-98ba-7df51b877c8f}">
+    <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_2100 :
+STRUCT
+	// Packet number - 2100.
+	// To robot.
+	// Robot correction (data) packet.
+	// Trigger.
+	
+	Header							: DINT := 2100;													// Packet header.
+	
+	CorrectionID					: DINT;															// Correction ID.
+	
+	XCorrection						: DINT;															// Position X correction.
+	YCorrection						: DINT;															// Position Y correction.
+	ZCorrection						: DINT;															// Position Z correction.
+	ACorrection						: DINT;															// Position A correction.
+	BCorrection						: DINT;															// Position B correction.
+	CCorrection						: DINT;															// Position C correction.
+	L1Correction					: DINT;															// Position L1 correction.
+	L2Correction					: DINT;															// Position L2 correction.
+	FLG1Correction					: DINT;															// Position FLG1 correction.
+	FLG2Correction					: DINT;															// Position FLG2 correction.
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

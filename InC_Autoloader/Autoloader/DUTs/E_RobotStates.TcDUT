@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="E_RobotStates" Id="{977d8176-e4bf-4762-b202-d956adcb651c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'to_string'}
+TYPE E_RobotStates :
+(
+	STATE_WAITING_FOR_INIT := 0,
+	STATE_INIT_ROBOT_TOGGLE,
+	STATE_INIT_ROBOT_ON,
+	STATE_INIT_CHECK_ROBOT_ERROR,
+	STATE_INIT_CHECK_ROBOT_ERROR_DONE,
+	STATE_INIT_CHECK_ROBOT_READY,
+	STATE_INIT_CHECK_ROBOT_BUSY,
+	STATE_INIT_CHECK_ROBOT_READY_DONE,
+	STATE_INIT_CHECK_ROBOT_SERVOON,
+	STATE_INIT_CHECK_ROBOT_SERVOON_DONE,
+	STATE_INIT_DONE,
+	STATE_WAITING_FOR_COMMAND := 10,
+	STATE_PROGRAM_DONE,	//Ready
+	STATE_ERROR := 1000	// Default error
+) UDINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

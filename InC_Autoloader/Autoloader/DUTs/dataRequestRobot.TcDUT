@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
   <DUT Name="dataRequestRobot" Id="{a536e752-6cb6-4780-b60e-5e93ce5198c0}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 
@@ -12,7 +12,8 @@ TYPE dataRequestRobot :
 	error      := Consts.REQUEST_ERROR,
 	
 	roboRecipe     := 99,               // Заражда репта на робота - номера и се намира в TagsHMI.RoboRecipeNum (1-15)
-
+	roboInit		:= 100,				// Зарежда MAINPROGRAM и изчаква робота да е в READY
+	
 	roboPrg_Home   := 1,
 	roboPrg_SensorLoad,
 	roboPrg_SensorUnload,
