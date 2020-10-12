@@ -44,10 +44,10 @@ STRUCT
 	NA31							: BIT;	
 	NA32							: BIT;	
 	
-	TargetTrayPosition				: DINT;															// The station of interest to be worked with.
-	TargetProgram					: DINT;															// The program to be executed.
-	TargetSpeed						: DINT;															// The speed overdrive to be set.
-	TargetProductID					: DINT;
+	TargetTrayPosition				: DINT;		// The station of interest to be worked with.
+	TargetProgram					: DINT;		// The program to be executed.
+	TargetSpeed						: DINT;		// The speed overdrive to be set.
+	TargetProductID					: DINT;		// Targer Tray Variation
 END_STRUCT
 END_TYPE
 ]]></Declaration>

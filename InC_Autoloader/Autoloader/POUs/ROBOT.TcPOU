@@ -8,8 +8,8 @@ VAR
 	nLastState					: DINT;				
 	rtRobot_ProgramStarted		: TON;
 	rtRobot_ProgramCompleted	: TON;
-	fbTimerRobot				:TON;
-	gbTimerTimeoutRobot			:TON;
+	fbTimerRobot				: TON;
+	gbTimerTimeoutRobot			: TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -28,6 +28,13 @@ IF Stations.gstRobotMitsubishi.bError AND nCurrentState > E_RobotStates.STATE_IN
 AND nCurrentState < E_RobotStates.STATE_ERROR THEN
 	nLastState:=nCurrentState;
 	nCurrentState:=E_RobotStates.STATE_ERROR;
+END_IF
+
+// Robot Settings
+IF Stations.roboSetings.roboArmParams[Global.recipe].waitPos24 THEN
+	Stations.gstRobotMitsubishi.nTargetCorrectionID := 	0;			
+ELSIF Stations.roboSetings.roboArmParams[Global.recipe].waitPos27 THEN
+	Stations.gstRobotMitsubishi.nTargetCorrectionID := 	1; 			
 END_IF
 		
 CASE nCurrentState OF
@@ -185,6 +192,12 @@ END_IF]]></ST>
       <LineId Id="165" Count="3" />
       <LineId Id="170" Count="1" />
       <LineId Id="20" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="192" Count="1" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="188" Count="0" />
       <LineId Id="10" Count="2" />
       <LineId Id="18" Count="0" />
       <LineId Id="35" Count="0" />
