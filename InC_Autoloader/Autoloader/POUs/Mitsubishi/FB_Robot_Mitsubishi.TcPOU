@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <POU Name="FB_Robot_Mitsubishi" Id="{9be6ec0c-b614-4729-b28e-502fb8a369d3}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Robot_Mitsubishi
 VAR_INPUT
@@ -577,7 +577,7 @@ IF fbSend.bLastPacketConfirmed
 OR (Robot.nDependencyState = 0) THEN
 	fbSend(bDoSend:=FALSE);
 	IF NOT Robot.bDoConfirmDependency THEN
-		gnLostDPPackets := gnLostDPPackets + 1;
+		Global.gnLostDPPackets := Global.gnLostDPPackets + 1;
 	END_IF
 	a_ResetAllRequests();
 	nState := E_Robot_Mitsubishi_States.STATE_WAIT_DEPENDENCY_CONFIRMATION;		// Go to wait confirmation acknowledge.

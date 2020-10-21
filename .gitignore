@@ -259,3 +259,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pycInC_Autoloader.project.~u
+InC_Autoloader.project.~u
