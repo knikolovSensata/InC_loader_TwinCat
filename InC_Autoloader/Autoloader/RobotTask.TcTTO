@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <Task Name="RobotTask" Id="{ed4d1928-4b1c-40f4-851c-fb9ccdb97640}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>10000</CycleTime>
+    <Priority>1</Priority>
+    <PouCall>
+      <Name>Robot</Name>
+    </PouCall>
+    <TaskFBGuid>{fe7bfd7f-124d-4e24-8c4d-f26aa3de0fe0}</TaskFBGuid>
+    <Fb_init>{4e27e020-5e90-40e5-93da-0a1b98c2a9eb}</Fb_init>
+    <Fb_exit>{baae451d-af22-456d-912c-d750247cfb39}</Fb_exit>
+    <CycleUpdate>{df370794-6620-498e-bdc9-1f8406ddd6d6}</CycleUpdate>
+    <PostCycleUpdate>{02d7ab74-d65d-4c98-ab68-01d717f89dba}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

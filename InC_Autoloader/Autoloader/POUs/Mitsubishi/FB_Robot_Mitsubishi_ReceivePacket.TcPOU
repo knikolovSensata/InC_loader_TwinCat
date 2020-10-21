@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <POU Name="FB_Robot_Mitsubishi_ReceivePacket" Id="{52dc5b5e-1f9d-410f-9612-1286f69acc03}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Robot_Mitsubishi_ReceivePacket
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	LastReceivedPacket				: STRING(255);
+	LastReceivedPacketID			: DINT;
+END_VAR
+VAR_IN_OUT
+	ConnectionRef					: FB_ClientServerConnection;											//
+END_VAR
+VAR
+	fbReceive						: FB_SocketReceive;														// Receive data trough TCP IP.
+	aInputBuffer					: ARRAY[0..255] OF BYTE;												// 
+	bBusy							: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF ConnectionRef.eState = eSOCKET_CONNECTED AND (NOT ConnectionRef.bBusy) THEN
+	IF NOT bBusy THEN
+		fbReceive( bExecute := FALSE);	
+		fbReceive( 	sSrvNetId	:= ConnectionRef.sSrvNetID,
+					hSocket		:= ConnectionRef.hSocket,
+					cbLen		:= SIZEOF(aInputBuffer),
+					pDest		:= ADR(aInputBuffer),
+					tTimeout	:= T#100MS,
+					bExecute	:= TRUE);
+		bBusy := TRUE;
+	ELSE
+		fbReceive( bExecute := FALSE);
+		IF (NOT fbReceive.bBusy) THEN
+			bBusy := FALSE;
+			IF fbReceive.nRecBytes > 10 THEN															// 8 Bytes for packet ID and 2 bytes for <LF><CR>
+				LastReceivedPacketID := 0;
+				LastReceivedPacket := '';
+				MEMCPY(ADR(LastReceivedPacket),														// Copy the packet header data.
+					ADR(aInputBuffer),																// Could trim the <LF><CR> flags.
+					fbReceive.nRecBytes);
+				FB_HEXSTR_TO_DINT(in := LEFT(LastReceivedPacket, 8),
+					out => LastReceivedPacketID);
+				MEMSET(ADR(aInputBuffer),
+					0,
+					SIZEOF(aInputBuffer));
+			ELSE
+				MEMSET(ADR(aInputBuffer),
+					0,
+					SIZEOF(aInputBuffer));
+			END_IF
+		END_IF
+	END_IF
+ELSE
+	fbReceive( bExecute := FALSE );
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Robot_Mitsubishi_ReceivePacket">
+      <LineId Id="26" Count="0" />
+      <LineId Id="174" Count="1" />
+      <LineId Id="28" Count="2" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="187" Count="2" />
+      <LineId Id="257" Count="1" />
+      <LineId Id="154" Count="2" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="177" Count="2" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Mitsubishi_Packet_2010" Id="{c74f73e7-657f-4bc7-8cb2-29d928661309}">
+    <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_2010 :
+STRUCT
+	// Packet number - 2010.
+	// To robot.
+	// Robot servo power control packet.
+	// Trigger.
+	
+	Header							: DINT := 2010;	//7DA // Packet header.
+	
+	Reset 							: BIT; 	//000007DA00000001
+	ServoOn							: BIT;	//000007DA00000002
+	ServoOff						: BIT;	//000007DA00000004			
+	End								: BIT;	//000007DA00000008
+	Stop							: BIT;	//000007DA00000010
+	Start							: BIT;	//000007DA00000020
+		// Not avalable - fillers.
+	OpenGripperA					 :BIT;	//000007DA00000040
+	CloseGripperA					: BIT;	//000007DA00000080
+	OpenGripperB					: BIT;	//000007DA00000100
+	CloseGripperB					: BIT;	//000007DA00000200
+	NA11							: BIT;	
+	NA12							: BIT;
+	NA13							: BIT;	
+	NA14							: BIT;	
+	NA15							: BIT;	
+	NA16							: BIT;	
+	NA17							: BIT;	
+	NA18							: BIT;	
+	NA19							: BIT;	
+	NA20							: BIT;	
+	NA21							: BIT;	
+	NA22							: BIT;	
+	NA23							: BIT;	
+	NA24							: BIT;	
+	NA25							: BIT;	
+	NA26							: BIT;	
+	NA27							: BIT;	
+	NA28							: BIT;	
+	NA29							: BIT;	
+	NA30							: BIT;	
+	NA31							: BIT;	
+	NA32							: BIT;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

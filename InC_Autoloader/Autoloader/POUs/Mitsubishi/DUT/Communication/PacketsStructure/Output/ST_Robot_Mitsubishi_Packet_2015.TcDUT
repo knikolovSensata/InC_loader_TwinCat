@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+  <DUT Name="ST_Robot_Mitsubishi_Packet_2015" Id="{90fed3f2-5ad2-4725-ad6b-8470c440b575}">
+    <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_2015 :
+STRUCT
+	// Packet number - 2015.
+	// To robot.
+	// Robot change target program control packet.
+	// Trigger.
+	
+	Header							: DINT := 2015;													// Packet header.
+	
+	TargetProgram					: DINT;															// The program to be executed.
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
