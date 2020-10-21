@@ -25,6 +25,7 @@ VAR_GLOBAL
 	sensorOnIUnload  : BOOL;                  // има сензор в гнездото под изх. инсъртър
 	purgeDoneIL      : BOOL;                  // PURGE процедурата е завършила - сигнализира вх. инсъртър
 	purgeDoneIU      : BOOL;                  // PURGE процедурата е завършила - сигнализира изх. инсъртър
+	gnLostDPPackets  : INT;                   // Не се ползва
 	
 	
 	
