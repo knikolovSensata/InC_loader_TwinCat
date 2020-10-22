@@ -1,15 +1,9 @@
-InC_Autoloader/_Boot/
-InC_Autoloader/_Boot/CurrentConfig
-InC_Autoloader/_Boot/TwinCAT*CE7*(ARMV7)/
-#InC_Autoloader/_Boot/TwinCAT\CE7\(ARMV7)/Plc
-InC_Autoloader/_Boot/TwinCAT*RT*(x64)/
-#InC_Autoloader/_Boot/TwinCAT RT (x64)/Plc
-#InC_Autoloader/_Boot/TwinCAT RT (x64)/Plc/Port_851
-InC_Autoloader/_Config/
-InC_Autoloader/Autoloader/_CompileInfo/
-InC_Autoloader/Autoloader/Autoloader.tmc
-InC_Autoloader/Autoloader/Autoloader.plcproj
-InC_Autoloader/InC_Autoloader.tsproj
-InC_Autoloader/InC_Autoloader.tsproj.bak
-InC_Autoloader/TrialLicense.tclrs
+/InC_Autoloader/_Boot/
+/InC_Autoloader/_Config/
+/InC_Autoloader/Autoloader/_CompileInfo/
+/InC_Autoloader/Autoloader/Autoloader.tmc
+/InC_Autoloader/Autoloader/Autoloader.plcproj
+/InC_Autoloader/InC_Autoloader.tsproj
+/InC_Autoloader/InC_Autoloader.tsproj.bak
+/InC_Autoloader/TrialLicense.tclrs
 .vs/
