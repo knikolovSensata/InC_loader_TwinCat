@@ -1,8 +1,8 @@
 InC_Autoloader/_Boot/
 InC_Autoloader/_Boot/CurrentConfig
-InC_Autoloader/_Boot/TwinCAT*CE7*(ARMV7)
+InC_Autoloader/_Boot/TwinCAT*CE7*(ARMV7)/
 #InC_Autoloader/_Boot/TwinCAT\CE7\(ARMV7)/Plc
-InC_Autoloader/_Boot/TwinCAT*RT*(x64)
+InC_Autoloader/_Boot/TwinCAT*RT*(x64)/
 #InC_Autoloader/_Boot/TwinCAT RT (x64)/Plc
 #InC_Autoloader/_Boot/TwinCAT RT (x64)/Plc/Port_851
 InC_Autoloader/_Config/
