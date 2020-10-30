@@ -67,7 +67,7 @@ IF x.iType = ioType.INPUT_BIT THEN
 
 	IF NOT DEBUG.ioDebugActive THEN	
 
-		tempByte 		 := x.image[x.iByte];       // Взима байта от IO Image
+		tempByte 		 := x.image^[x.iByte];       // Взима байта от IO Image
 		mask     		 := SHL(1, x.iBit);         // Подготвя маската
   	 	 res              := tempByte AND mask;
 		IF (res = 0) THEN
@@ -113,10 +113,10 @@ END_VAR]]></Declaration>
 	 
 		y.stIO   		 := FALSE;         			//  Задава стойността в Station IO
 
-		tempByte 		 := y.image[y.iByte];       // Взима байта от IO Image
+		tempByte 		 := y.image^[y.iByte];       // Взима байта от IO Image
 		mask     		 := SHL(1, y.iBit);         // Подготвя маската
 		mask             := NOT mask; 				// Инвертирая
-		y.image[y.iByte] := tempByte AND mask;      // Ресетване на желаният бит
+		y.image^[y.iByte] := tempByte AND mask;      // Ресетване на желаният бит
 		
 	ELSE
 		y.stIO   		 := FALSE;         			//  Задава стойността в Station IO
@@ -168,9 +168,9 @@ IF y.iType = ioType.OUTPUT_BIT THEN
 
 		y.stIO           := TRUE;         			//  Задава стойността в Station IO
 	
-		tempByte 		 := y.image[y.iByte];       // Взима байта от IO Image
+		tempByte 		 := y.image^[y.iByte];       // Взима байта от IO Image
 		mask     		 := SHL(1, y.iBit);         // Подготвя маската
-		y.image[y.iByte] := tempByte OR mask;       // Сетване на желаният бит
+		y.image^[y.iByte] := tempByte OR mask;       // Сетване на желаният бит
 		
 	ELSE
 		y.stIO           := TRUE;         			//  Задава стойността в Station IO

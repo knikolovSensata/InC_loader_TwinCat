@@ -314,7 +314,7 @@
 			</SubItem>
 		</DataType>
 	</DataTypes>
-	<Project ProjectGUID="{DE05A637-3AA8-4885-9616-7915B0F8DDF4}" ShowHideConfigurations="#x106">
+	<Project ProjectGUID="{DE05A637-3AA8-4885-9616-7915B0F8DDF4}" Target64Bit="true" ShowHideConfigurations="#x106">
 		<System>
 			<Tasks>
 				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">

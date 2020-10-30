@@ -2,6 +2,15 @@
 <TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.7">
 	<DataTypes>
 		<DataType>
+			<Name GUID="{1AA458C6-5E59-4D41-7B2F-916D31BBD436}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..512] OF BYTE</Name>
+			<BitSize>4104</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>513</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
 			<Name GUID="{18071995-0000-0000-0000-000000000041}" TcBaseType="true" HideSubItems="true" CName="AmsNetId">AMSNETID</Name>
 			<BitSize>48</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
@@ -333,6 +342,11 @@
 					<Vars VarGrpType="1">
 						<Name>PlcTask Inputs</Name>
 						<Var>
+							<Name>Global.INPUT_IMAGE</Name>
+							<Comment><![CDATA[ է֧  ڧ٧է֧ ާѧڧ ٧ IO Image]]></Comment>
+							<Type GUID="{1AA458C6-5E59-4D41-7B2F-916D31BBD436}">ARRAY [0..512] OF BYTE</Type>
+						</Var>
+						<Var>
 							<Name>Stations.sLoadAxis.WcState_In</Name>
 							<Type>BOOL</Type>
 						</Var>
@@ -409,6 +423,10 @@
 					</Vars>
 					<Vars VarGrpType="2">
 						<Name>PlcTask Outputs</Name>
+						<Var>
+							<Name>Global.OUTPUT_IMAGE</Name>
+							<Type GUID="{1AA458C6-5E59-4D41-7B2F-916D31BBD436}">ARRAY [0..512] OF BYTE</Type>
+						</Var>
 						<Var>
 							<Name>Stations.sLoadAxis.Controlword_Out</Name>
 							<Type>UINT</Type>

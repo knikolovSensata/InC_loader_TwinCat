@@ -6,8 +6,8 @@ VAR_GLOBAL
 	
 	// Входен и изходен масив за IO Image
 	
-//	INPUT_IMAGE   	    AT %I* : ARRAY[0..Consts.MAX_IO_POINTS] OF BYTE;
-//  OUTPUT_IMAGE   	    AT %Q* : ARRAY[0..Consts.MAX_IO_POINTS] OF BYTE;
+	INPUT_IMAGE   	    AT %I* : ARRAY[0..Consts.MAX_IO_POINTS] OF BYTE;
+    OUTPUT_IMAGE   	    AT %Q* : ARRAY[0..Consts.MAX_IO_POINTS] OF BYTE;
 
 	commands         : controlCommands;       // главни команди
 	purgeActive      : BOOL; 				  // има започнала purge процедура
@@ -30,8 +30,8 @@ VAR_GLOBAL
 	
 	
 
-    INPUT_IMAGE   : ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE; 
-	OUTPUT_IMAGE  : ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE;
+ //   INPUT_IMAGE   : ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE; 
+ //	 OUTPUT_IMAGE  : ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE;
 
 END_VAR]]></Declaration>
   </GVL>

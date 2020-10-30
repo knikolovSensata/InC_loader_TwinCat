@@ -9,7 +9,7 @@ STRUCT
 	// TO DO -> да се реализира подхода и за аналогови сигнали 
 	
 	stIO			: REFERENCE TO BOOL; 						                // име на сигнал от stationIO
-	image			: REFERENCE TO ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE;     // масив на IO image
+	image			: POINTER TO ARRAY [0..Consts.MAX_IO_POINTS] OF BYTE;       // масив на IO image
 	iType           : ioType; 													// тип
 	iByte 			: UINT;                                                     // номер на байт от масива
 	iBit			: UINT; 									                // номер на бит от байта

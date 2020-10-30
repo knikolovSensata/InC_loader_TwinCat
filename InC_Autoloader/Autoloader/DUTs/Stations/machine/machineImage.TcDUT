@@ -5,28 +5,28 @@
 STRUCT
 	
    xDoors 	        	: imageIO := ( stIO   := Stations.machineHmiIO.x_DoorsOK,
-									   image  := Global.INPUT_IMAGE,
+									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
 									   iByte  := 0,
 									   iBit   := 1 );	
 									   
    xEmgBnt				: imageIO := ( stIO   := Stations.machineHmiIO.x_EmgOK,
-									   image  := Global.INPUT_IMAGE,
+									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
 									   iByte  := 0,
 									   iBit   := 2 );
 
     xAirOk 				: imageIO := ( stIO   := Stations.machineHmiIO.x_AirOk,
-									   image  := Global.INPUT_IMAGE,
+									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
 									   iByte  := 0,
 									   iBit   := 3 );
 									   									   
     yZumer 				: imageIO := ( stIO   := Stations.machineHmiIO.y_Zumer,
-									   image  		  := Global.OUTPUT_IMAGE,
-									   iType  		  := ioType.OUTPUT_BIT,
-									   iByte 		  := 0,
-									   iBit   		  := 3 ); 	
+									   image  := ADR(Global.OUTPUT_IMAGE),
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 0,
+									   iBit   := 3 ); 	
 
 	
   
