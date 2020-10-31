@@ -646,7 +646,7 @@ CASE activeState OF
 		IF moveDone AND currentPos = posCount THEN
 			nextState(stackerUnloadStates.stUnloadPurgeDone);
 		ELSE
-			IF Stations.sLoadDrive.Enabled AND NOT Stations.sLoadDrive.Error THEN
+			IF Stations.sUnLoadDrive.Enabled AND NOT Stations.sUnLoadDrive.Error THEN
 				nextState(stackerUnloadStates.stUnloadPurgeMove);
 			 ELSE
 				nextState(stackerUnloadStates.stUnloadPurgeDriveOn);
