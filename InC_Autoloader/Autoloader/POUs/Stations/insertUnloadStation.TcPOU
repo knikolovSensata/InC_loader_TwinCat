@@ -297,9 +297,9 @@ CASE activeState OF
 
 	inserterUnloadStates.stPrepareDriveMove:
 		IF Stations.insertUnLoadDrive.Enabled AND NOT Stations.insertUnLoadDrive.Error THEN	
-			Stations.insertUnLoadDrive.TargetVelocity      := Stations.insertLoadSetting.axisWorkSpeed;
-			Stations.insertUnLoadDrive.TargetAcceleration  := Stations.insertLoadSetting.axisAcc;
-			Stations.insertUnLoadDrive.TargetPrecision     := Stations.insertLoadSetting.axisPres;
+			Stations.insertUnLoadDrive.TargetVelocity      := Stations.insertUnLoadSetting.axisWorkSpeed;
+			Stations.insertUnLoadDrive.TargetAcceleration  := Stations.insertUnLoadSetting.axisAcc;
+			Stations.insertUnLoadDrive.TargetPrecision     := Stations.insertUnLoadSetting.axisPres;
 			Stations.insertUnLoadDrive.TargetPosition      := initRotPos;
 		    Stations.insertUnLoadDrive.DoMove              := TRUE;	
 			IF stateDelay(drivePosTime) THEN		
@@ -470,9 +470,9 @@ CASE activeState OF
 
 	inserterUnloadStates.stPosDriveMove:
 		IF Stations.insertUnLoadDrive.Enabled AND NOT Stations.insertUnLoadDrive.Error THEN	
-			Stations.insertUnLoadDrive.TargetVelocity      := Stations.insertLoadSetting.axisWorkSpeed;
-			Stations.insertUnLoadDrive.TargetAcceleration  := Stations.insertLoadSetting.axisAcc;
-			Stations.insertUnLoadDrive.TargetPrecision     := Stations.insertLoadSetting.axisPres;
+			Stations.insertUnLoadDrive.TargetVelocity      := Stations.insertUnLoadSetting.axisWorkSpeed;
+			Stations.insertUnLoadDrive.TargetAcceleration  := Stations.insertUnLoadSetting.axisAcc;
+			Stations.insertUnLoadDrive.TargetPrecision     := Stations.insertUnLoadSetting.axisPres;
 			Stations.insertUnLoadDrive.TargetPosition      := workRotPos;
 		    Stations.insertUnLoadDrive.DoMove              := TRUE;	
 			IF stateDelay(drivePosTime) THEN		
