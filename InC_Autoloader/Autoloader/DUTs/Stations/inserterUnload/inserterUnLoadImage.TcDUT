@@ -8,57 +8,57 @@ STRUCT
    xGrip_open 	        : imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Grip_open,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 1 );	
+									   iByte  := 18,
+									   iBit   := 4 );	
 									   
    xGrip_close			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Grip_close,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 2 );
+									   iByte  := 18,
+									   iBit   := 5 );
 
     xInsert_up 			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Insert_up,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 );
+									   iByte  := 18,
+									   iBit   := 6 );
 									   
     xInsert_down 		: imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Insert_down,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 );									   	   
+									   iByte  := 18,
+									   iBit   := 7 );									   	   
 									   
     xNest 			    : imageIO := ( stIO   := Stations.insertUnloadHmiIO.x_Nest,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 );
+									   iByte  := 3,
+									   iBit   := 1 );
 
 	// Изходи								   									   
     yGrip_open 			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Grip_open,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 ); 
+									   iByte  := 150,
+									   iBit   := 2 ); 
 
     yGrip_close 		: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Grip_close,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
+									   iByte  := 150,
 									   iBit   := 3 ); 
 
     yInsert_up 			: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Insert_up,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 ); 
+									   iByte  := 150,
+									   iBit   := 7 ); 
 
     yInsert_down 		: imageIO := ( stIO   := Stations.insertUnloadHmiIO.y_Insert_down,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 ); 	
+									   iByte  := 150,
+									   iBit   := 6 ); 	
 
 	  
 

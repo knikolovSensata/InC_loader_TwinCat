@@ -277,8 +277,8 @@ CASE activeState OF
 		IF Stations.roboData = dataRequestRobot.done THEN
 			io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
 			io.setSR(ioImage.yRot_home, ioImage.yRot_back);
-			io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
-			io.rstY(ioImage.yPalletLoad);
+			io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
+			io.rstY(ioImage.yPalletLoad24);
 			nextState(roboArmStates.stInitToolCheck);
 		END_IF
 		IF Stations.roboData = dataRequestRobot.error THEN
@@ -292,7 +292,7 @@ CASE activeState OF
 	roboArmStates.stInitToolCheck:
 		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) AND
 		   io.getSR(ioImage.xRot_home, ioImage.xRot_back)    AND
-		   io.getSR(ioImage.xSlide_up, ioImage.xSlide_down)  THEN
+		   io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down)  THEN
 		   		nextState(roboArmStates.stInitLoadRecipe);
 		END_IF
 		
@@ -305,7 +305,7 @@ CASE activeState OF
 				setError(roboArmStates.stErrRotNotTurn0);
 			END_IF
 
-			IF NOT io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN
+			IF NOT io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN
 				setError(roboArmStates.stErrSlideNotUp);
 			END_IF
 		END_IF	
@@ -393,9 +393,9 @@ CASE activeState OF
 		IF 	palletIn THEN
 			nextState(roboArmStates.stResetGrip);	
 		ELSE
-			io.rstY(ioImage.yPalletLoad);
+			io.rstY(ioImage.yPalletLoad24);
 			IF stateDelay(palletGripTime) THEN
-				io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
+				io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
 			    nextState(roboArmStates.stResetSliderCheck);				
 			END_IF
 		END_IF
@@ -404,7 +404,7 @@ CASE activeState OF
 // Няма захваната тара и се проверява дали слайдера е горе
 
 	roboArmStates.stResetSliderCheck:	
-		IF io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN 
+		IF io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN 
 			nextState(roboArmStates.stResetGrip);
 		END_IF
 		timeOutError(slideTime, roboArmStates.stErrSlideNotUp);	
@@ -716,15 +716,15 @@ CASE activeState OF
 // Слайдера слиза надолу
 
 	roboArmStates.stMoveToEmptySliderDown:		
-		io.setSR(ioImage.ySlide_down, ioImage.ySlide_up);	
+		io.setSR(ioImage.ySlide24_down, ioImage.ySlide24_up);	
 		nextState(roboArmStates.stMoveToEmptySliderCheck);		
 
 // *** Move to Empty - Slider Check
 // Проверка дали скайдера е долу
 
 	roboArmStates.stMoveToEmptySliderCheck:
-		IF io.getSR(ioImage.xSlide_down, ioImage.xSlide_up) THEN 
-			io.setY(ioImage.yPalletLoad);
+		IF io.getSR(ioImage.xSlide24_down, ioImage.xSlide24_up) THEN 
+			io.setY(ioImage.yPalletLoad24);
 			IF stateDelay(palletGripTime) THEN
 				palletIn         := TRUE;
 				palletOnEmptyPos := FALSE;
@@ -815,9 +815,9 @@ CASE activeState OF
 		palletOnEmptyPos := FALSE;
 		lamp24On         := FALSE;
 		lamp27On         := FALSE;	
-		io.rstY(ioImage.yPalletLoad);
+		io.rstY(ioImage.yPalletLoad24);
 		IF stateDelay (palletGripTime) THEN
-			io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
+			io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
 		    nextState(roboArmStates.stUnloadPalletSlideCheck);	
        END_IF							
 		
@@ -826,7 +826,7 @@ CASE activeState OF
 // освободил тарата
 
 	roboArmStates.stUnloadPalletSlideCheck:		
-		IF io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN 
+		IF io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN 
 			resetActive     := TRUE;
 			palletIn        := FALSE;
 			unLoadFixtures  := fixturesCount;		
@@ -859,15 +859,15 @@ CASE activeState OF
 // Сваляне на слайдера
 
 	roboArmStates.stLoadPalletSlideDown:			
-		io.setSR(ioImage.ySlide_down, ioImage.ySlide_up);
+		io.setSR(ioImage.ySlide24_down, ioImage.ySlide24_up);
 		nextState(roboArmStates.stLoadPalletSliderCheck);	
 	
 // *** Load Pallet - Slider Check
 // Проверка дали слайдера е в долна поз.
 
 	roboArmStates.stLoadPalletSliderCheck:		
-		IF io.getSR(ioImage.xSlide_down, ioImage.xSlide_up) THEN 
-			io.setY(ioImage.yPalletLoad);
+		IF io.getSR(ioImage.xSlide24_down, ioImage.xSlide24_up) THEN 
+			io.setY(ioImage.yPalletLoad24);
 			resetActive := FALSE;
 			IF stateDelay(palletGripTime) THEN
 				nextState(roboArmStates.stLoadPalletSignal);				
@@ -935,9 +935,9 @@ CASE activeState OF
 // Освобождаване на тарата
 
 	roboArmStates.stEmptyPosRelease:	
-		io.rstY(ioImage.yPalletLoad);
+		io.rstY(ioImage.yPalletLoad24);
 		IF stateDelay(palletGripTime) THEN
-			io.setSR(ioImage.ySlide_up, ioImage.ySlide_down);
+			io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
 			nextState(roboArmStates.stEmptyPosSlideCheck);			
 		END_IF
 
@@ -945,7 +945,7 @@ CASE activeState OF
 // Проверка дали слайдера е горe
 
 	roboArmStates.stEmptyPosSlideCheck:
-		IF io.getSR(ioImage.xSlide_up, ioImage.xSlide_down) THEN 
+		IF io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN 
 			nextState(roboArmStates.stEmptyPosSync);
 		    palletIn := FALSE;			
 		END_IF

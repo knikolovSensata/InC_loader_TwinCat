@@ -343,7 +343,7 @@
 						<Name>PlcTask Inputs</Name>
 						<Var>
 							<Name>Global.INPUT_IMAGE</Name>
-							<Comment><![CDATA[ Входен и изходен масив за IO Image]]></Comment>
+							<Comment><![CDATA[ է֧  ڧ٧է֧ ާѧڧ ٧ IO Image]]></Comment>
 							<Type GUID="{1AA458C6-5E59-4D41-7B2F-916D31BBD436}">ARRAY [0..512] OF BYTE</Type>
 						</Var>
 						<Var>

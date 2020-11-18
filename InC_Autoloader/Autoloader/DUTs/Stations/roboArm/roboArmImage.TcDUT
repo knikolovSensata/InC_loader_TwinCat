@@ -7,111 +7,142 @@ STRUCT
     xGrip_open 	    	: imageIO := ( stIO   := Stations.roboHmiIO.x_Grip_open,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 1 );	
+									   iByte  := 9,
+									   iBit   := 2 );	
 									   
     xGrip_close 		: imageIO := ( stIO   := Stations.roboHmiIO.x_Grip_close,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 2 );
+									   iByte  := 9,
+									   iBit   := 3 );
 
     xRot_home 	    	: imageIO := ( stIO   := Stations.roboHmiIO.x_Rot_home,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 );
+									   iByte  := 9,
+									   iBit   := 0 );
 
     xRot_back 		    : imageIO := ( stIO   := Stations.roboHmiIO.x_Rot_back,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 4 );	
+									   iByte  := 9,
+									   iBit   := 1 );	
 
-    xSlide_up 	       : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide_up,
+    xSlide24_up 	   : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide24_up,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);	
+									   iByte  := 9,
+									   iBit   := 4);	
 
-    xSlide_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide_down,
+    xSlide24_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide24_down,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);					   
+									   iByte  := 9,
+									   iBit   := 5);
+									   
+    xSlide27_up 	   : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide27_up,
+									   image  := ADR(Global.INPUT_IMAGE),
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 9,
+									   iBit   := 6);	
+
+    xSlide27_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.x_Slide27_down,
+									   image  := ADR(Global.INPUT_IMAGE),
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 9,
+									   iBit   := 7);
+					   
 
     xLaser 	           : imageIO := ( stIO   := Stations.roboHmiIO.x_Laser,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);	
+									   iByte  := 10,
+									   iBit   := 0);	
 
     xWaitPos24 	        : imageIO := ( stIO   := Stations.roboHmiIO.x_waitPos24,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);
+									   iByte  := 16,
+									   iBit   := 7);
 
     xWaitPos27 	        : imageIO := ( stIO   := Stations.roboHmiIO.x_waitPos27,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);								   			   							   
+									   iByte  := 17,
+									   iBit   := 7);								   			   							   
 									   
 	// Изходи
     yGrip_open 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Grip_open,
 					 				   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 1 );
+									   iByte  := 9,
+									   iBit   := 2 );
 
     yGrip_close 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_Grip_close,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 2 );
+									   iByte  := 9,
+									   iBit   := 3 );
 
     yRot_home 		   : imageIO := ( stIO   := Stations.roboHmiIO.y_Rot_home,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 );	
+									   iByte  := 9,
+									   iBit   := 0 );	
 
     yRot_back 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Rot_back,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 4 );	
+									   iByte  := 9,
+									   iBit   := 1 );	
 
-    ySlide_up 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide_up,
+    ySlide24_up 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide24_up,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
+									   iByte  := 9,
 									   iBit   := 4 );
 
-    ySlide_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide_down,
+    ySlide24_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide24_down,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 4 );
+									   iByte  := 9,
+									   iBit   := 5 );
 
-    yPalletLoad 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_PalletLoad,
+    yPalletLoad24 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_PalletLoad24,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 4 );
+									   iByte  := 10,
+									   iBit   := 0 );		   
+
+    ySlide27_up 	       : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide27_up,
+									   image  := ADR(Global.OUTPUT_IMAGE),
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 9,
+									   iBit   := 6 );
+
+    ySlide27_down 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_Slide27_down,
+									   image  := ADR(Global.OUTPUT_IMAGE),
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 9,
+									   iBit   := 7 );
+
+    yPalletLoad27 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_PalletLoad27,
+									   image  := ADR(Global.OUTPUT_IMAGE),
+									   iType  := ioType.OUTPUT_BIT,
+									   iByte  := 10,
+									   iBit   := 1 );									      
 									  						   
     ySignalLamp24 	   : imageIO := ( stIO   := Stations.roboHmiIO.y_signalLamp24,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 4 );	
+									   iByte  := 6,
+									   iBit   := 0 );	
 
     ySignalLamp27	   : imageIO := ( stIO   := Stations.roboHmiIO.y_signalLamp27,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 4 );								   
+									   iByte  := 6,
+									   iBit   := 1 );								   
 				   	
 
 END_STRUCT

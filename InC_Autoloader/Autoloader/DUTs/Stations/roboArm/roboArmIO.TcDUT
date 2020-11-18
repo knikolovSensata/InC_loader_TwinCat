@@ -9,8 +9,10 @@ STRUCT
 	x_Grip_close			: BOOL;        //  Грипера на робота е затворен
 	x_Rot_home				: BOOL;        //  Ротатора е в home (прав)
 	x_Rot_back				: BOOL;        //  Ротатора е завъртян (обърнал е сензор на 180 град.)
-	x_Slide_up				: BOOL;        //  Грипера за тара е свален
-	x_Slide_down            : BOOL;        //  Грипера за тара е вдигнат
+	x_Slide24_up			: BOOL;        //  Грипера за тара е свален
+	x_Slide24_down          : BOOL;        //  Грипера за тара е вдигнат
+	x_Slide27_up			: BOOL;        //  Грипера за тара е свален
+	x_Slide27_down          : BOOL;        //  Грипера за тара е вдигнат	
 	x_Laser                 : BOOL;        //  Сигнал от лазерната ролетка
 	x_waitPos24             : BOOL;        //  Сензор на чакаща поз. HEX24
 	x_waitPos27             : BOOL;        //  Сензор на чакаща поз. HEX27
@@ -20,9 +22,12 @@ STRUCT
 	y_Grip_close			: BOOL;        //  
 	y_Rot_home				: BOOL;        //  
 	y_Rot_back				: BOOL;        //  
-	y_Slide_up				: BOOL;        //  
-	y_Slide_down            : BOOL;        // 
-	y_PalletLoad            : BOOL;        //  Сигнал за захващане/пускане на тара
+	y_Slide24_up			: BOOL;        //  
+	y_Slide24_down          : BOOL;        // 
+	y_Slide27_up			: BOOL;        //  
+	y_Slide27_down          : BOOL;        // 
+	y_PalletLoad24          : BOOL;        //  Сигнал за захващане/пускане на тара
+	y_PalletLoad27          : BOOL;        //  Сигнал за захващане/пускане на тара	
 	y_signalLamp24          : BOOL;        //  Сигнална лампа за чакаща поз. HEX24
 	y_signalLamp27          : BOOL;        //  Сигнална лампа за чакаща поз. HEX27	
 	

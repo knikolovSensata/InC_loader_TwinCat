@@ -74,13 +74,13 @@
     <Compile Include="DUTs\Stations\inserterLoad\inserterLoadStates.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Stations\inserterUnload\inserterUnLoadImage.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Stations\inserterUnload\inserterUnLoadRecipe.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Stations\inserterUnload\inserterUnLoadDisplayStates.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Stations\inserterUnload\inserterUnLoadImage.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Stations\inserterUnload\inserterUnLoadIO.TcDUT">

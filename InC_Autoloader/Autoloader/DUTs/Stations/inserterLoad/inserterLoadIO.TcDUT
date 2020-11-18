@@ -16,6 +16,7 @@ STRUCT
     y_Grip_close            : BOOL;           // Грипера е затворен -  цилиндър
 	y_Insert_up             : BOOL;           // Инсъртъра е вдигнат - цилиндър
 	y_Insert_down           : BOOL;           // Инсъртъра е свален	-  цилиндър
+	y_FlashLight            : BOOL;
 
 
 END_STRUCT

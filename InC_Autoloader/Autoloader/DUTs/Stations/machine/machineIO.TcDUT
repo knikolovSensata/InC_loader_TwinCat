@@ -8,6 +8,7 @@ STRUCT
 	x_DoorsOK		: BOOL;					    // Вратите са затворени 
 	x_EmgOK			: BOOL;					    // Систама за безопасност е активна
 	x_AirOk 		: BOOL;						// Има налягане на въздуха
+	x_robotEmgOk    : BOOL;
 	
 	// Изходи
 	y_Zumer					    : BOOL;        // Звуков сигнал

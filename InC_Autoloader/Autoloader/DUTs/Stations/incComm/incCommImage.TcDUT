@@ -8,69 +8,70 @@ STRUCT
     xSignalStop 		: imageIO := ( stIO   := Stations.incCommHmiIO.x_SignalStop,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 1 );	
+									   iByte  := 4,
+									   iBit   := 0 );	
 									   
     xSignalStart 		: imageIO := ( stIO   := Stations.incCommHmiIO.x_SignalStart,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 2 );
+									   iByte  := 4,
+									   iBit   := 1 );
 
     xPickNestLoaded 	: imageIO := ( stIO   := Stations.incCommHmiIO.x_pickNestLoaded,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 );
+									   iByte  := 4,
+									   iBit   := 2 );
+									   
+    x_DailIndexDone 	: imageIO := ( stIO   := Stations.incCommHmiIO.x_DailIndexDone,
+									   image  := ADR(Global.INPUT_IMAGE),
+									   iType  := ioType.INPUT_BIT,
+									   iByte  := 4,
+									   iBit   := 3);									   
 
     xRecipeBit0 	    : imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit0,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);
+									   iByte  := 4,
+									   iBit   := 4);
 
     xRecipeBit1 	    : imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit1,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
+									   iByte  := 4,
 									   iBit   := 5);	
 									   
    xRecipeBit2 	    	: imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit2,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);
+									   iByte  := 4,
+									   iBit   := 6);
 
    xRecipeBit3 	    	: imageIO := ( stIO   := Stations.incCommHmiIO.x_recipeBit3,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);									   
-									   
-    x_DailIndexDone 	: imageIO := ( stIO   := Stations.incCommHmiIO.x_DailIndexDone,
-									   image  := ADR(Global.INPUT_IMAGE),
-									   iType  := ioType.INPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 5);									   
+									   iByte  := 4,
+									   iBit   := 7);									   
+									   									   
 
 	// Изходи
     yProductChange 		: imageIO := ( stIO   := Stations.incCommHmiIO.y_productChange,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 1 );
+									   iByte  := 5,
+									   iBit   := 0 );
 
     yAlarm 		        : imageIO := ( stIO   := Stations.incCommHmiIO.y_alarm,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 2 );
+									   iByte  := 5,
+									   iBit   := 1 );
 
     yDailIndex 		    : imageIO := ( stIO   := Stations.incCommHmiIO.y_dailIndex,
 									   image  := ADR(Global.OUTPUT_IMAGE),
 									   iType  := ioType.OUTPUT_BIT,
-									   iByte  := 0,
-									   iBit   := 3 );	
+									   iByte  := 5,
+									   iBit   := 2 );	
 					   	
 
 END_STRUCT

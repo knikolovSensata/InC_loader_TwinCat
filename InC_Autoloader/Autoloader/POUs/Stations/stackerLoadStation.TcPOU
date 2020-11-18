@@ -159,8 +159,7 @@ CASE activeState OF
 // Всички ключалки на стакера се отварят
 
 	stackerLoadStates.stResetUnlockPallet:
-		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
-		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);
+		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stResetCheckLocks);	
 
@@ -296,8 +295,7 @@ CASE activeState OF
 // Oтварят се всички ключалки
 
 	stackerLoadStates.stPalletsLoadCheckTop:
-		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
-		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);
+		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stPalletsLoadCheckLocks);
 	
@@ -408,8 +406,7 @@ CASE activeState OF
 //  Отваряне на всички грипери
 
 	stackerLoadStates.stPreparePalletCheckTop:
-		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
-		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);
+		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stPreparePalletCheckLocks1);
 
@@ -530,8 +527,7 @@ CASE activeState OF
 // Проверява дали има тара на върха на стакера 
 	stackerLoadStates.stMoveDownCkeckTop:		
 		IF io.getX(ioImage.xPalletOnTop) THEN
-			io.setSR(ioImage.yLock1_lock, ioImage.yLock1_unlock);
-			io.setSR(ioImage.yLock2_lock, ioImage.yLock2_unlock);
+			io.setSR(ioImage.yLocks_lock, ioImage.yLocks_unlock);
 			nextState(stackerLoadStates.stMoveDownCheckLocks);
 		ELSE
 			preparePalletDone := FALSE;
@@ -647,8 +643,7 @@ CASE activeState OF
 // Отключва тарата
 
 	stackerLoadStates.stReleasePalletUnlock:	
-		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
-		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);
+		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stReleasePalletUnlockCheck);	
 
@@ -934,7 +929,8 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       <LineId Id="8333" Count="0" />
       <LineId Id="8338" Count="0" />
       <LineId Id="8334" Count="3" />
-      <LineId Id="7524" Count="56" />
+      <LineId Id="7524" Count="5" />
+      <LineId Id="7531" Count="49" />
       <LineId Id="8515" Count="0" />
       <LineId Id="7581" Count="0" />
       <LineId Id="8516" Count="0" />
@@ -946,14 +942,16 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       <LineId Id="7615" Count="7" />
       <LineId Id="8477" Count="0" />
       <LineId Id="8561" Count="0" />
-      <LineId Id="7623" Count="104" />
+      <LineId Id="7623" Count="42" />
+      <LineId Id="7667" Count="60" />
       <LineId Id="8517" Count="0" />
       <LineId Id="7728" Count="0" />
       <LineId Id="8518" Count="0" />
       <LineId Id="7729" Count="17" />
       <LineId Id="7749" Count="1" />
       <LineId Id="7752" Count="1" />
-      <LineId Id="7755" Count="53" />
+      <LineId Id="7755" Count="24" />
+      <LineId Id="7781" Count="27" />
       <LineId Id="7810" Count="40" />
       <LineId Id="8519" Count="0" />
       <LineId Id="7851" Count="0" />
@@ -965,7 +963,8 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       <LineId Id="8293" Count="0" />
       <LineId Id="7878" Count="4" />
       <LineId Id="8294" Count="0" />
-      <LineId Id="7883" Count="26" />
+      <LineId Id="7883" Count="17" />
+      <LineId Id="7902" Count="7" />
       <LineId Id="8577" Count="0" />
       <LineId Id="7910" Count="21" />
       <LineId Id="7938" Count="0" />
@@ -983,7 +982,8 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       <LineId Id="8521" Count="0" />
       <LineId Id="7976" Count="0" />
       <LineId Id="8522" Count="0" />
-      <LineId Id="7977" Count="73" />
+      <LineId Id="7977" Count="36" />
+      <LineId Id="8015" Count="35" />
       <LineId Id="8378" Count="0" />
       <LineId Id="8380" Count="0" />
       <LineId Id="8382" Count="0" />
