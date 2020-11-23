@@ -4,8 +4,8 @@
     <Declaration><![CDATA[TYPE inserterUnLoadSettings :
 STRUCT
 	
-	axisWorkSpeed             :	  REAL   := 500.0; 	   // скорост 
-	axisAcc					  :   REAL   := 0.1;       // ускр.
+	axisWorkSpeed             :	  REAL   := 2000; 	   // скорост 
+	axisAcc					  :   REAL   := 2;         // ускр.
 	axisPres                  :   REAL   := 0.1;       // точност на позициониране
 	rotParams                 :   ARRAY[1..Consts.MAX_RECIPE] OF inserterUnLoadRecipe; 
 

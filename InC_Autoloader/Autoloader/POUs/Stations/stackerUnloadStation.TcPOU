@@ -11,7 +11,7 @@ END_VAR
 VAR
 
 	activeState            : stackerUnloadStates;	
-	axisFesto              : fakeDriveFesto; //FB_ServoAxis_FESTO_v2;
+	axisFesto              : FB_FESTO_CMMT_AS;
 	
 
 	resetDone			   : BOOL := FALSE; 						   //  След подава не захр. станцията се е ресетната
@@ -22,6 +22,7 @@ VAR
 	purgeStart			   : BOOL := FALSE; 						   //  Purge на станцията е завършил	
 	
 	moveDone		       : BOOL := FALSE; 						   // Фесто мотора си е изпълнил заданието при движение
+	moveInit			   : BOOL;
 	
 	posCount			   : DINT;					 				   // Брой позиций на оста
 	axisLen				   : REAL;				
@@ -199,7 +200,7 @@ CASE activeState OF
 
 	stackerUnloadStates.stResetDriveMove:	
 		IF Stations.sUnloadDrive.Enabled AND NOT Stations.sUnloadDrive.Error THEN
-			Stations.sUnloadDrive.TargetPosition     := 0.0;
+			Stations.sUnloadDrive.TargetPosition     := Stations.sUnloadSettings.pallet[Global.recipe].zeroPos;
 			Stations.sUnloadDrive.TargetAcceleration := Stations.sUnloadSettings.axisAcc;
 			Stations.sUnloadDrive.TargetVelocity     := Stations.sUnloadSettings.axisInitSpeed;
 			Stations.sUnloadDrive.DoMove             := TRUE;
@@ -267,7 +268,7 @@ CASE activeState OF
 //  Ако няма такива НЕ може да се продължи с инизиализацията
 
 	stackerUnloadStates.stPrepareLimitCheck:
-		IF Stations.sUnloadSettings.axisLength < Consts.MIN_AXIS_LEN OR Stations.sUnloadSettings.palletSize[Global.recipe] < Consts.MIN_PALLET_SIZE THEN
+		IF Stations.sUnloadSettings.axisLength < Consts.MIN_AXIS_LEN OR Stations.sUnloadSettings.pallet[Global.recipe].moveDownStep < Consts.MIN_PALLET_SIZE THEN
 				setError(stackerUnloadStates.stErrNoProperSettings);
 		END_IF
 		nextState(stackerUnloadStates.stPrepareCalcAxis);			
@@ -276,13 +277,16 @@ CASE activeState OF
 // Изчисляват се позицийте за хода на оста на стакера 	
 
 	stackerUnloadStates.stPrepareCalcAxis:
-	    axisLen       := 0.0;
-		axisPosArr[0] := 0.0;
+	    axisLen       := Stations.sUnloadSettings.pallet[Global.recipe].zeroPos;
+		axisPosArr[0] := Stations.sUnloadSettings.pallet[Global.recipe].zeroPos;
 		currentPos 	  := 1;
 		posCount      := 1;
 		
 		WHILE axisLen < Stations.sUnloadSettings.axisLength AND currentPos < Consts.MAX_AXIS_POS DO
-			axisLen    			   := axisLen + Stations.sUnloadSettings.palletSize[Global.recipe];
+			axisLen    			   := axisLen + Stations.sUnloadSettings.pallet[Global.recipe].moveDownStep;
+			axisPosArr[currentPos] := axisLen;
+			currentPos  := currentPos + 1;
+			axisLen    			   := axisLen - Stations.sUnloadSettings.pallet[Global.recipe].moveUpStep;
 			axisPosArr[currentPos] := axisLen;
 			currentPos  := currentPos + 1;
 		END_WHILE
@@ -348,6 +352,7 @@ CASE activeState OF
 			Stations.sUnloadDrive.TargetVelocity     := Stations.sUnloadSettings.axisInitSpeed;
 			Stations.sUnloadDrive.DoMove             := TRUE;
 			moveDone							     := FALSE;
+			moveInit								 := FALSE;
 			IF stateDelay(drivePosTime) THEN
 				nextState(stackerUnloadStates.stPrepareCheckDrive);
 			END_IF
@@ -412,10 +417,9 @@ CASE activeState OF
 // Прави 1 ход нагоре
 
 	stackerUnloadStates.stMoveUpDriveMove:	
-		IF moveDone THEN
-			currentPos := currentPos - 1;
-		END_IF
-		IF currentPos <= 0 THEN
+		IF moveDone AND moveInit THEN
+			currentPos := currentPos + 1;
+		ELSIF moveDone AND NOT moveInit THEN
 			currentPos := 0;
 		END_IF
 		Stations.sUnloadDrive.TargetPosition     := axisPosArr[currentPos];
@@ -503,19 +507,21 @@ CASE activeState OF
 		timeOutError(driveEnTime*2, stackerUnloadStates.stErrAxis);	
 		
 // *** Unlock Pallet - Drive Move
-// Прави 2 хода надолу
+// Прави ход надолу
 
 	stackerUnloadStates.stUnlockPalletDriveMove:	
-		IF currentPos = posCount - 1 THEN                         // Стакера е пълен
+		IF currentPos = posCount THEN                         // Стакера е пълен
 			unlockPalletStart   := FALSE;
-			nextState(stackerUnloadStates.stResetOpenLocks);
-		ELSIF currentPos = posCount - 2 THEN
 			Global.startZumer   := TRUE;
-			Global.uStackerFull := TRUE;	
+			Global.uStackerFull := TRUE;
+			nextState(stackerUnloadStates.stResetOpenLocks);
 		ELSE
-			IF moveDone THEN
-				currentPos := currentPos + 2;
-			END_IF
+			IF moveDone AND moveInit THEN
+				currentPos := currentPos + 1;
+			ELSIF moveDone AND NOT moveInit THEN
+				currentPos :=  1;	
+			    moveInit   := TRUE;
+			END_IF		
 			IF currentPos >= posCount THEN
 				currentPos := posCount;
 			END_IF
@@ -524,21 +530,21 @@ CASE activeState OF
 			Stations.sUnloadDrive.TargetVelocity     := Stations.sUnloadSettings.axisInitSpeed;
 			Stations.sUnloadDrive.DoMove             := TRUE;
 			moveDone							     := FALSE;
-			IF stateDelay(drivePosTime) THEN
-				nextState(stackerUnloadStates.stUnlockPalletCkeckDrive);	
-			END_IF	
+		    nextState(stackerUnloadStates.stUnlockPalletCkeckDrive);
 	   END_IF	
 		
 // *** Unlock Pallet - Check Drive
 // Проверка дали е завършил хода на оста
 
-	stackerUnloadStates.stUnlockPalletCkeckDrive:		
-		IF Stations.sUnloadDrive.TargetReached AND NOT Stations.sUnloadDrive.Error THEN
-			Stations.sUnloadDrive.DoMove := FALSE;
-			moveDone 				     := TRUE;
-			nextState(stackerUnloadStates.stUnlockPalletSync);	
-		ELSIF NOT Stations.sUnloadDrive.TargetReached AND Stations.sUnloadDrive.Error THEN
-			setError(stackerUnloadStates.stInitMoveErr);
+	stackerUnloadStates.stUnlockPalletCkeckDrive:	
+		IF stateDelay(drivePosTime) THEN
+			IF Stations.sUnloadDrive.TargetReached AND NOT Stations.sUnloadDrive.Error THEN
+				Stations.sUnloadDrive.DoMove := FALSE;
+				moveDone 				     := TRUE;
+				nextState(stackerUnloadStates.stUnlockPalletSync);	
+			ELSIF NOT Stations.sUnloadDrive.TargetReached AND Stations.sUnloadDrive.Error THEN
+				setError(stackerUnloadStates.stInitMoveErr);
+			END_IF	
 		END_IF	
 		timeOutError(palletMoveTimeOut, stackerUnloadStates.stErrPalletMove);
 
@@ -834,76 +840,15 @@ axisFesto          ( axis				:= Stations.sUnloadAxis,
 					Enabled 			=> Stations.sUnloadDrive.Enabled,
 					Error 				=> Stations.sUnloadDrive.Error,
 					ErrorID 			=> Stations.sUnloadDrive.ErrorID,
-					TargetReached 		:= Stations.sUnloadDrive.TargetReached,
+					TargetReached 		=> Stations.sUnloadDrive.TargetReached,
 					HomeDone 			=> Stations.sUnloadDrive.Refferenced,
 					Moving 				=> Stations.sUnloadDrive.Moving,
 					CurrentPosition 	=> Stations.sUnloadDrive.CurrentPosition,
-					OperationMode		:= Stations.sUnloadDrive.OperationMode);]]></ST>
+					OperationMode		=> Stations.sUnloadDrive.OperationMode);]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="stackerUnloadStation">
-      <LineId Id="3296" Count="60" />
-      <LineId Id="4253" Count="0" />
-      <LineId Id="3358" Count="22" />
-      <LineId Id="4294" Count="0" />
-      <LineId Id="3381" Count="4" />
-      <LineId Id="3390" Count="21" />
-      <LineId Id="3413" Count="49" />
-      <LineId Id="4186" Count="0" />
-      <LineId Id="3463" Count="0" />
-      <LineId Id="4188" Count="0" />
-      <LineId Id="3464" Count="22" />
-      <LineId Id="4147" Count="0" />
-      <LineId Id="3487" Count="0" />
-      <LineId Id="4145" Count="1" />
-      <LineId Id="3494" Count="7" />
-      <LineId Id="4148" Count="0" />
-      <LineId Id="4293" Count="0" />
-      <LineId Id="3502" Count="51" />
-      <LineId Id="3555" Count="51" />
-      <LineId Id="4189" Count="0" />
-      <LineId Id="3607" Count="0" />
-      <LineId Id="4190" Count="0" />
-      <LineId Id="3608" Count="10" />
-      <LineId Id="3620" Count="4" />
-      <LineId Id="4197" Count="0" />
-      <LineId Id="4201" Count="1" />
-      <LineId Id="4198" Count="0" />
-      <LineId Id="4203" Count="0" />
-      <LineId Id="4199" Count="1" />
-      <LineId Id="3626" Count="3" />
-      <LineId Id="4107" Count="0" />
-      <LineId Id="3630" Count="43" />
-      <LineId Id="4191" Count="0" />
-      <LineId Id="3674" Count="0" />
-      <LineId Id="4192" Count="0" />
-      <LineId Id="3675" Count="31" />
-      <LineId Id="3708" Count="49" />
-      <LineId Id="3760" Count="1" />
-      <LineId Id="4104" Count="0" />
-      <LineId Id="4106" Count="0" />
-      <LineId Id="4105" Count="0" />
-      <LineId Id="3762" Count="10" />
-      <LineId Id="4193" Count="0" />
-      <LineId Id="3773" Count="0" />
-      <LineId Id="4194" Count="0" />
-      <LineId Id="3774" Count="13" />
-      <LineId Id="4206" Count="2" />
-      <LineId Id="4204" Count="0" />
-      <LineId Id="4211" Count="1" />
-      <LineId Id="3788" Count="10" />
-      <LineId Id="3800" Count="8" />
-      <LineId Id="3810" Count="37" />
-      <LineId Id="4064" Count="0" />
-      <LineId Id="3848" Count="24" />
-      <LineId Id="4292" Count="0" />
-      <LineId Id="3873" Count="43" />
-      <LineId Id="4195" Count="0" />
-      <LineId Id="3917" Count="0" />
-      <LineId Id="4196" Count="0" />
-      <LineId Id="3918" Count="101" />
-      <LineId Id="4028" Count="20" />
-      <LineId Id="4050" Count="13" />
+      <LineId Id="4333" Count="779" />
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="stackerUnloadStation.drivesControl">

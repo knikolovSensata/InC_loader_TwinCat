@@ -11,7 +11,7 @@ STRUCT
 	x_robotEmgOk    : BOOL;
 	
 	// Изходи
-	y_Zumer					    : BOOL;        // Звуков сигнал
+	y_Zumer		    : BOOL;                     // Звуков сигнал
 	
 
 

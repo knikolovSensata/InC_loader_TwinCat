@@ -11,7 +11,7 @@ END_VAR
 VAR
 
 	activeState            : inserterUnloadStates;	
-	axisLinMot             : fakeDriveLinMot; //FB_ServoAxis_LinMot; 
+	axisLinMot             : FB_ServoAxis_LinMot; 
 	
 	resetDone			   : BOOL := FALSE; 						   // Инсъртъра е ресетнат
 	prepareStart           : BOOL := FALSE; 						   // Ако има сенсор в гнездото, завърта грипера 
@@ -682,49 +682,7 @@ axisLinMot       ( TargetPosition 		   := Stations.insertUnloadDrive.TargetPosit
       </Implementation>
     </Action>
     <LineIds Name="insertUnloadStation">
-      <LineId Id="1418" Count="56" />
-      <LineId Id="2096" Count="3" />
-      <LineId Id="1475" Count="15" />
-      <LineId Id="2292" Count="2" />
-      <LineId Id="2291" Count="0" />
-      <LineId Id="1491" Count="27" />
-      <LineId Id="2050" Count="0" />
-      <LineId Id="1519" Count="1" />
-      <LineId Id="2051" Count="0" />
-      <LineId Id="2053" Count="0" />
-      <LineId Id="2052" Count="0" />
-      <LineId Id="1521" Count="53" />
-      <LineId Id="2251" Count="0" />
-      <LineId Id="1575" Count="0" />
-      <LineId Id="2252" Count="0" />
-      <LineId Id="1576" Count="53" />
-      <LineId Id="2090" Count="0" />
-      <LineId Id="1631" Count="37" />
-      <LineId Id="2253" Count="0" />
-      <LineId Id="1669" Count="0" />
-      <LineId Id="2254" Count="0" />
-      <LineId Id="1670" Count="29" />
-      <LineId Id="1701" Count="139" />
-      <LineId Id="2255" Count="0" />
-      <LineId Id="1841" Count="0" />
-      <LineId Id="2256" Count="0" />
-      <LineId Id="1842" Count="33" />
-      <LineId Id="2089" Count="0" />
-      <LineId Id="1878" Count="28" />
-      <LineId Id="2094" Count="0" />
-      <LineId Id="2092" Count="0" />
-      <LineId Id="1907" Count="6" />
-      <LineId Id="2095" Count="0" />
-      <LineId Id="1914" Count="0" />
-      <LineId Id="2086" Count="0" />
-      <LineId Id="1916" Count="18" />
-      <LineId Id="2171" Count="6" />
-      <LineId Id="2170" Count="0" />
-      <LineId Id="1935" Count="49" />
-      <LineId Id="2003" Count="4" />
-      <LineId Id="2212" Count="4" />
-      <LineId Id="2211" Count="0" />
-      <LineId Id="2008" Count="9" />
+      <LineId Id="2329" Count="614" />
       <LineId Id="50" Count="0" />
     </LineIds>
     <LineIds Name="insertUnloadStation.drivesControl">

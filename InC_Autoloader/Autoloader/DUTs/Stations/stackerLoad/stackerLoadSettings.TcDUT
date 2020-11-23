@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
-  <DUT Name="stackerLoadSettings" Id="{4d6720e7-4404-4a67-8f80-d50afb3160af}">
+  <DUT Name="stackerLoadSettings" Id="{b72d7445-e04e-4972-ab96-f824c857434d}">
     <Declaration><![CDATA[TYPE stackerLoadSettings :
 STRUCT
 	
-	axisLength                :   REAL   := 600; 		   // макс ход на оста на стакера за модел HEX 24
-	axisWorkSpeed             :	  REAL   := 1000.0; 	   // скорост 
-	axisInitSpeed			  :   REAL   := 2000.0; 	   // скорост при движение нагоре (при init)
-	axisAcc					  :   REAL   := 0.2 ;          // ускр.
-	palletSize                :   ARRAY[1..Consts.MAX_RECIPE] OF REAL; 
+	axisLength                :   REAL   := 625; 		   // макс ход на оста на стакера за модел HEX 24
+	axisWorkSpeed             :	  REAL   := 200; 	       // скорост 
+	axisInitSpeed			  :   REAL   := 200; 	       // скорост при движение нагоре (при init)
+	axisAcc					  :   REAL   := 200 ;          // ускр.
+	pallet                    :   ARRAY[1..Consts.MAX_RECIPE] OF palletParamsL; 
 
 END_STRUCT
 END_TYPE

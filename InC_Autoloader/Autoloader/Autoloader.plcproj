@@ -125,6 +125,9 @@
     <Compile Include="DUTs\Stations\roboArm\roboArmStates.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Stations\stackerLoad\palletParamsL.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Stations\stackerLoad\stackerLoadDisplayStates.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -141,6 +144,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\stationBase.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Stations\stackerUnload\palletParamsU.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Stations\stackerUnload\stackerUnLoadDisplayStates.TcDUT">
@@ -183,12 +189,6 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="PlcTask.TcTTO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="POUs\fakeDriveFesto.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="POUs\fakeDriveLinMot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\MAIN.TcPOU">
@@ -339,6 +339,10 @@
     <Folder Include="POUs" />
   </ItemGroup>
   <ItemGroup>
+    <PlaceholderReference Include="FESTO CMMT_AS Drive Control">
+      <DefaultResolution>FESTO CMMT_AS Drive Control, * (Sensata Mech Sofia)</DefaultResolution>
+      <Namespace>FESTO_CMMT_AS_Drive_Control</Namespace>
+    </PlaceholderReference>
     <PlaceholderReference Include="Motors_AFAG_CoE">
       <DefaultResolution>Motors_AFAG_CoE, * (Sensata Technologies Bulgaria)</DefaultResolution>
       <Namespace>Motors_AFAG_CoE</Namespace>
@@ -346,10 +350,6 @@
     <PlaceholderReference Include="Motors_DUTs">
       <DefaultResolution>Motors_DUTs, * (Sensata Technologies Bulgaria)</DefaultResolution>
       <Namespace>Motors_DUTs</Namespace>
-    </PlaceholderReference>
-    <PlaceholderReference Include="Motors_FESTO_CMMT_AS">
-      <DefaultResolution>Motors_FESTO_CMMT_AS, * (Sensata Technologies Bulgaria)</DefaultResolution>
-      <Namespace>Motors_FESTO_CMMT_AS</Namespace>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Math">
       <DefaultResolution>Tc2_Math, * (Beckhoff Automation GmbH)</DefaultResolution>

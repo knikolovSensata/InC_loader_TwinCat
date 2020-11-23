@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="palletParamsU" Id="{1ee5c8fc-3b85-4051-ab38-f95a42e3dd60}">
+    <Declaration><![CDATA[TYPE palletParamsU :
+STRUCT
+	
+	zeroPos             : REAL;
+    moveDownStep		: REAL;
+	moveUpStep 			: REAL;
+
+
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -11,7 +11,7 @@ END_VAR
 VAR
 
 	activeState            : inserterLoadStates;	
-	axisLinMot             : fakeDriveLinMot; //FB_ServoAxis_LinMot; 
+	axisLinMot             : FB_ServoAxis_LinMot; 
 	
 	resetDone			   : BOOL := FALSE; 						   // Инсъртъра е ресетнат
 	prepareStart           : BOOL := FALSE; 						   // Изчаква синхронизация с индекс масата
@@ -389,6 +389,7 @@ CASE activeState OF
 	inserterLoadStates.stRotDriveCheck:
 		IF Stations.insertLoadDrive.TargetReached AND NOT Stations.insertLoadDrive.Error THEN
 			Stations.insertLoadDrive.DoMove := FALSE;
+			io.setY(ioImage.yFlashLight);
 			nextState(inserterLoadStates.stRotCamShot);	
 		ELSIF NOT Stations.insertLoadDrive.TargetReached AND Stations.insertLoadDrive.Error THEN
 			setError(inserterLoadStates.stErrDriveErr);
@@ -407,6 +408,7 @@ CASE activeState OF
 
 	inserterLoadStates.stRotCamCheck:
 		IF Stations.insertLoadData = dataRequestCam.done THEN 
+			io.rstY(ioImage.yFlashLight);
 			
 			IF TagsHMI.camResult <> camResult.null THEN
 				
@@ -774,53 +776,7 @@ axisLinMot       ( TargetPosition 		   := Stations.insertLoadDrive.TargetPositio
       </Implementation>
     </Action>
     <LineIds Name="insertLoadStation">
-      <LineId Id="1924" Count="77" />
-      <LineId Id="2871" Count="2" />
-      <LineId Id="2870" Count="0" />
-      <LineId Id="2002" Count="10" />
-      <LineId Id="2689" Count="0" />
-      <LineId Id="2013" Count="15" />
-      <LineId Id="2643" Count="0" />
-      <LineId Id="2029" Count="1" />
-      <LineId Id="2644" Count="2" />
-      <LineId Id="2031" Count="54" />
-      <LineId Id="2821" Count="0" />
-      <LineId Id="2086" Count="0" />
-      <LineId Id="2822" Count="0" />
-      <LineId Id="2087" Count="23" />
-      <LineId Id="2823" Count="0" />
-      <LineId Id="2111" Count="0" />
-      <LineId Id="2824" Count="0" />
-      <LineId Id="2112" Count="46" />
-      <LineId Id="2686" Count="0" />
-      <LineId Id="2161" Count="30" />
-      <LineId Id="2687" Count="0" />
-      <LineId Id="2194" Count="13" />
-      <LineId Id="2209" Count="38" />
-      <LineId Id="2825" Count="0" />
-      <LineId Id="2248" Count="0" />
-      <LineId Id="2826" Count="0" />
-      <LineId Id="2249" Count="59" />
-      <LineId Id="2310" Count="0" />
-      <LineId Id="2312" Count="35" />
-      <LineId Id="2827" Count="0" />
-      <LineId Id="2348" Count="0" />
-      <LineId Id="2828" Count="0" />
-      <LineId Id="2349" Count="44" />
-      <LineId Id="2685" Count="0" />
-      <LineId Id="2394" Count="48" />
-      <LineId Id="2444" Count="25" />
-      <LineId Id="2829" Count="0" />
-      <LineId Id="2470" Count="0" />
-      <LineId Id="2830" Count="0" />
-      <LineId Id="2471" Count="28" />
-      <LineId Id="2688" Count="0" />
-      <LineId Id="2501" Count="6" />
-      <LineId Id="2509" Count="10" />
-      <LineId Id="2772" Count="4" />
-      <LineId Id="2779" Count="1" />
-      <LineId Id="2771" Count="0" />
-      <LineId Id="2520" Count="84" />
+      <LineId Id="2913" Count="703" />
       <LineId Id="96" Count="0" />
     </LineIds>
     <LineIds Name="insertLoadStation.drivesControl">
