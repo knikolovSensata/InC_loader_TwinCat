@@ -215,7 +215,7 @@ CASE activeState OF
 	incCommStates.stIndexEnable:		
 		setDisplayState(incCommDisplayStates.dStDialTableIndexPermition);
 		io.setY(ioImage.yDailIndex);
-		IF NOT io.getX(ioImage.x_DailIndexDone) THEN
+		IF NOT io.getX(ioImage.xDailIndexDone) THEN
 			nextState(incCommStates.stIndexReady);
 		END_IF
 		
@@ -223,7 +223,7 @@ CASE activeState OF
 // Масата се е завъртяла с 1 ход и е приключила хода си
 
 	incCommStates.stIndexReady:	
-		IF io.getX(ioImage.x_DailIndexDone) THEN
+		IF io.getX(ioImage.xDailIndexDone) THEN
 			io.rstY(ioImage.yDailIndex);
 			nextState(incCommStates.stIndexCheck);
 			IF purgeActive THEN

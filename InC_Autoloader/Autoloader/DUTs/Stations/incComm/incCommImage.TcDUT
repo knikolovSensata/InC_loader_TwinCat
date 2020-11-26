@@ -23,7 +23,7 @@ STRUCT
 									   iByte  := 4,
 									   iBit   := 2 );
 									   
-    x_DailIndexDone 	: imageIO := ( stIO   := Stations.incCommHmiIO.x_DailIndexDone,
+    xDailIndexDone 	: imageIO := ( stIO   := Stations.incCommHmiIO.x_DailIndexDone,
 									   image  := ADR(Global.INPUT_IMAGE),
 									   iType  := ioType.INPUT_BIT,
 									   iByte  := 4,
