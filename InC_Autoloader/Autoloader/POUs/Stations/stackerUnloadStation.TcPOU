@@ -154,7 +154,8 @@ CASE activeState OF
 // Отваряне на всички ключалки	
 
 	stackerUnloadStates.stResetOpenLocks:
-		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
+		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
+		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerUnloadStates.stResetCheckLocks);
 
@@ -299,7 +300,8 @@ CASE activeState OF
 // Отваряне на всички ключалки	
 
 	stackerUnloadStates.stPrepareOpenLocks:		
-		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
+		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
+        io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);		
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerUnloadStates.stPrepareCheckLocks);	
 
@@ -461,7 +463,8 @@ CASE activeState OF
 // Освобождаване на палето
 
 	stackerUnloadStates.stUnlockPalletRelease:			
-		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
+		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
+		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerUnloadStates.stUnlockPalletCheck);		
 	
@@ -572,7 +575,8 @@ CASE activeState OF
 
 	stackerUnloadStates.stLockPalletLocking: 
 	IF io.getX(ioImage.xPalletOnTop) THEN
-		io.setSR(ioImage.yLocks_lock, ioImage.yLocks_unlock);		
+		io.setSR(ioImage.yLock1_lock, ioImage.yLock1_unlock);
+		io.setSR(ioImage.yLock2_lock, ioImage.yLock2_unlock);	
 		nextState(stackerUnloadStates.stLockPalletCheckLocks);		
 	END_IF
 	IF stateDelay(sensorTime) THEN 
@@ -848,7 +852,15 @@ axisFesto          ( axis				:= Stations.sUnloadAxis,
       </Implementation>
     </Action>
     <LineIds Name="stackerUnloadStation">
-      <LineId Id="4333" Count="779" />
+      <LineId Id="4333" Count="112" />
+      <LineId Id="5152" Count="0" />
+      <LineId Id="4446" Count="144" />
+      <LineId Id="5153" Count="0" />
+      <LineId Id="4591" Count="161" />
+      <LineId Id="5154" Count="0" />
+      <LineId Id="4753" Count="110" />
+      <LineId Id="5155" Count="0" />
+      <LineId Id="4864" Count="248" />
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="stackerUnloadStation.drivesControl">

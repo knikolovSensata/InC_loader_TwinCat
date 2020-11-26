@@ -46,17 +46,29 @@ STRUCT
 									   iByte 		  := 16,
 									   iBit   		  := 4 );
 
-    yLocks_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Locks_lock,
+    yLock1_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock1_lock,
 									   image  		  := ADR(Global.OUTPUT_IMAGE),
 									   iType  		  := ioType.OUTPUT_BIT,
 									   iByte 		  := 151,
 									   iBit   		  := 1 ); 
 
-    yLocks_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Locks_unlock,
+    yLock1_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock1_unlock,
 									   image  		  := ADR(Global.OUTPUT_IMAGE),
 									   iType  		  := ioType.OUTPUT_BIT,
 									   iByte 		  := 151,
 									   iBit   		  := 0 ); 
+									   
+    yLock2_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock2_lock,
+									   image  		  := ADR(Global.OUTPUT_IMAGE),
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 151,
+									   iBit   		  := 1 ); 
+
+    yLock2_unlock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_Lock2_unlock,
+									   image  		  := ADR(Global.OUTPUT_IMAGE),
+									   iType  		  := ioType.OUTPUT_BIT,
+									   iByte 		  := 151,
+									   iBit   		  := 0 ); 									   
 
  
     yPalletFix_lock 				: imageIO := ( stIO   := Stations.sLoadHmiIO.y_PalletFix_lock,

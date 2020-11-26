@@ -159,7 +159,8 @@ CASE activeState OF
 // Всички ключалки на стакера се отварят
 
 	stackerLoadStates.stResetUnlockPallet:
-		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
+		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
+		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);		
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stResetCheckLocks);	
 
@@ -295,7 +296,8 @@ CASE activeState OF
 // Oтварят се всички ключалки
 
 	stackerLoadStates.stPalletsLoadCheckTop:
-		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
+		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
+		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);		
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stPalletsLoadCheckLocks);
 	
@@ -406,7 +408,8 @@ CASE activeState OF
 //  Отваряне на всички грипери
 
 	stackerLoadStates.stPreparePalletCheckTop:
-		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
+		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
+		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);		
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stPreparePalletCheckLocks1);
 
@@ -527,7 +530,8 @@ CASE activeState OF
 // Проверява дали има тара на върха на стакера 
 	stackerLoadStates.stMoveDownCkeckTop:		
 		IF io.getX(ioImage.xPalletOnTop) THEN
-			io.setSR(ioImage.yLocks_lock, ioImage.yLocks_unlock);
+			io.setSR(ioImage.yLock1_lock, ioImage.yLock1_unlock);
+			io.setSR(ioImage.yLock2_lock, ioImage.yLock2_unlock);			
 			nextState(stackerLoadStates.stMoveDownCheckLocks);
 		ELSE
 			preparePalletDone := FALSE;
@@ -643,7 +647,8 @@ CASE activeState OF
 // Отключва тарата
 
 	stackerLoadStates.stReleasePalletUnlock:	
-		io.setSR(ioImage.yLocks_unlock, ioImage.yLocks_lock);
+		io.setSR(ioImage.yLock1_unlock, ioImage.yLock1_lock);
+		io.setSR(ioImage.yLock2_unlock, ioImage.yLock2_lock);		
 		io.setSR(ioImage.yPalletFix_unlock, ioImage.yPalletFix_lock);
 		nextState(stackerLoadStates.stReleasePalletUnlockCheck);	
 
@@ -916,7 +921,17 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       </Implementation>
     </Action>
     <LineIds Name="stackerLoadStation">
-      <LineId Id="8616" Count="850" />
+      <LineId Id="8616" Count="120" />
+      <LineId Id="9503" Count="0" />
+      <LineId Id="8737" Count="135" />
+      <LineId Id="9504" Count="0" />
+      <LineId Id="8873" Count="110" />
+      <LineId Id="9505" Count="0" />
+      <LineId Id="8984" Count="120" />
+      <LineId Id="9506" Count="0" />
+      <LineId Id="9105" Count="115" />
+      <LineId Id="9507" Count="0" />
+      <LineId Id="9221" Count="245" />
       <LineId Id="363" Count="0" />
     </LineIds>
     <LineIds Name="stackerLoadStation.drivesControl">
