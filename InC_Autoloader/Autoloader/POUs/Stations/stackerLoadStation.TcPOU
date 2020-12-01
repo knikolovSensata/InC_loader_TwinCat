@@ -53,7 +53,7 @@ CASE activeState OF
 	stackerLoadStates.stStartUp:
 		setDisplayState(stackerLoadDisplayStates.dStStartingUp);
 		Stations.sLoadDrive.DoEnable  := FALSE;
-		Stations.sLoadDrive.DoMove    := FALSE;						   						   
+		Stations.sLoadDrive.DoMove    := FALSE;				   						   
 		nextState(stackerLoadStates.stPowerUp);
 		
 //  *** Power Up - Start
@@ -225,6 +225,7 @@ CASE activeState OF
 		IF Stations.sLoadDrive.TargetReached AND NOT Stations.sLoadDrive.Error THEN
 			Stations.sLoadDrive.DoMove := FALSE;
 			moveDone 				   := TRUE;
+			Global.loadPalletCount     := 0;			
 			nextState(stackerLoadStates.stResetDone);	
 		ELSIF NOT Stations.sLoadDrive.TargetReached AND Stations.sLoadDrive.Error THEN
 			setError(stackerLoadStates.stInitMoveErr);
@@ -370,6 +371,7 @@ CASE activeState OF
 		IF Stations.sLoadDrive.TargetReached AND NOT Stations.sLoadDrive.Error THEN
 			Stations.sLoadDrive.DoMove := FALSE;
 			moveDone			       := TRUE;
+			Global.loadPalletCount     := Global.loadPalletCount + Consts.LOAD_PALLETS_STEP;
 			nextState(stackerLoadStates.stLoadPalletsMoveAgain);	
 		ELSIF NOT Stations.sLoadDrive.TargetReached AND Stations.sLoadDrive.Error THEN
 			setError(stackerLoadStates.stErrPalletLoad);
@@ -492,6 +494,7 @@ CASE activeState OF
 		IF Stations.sLoadDrive.TargetReached AND NOT Stations.sLoadDrive.Error THEN
 			Stations.sLoadDrive.DoMove := FALSE;
 			moveDone			       := TRUE;
+			Global.loadPalletCount     := Global.loadPalletCount - 1;			
 			nextState(stackerLoadStates.stPreparePalletLock);	
 		ELSIF NOT Stations.sLoadDrive.TargetReached AND Stations.sLoadDrive.Error THEN
 			setError(stackerLoadStates.stErrPalletMove);
@@ -923,11 +926,17 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
     <LineIds Name="stackerLoadStation">
       <LineId Id="8616" Count="120" />
       <LineId Id="9503" Count="0" />
-      <LineId Id="8737" Count="135" />
+      <LineId Id="8737" Count="63" />
+      <LineId Id="9547" Count="0" />
+      <LineId Id="8801" Count="71" />
       <LineId Id="9504" Count="0" />
-      <LineId Id="8873" Count="110" />
+      <LineId Id="8873" Count="71" />
+      <LineId Id="9548" Count="0" />
+      <LineId Id="8945" Count="38" />
       <LineId Id="9505" Count="0" />
-      <LineId Id="8984" Count="120" />
+      <LineId Id="8984" Count="81" />
+      <LineId Id="9549" Count="0" />
+      <LineId Id="9066" Count="38" />
       <LineId Id="9506" Count="0" />
       <LineId Id="9105" Count="115" />
       <LineId Id="9507" Count="0" />

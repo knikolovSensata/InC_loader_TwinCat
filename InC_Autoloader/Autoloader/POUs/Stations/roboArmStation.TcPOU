@@ -32,7 +32,6 @@ VAR
 	fixturesCount          : INT; 									   // Брой гнезда на тара спрямо избраната рецепта
 	loadFixtures           : INT; 									   // Брой гнезда на входната тара
 	unLoadFixtures         : INT; 									   // Брой гнезда на изходната тара
-    xWaitPos               : REFERENCE TO imageIO;                     // В зависимост от рецептата се използва само едната чакаща поз. 
 	typeHEX24              : BOOL;                                     // Работи се с HEX 24 
 	typeHEX27              : BOOL;                                     // Работи се с HEX 27 	
     lamp24On               : BOOL;                                     // Сигнализация че оператора трябва да постави празна тара на чакаща поз. HEX24                              
@@ -44,6 +43,15 @@ VAR
 	initWaitLStacker       : BOOL;
 	tempUnloadMove         : BOOL;
 	checkLoadStacker       : BOOL;
+	
+	xWaitPos               : REFERENCE TO imageIO;                     // В зависимост от рецептата се използва само едната чакаща поз. 
+	xSlideUp               : REFERENCE TO imageIO;
+	xSLideDown             : REFERENCE TO imageIO;
+    ySlideUp			   : REFERENCE TO imageIO;
+	ySlideDown             : REFERENCE TO imageIO;
+	yPalletLoadGrip        : REFERENCE TO imageIO;
+	yPalletLoadFree        : REFERENCE TO imageIO;
+  
 	
 	TON_0				   : TON;                                      // Тимери за мигането на лампите за чакащата поз.
 	TON_1                  : TON;
@@ -255,7 +263,7 @@ CASE activeState OF
 		nextState(roboArmStates.stStationStop);	
 
 // *** Init - Start
-// Робота се прибира на безопасно място и инициялизира толинга си
+// Робота се прибира на безопасно място и инициялизира тулинга си
 
 	roboArmStates.stInitStart:
 		initDone          := FALSE;
@@ -278,7 +286,7 @@ CASE activeState OF
 			io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
 			io.setSR(ioImage.yRot_home, ioImage.yRot_back);
 			io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
-			io.rstY(ioImage.yPalletLoad24);
+			io.setSR(ioImage.ySlide27_up, ioImage.ySlide27_down);
 			nextState(roboArmStates.stInitToolCheck);
 		END_IF
 		IF Stations.roboData = dataRequestRobot.error THEN
@@ -292,7 +300,8 @@ CASE activeState OF
 	roboArmStates.stInitToolCheck:
 		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) AND
 		   io.getSR(ioImage.xRot_home, ioImage.xRot_back)    AND
-		   io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down)  THEN
+		   io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) AND
+		   io.getSR(ioImage.xSlide27_up, ioImage.xSlide27_down)  THEN
 		   		nextState(roboArmStates.stInitLoadRecipe);
 		END_IF
 		
@@ -305,7 +314,8 @@ CASE activeState OF
 				setError(roboArmStates.stErrRotNotTurn0);
 			END_IF
 
-			IF NOT io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN
+			IF NOT io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) OR
+			   NOT io.getSR(ioImage.xSlide27_up, ioImage.xSlide27_down)THEN
 				setError(roboArmStates.stErrSlideNotUp);
 			END_IF
 		END_IF	
@@ -316,14 +326,27 @@ CASE activeState OF
 	roboArmStates.stInitLoadRecipe:
 		fixturesCount := Stations.roboSetings.roboArmParams[Global.recipe].fixtureNum;		
 		IF Stations.roboSetings.roboArmParams[Global.recipe].waitPos24 THEN
-			xWaitPos  REF= ioImage.xWaitPos24;
+			xWaitPos 		 REF= ioImage.xWaitPos24;
+			xSlideUp 		 REF= ioImage.xSlide24_up;
+			xSlideDown       REF= ioImage.xSlide24_down;
+			ySlideUp         REF= ioImage.ySlide24_up;
+			ySlideDown       REF= ioImage.ySlide24_down;
+			yPalletLoadGrip  REF= ioImage.yPalletLoad24;
+			yPalletLoadFree  REF= ioImage.yPalletLoad27;    //  така работи 24, да не се обръща
 			typeHEX24 := TRUE; 
 			typeHEX27 := FALSE;			
 		ELSIF Stations.roboSetings.roboArmParams[Global.recipe].waitPos27 THEN
-			xWaitPos  REF= ioImage.xWaitPos27;
+			xWaitPos 		 REF= ioImage.xWaitPos27;
+			xSlideUp 		 REF= ioImage.xSlide27_up;
+			xSlideDown       REF= ioImage.xSlide27_down;
+			ySlideUp         REF= ioImage.ySlide27_up;
+			ySlideDown       REF= ioImage.ySlide27_down;
+			yPalletLoadGrip  REF= ioImage.yPalletLoad27;
+			yPalletLoadFree  REF= ioImage.yPalletLoad24;    //  така работи 27, да не се обръща
 			typeHEX27 := TRUE;
 			typeHEX24 := FALSE;  			
 		END_IF	
+		io.setSR(yPalletLoadFree, yPalletLoadGrip);
 		palletOnEmptyPos        := TRUE;		
 		TagsRobot.roboRecipeNum := Global.recipe;
 		Stations.roboData       := dataRequestRobot.roboRecipe;
@@ -393,9 +416,9 @@ CASE activeState OF
 		IF 	palletIn THEN
 			nextState(roboArmStates.stResetGrip);	
 		ELSE
-			io.rstY(ioImage.yPalletLoad24);
+			io.setSR(yPalletLoadFree, yPalletLoadGrip);
 			IF stateDelay(palletGripTime) THEN
-				io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
+				io.setSR(ySlideUp, ySlideDown);
 			    nextState(roboArmStates.stResetSliderCheck);				
 			END_IF
 		END_IF
@@ -404,7 +427,7 @@ CASE activeState OF
 // Няма захваната тара и се проверява дали слайдера е горе
 
 	roboArmStates.stResetSliderCheck:	
-		IF io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN 
+		IF io.getSR(xSlideUp, xSlideDown) THEN 
 			nextState(roboArmStates.stResetGrip);
 		END_IF
 		timeOutError(slideTime, roboArmStates.stErrSlideNotUp);	
@@ -716,15 +739,15 @@ CASE activeState OF
 // Слайдера слиза надолу
 
 	roboArmStates.stMoveToEmptySliderDown:		
-		io.setSR(ioImage.ySlide24_down, ioImage.ySlide24_up);	
+		io.setSR(ySlideDown, ySlideUp);	
 		nextState(roboArmStates.stMoveToEmptySliderCheck);		
 
 // *** Move to Empty - Slider Check
 // Проверка дали скайдера е долу
 
 	roboArmStates.stMoveToEmptySliderCheck:
-		IF io.getSR(ioImage.xSlide24_down, ioImage.xSlide24_up) THEN 
-			io.setY(ioImage.yPalletLoad24);
+		IF io.getSR(xSlideDown, xSlideUp) THEN 
+			io.setSR(yPalletLoadGrip, yPalletLoadFree);
 			IF stateDelay(palletGripTime) THEN
 				palletIn         := TRUE;
 				palletOnEmptyPos := FALSE;
@@ -815,9 +838,9 @@ CASE activeState OF
 		palletOnEmptyPos := FALSE;
 		lamp24On         := FALSE;
 		lamp27On         := FALSE;	
-		io.rstY(ioImage.yPalletLoad24);
+		io.setSR(yPalletLoadFree, yPalletLoadGrip);
 		IF stateDelay (palletGripTime) THEN
-			io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
+			io.setSR(ySlideUp, ySlideDown);
 		    nextState(roboArmStates.stUnloadPalletSlideCheck);	
        END_IF							
 		
@@ -826,7 +849,7 @@ CASE activeState OF
 // освободил тарата
 
 	roboArmStates.stUnloadPalletSlideCheck:		
-		IF io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN 
+		IF io.getSR(xSlideUp, xSlideDown) THEN 
 			resetActive     := TRUE;
 			palletIn        := FALSE;
 			unLoadFixtures  := fixturesCount;		
@@ -859,15 +882,15 @@ CASE activeState OF
 // Сваляне на слайдера
 
 	roboArmStates.stLoadPalletSlideDown:			
-		io.setSR(ioImage.ySlide24_down, ioImage.ySlide24_up);
+		io.setSR(ySlideDown, ySlideUp);
 		nextState(roboArmStates.stLoadPalletSliderCheck);	
 	
 // *** Load Pallet - Slider Check
 // Проверка дали слайдера е в долна поз.
 
 	roboArmStates.stLoadPalletSliderCheck:		
-		IF io.getSR(ioImage.xSlide24_down, ioImage.xSlide24_up) THEN 
-			io.setY(ioImage.yPalletLoad24);
+		IF io.getSR(xSlideDown, xSlideUp) THEN 
+			io.setSR(yPalletLoadGrip, yPalletLoadFree);
 			resetActive := FALSE;
 			IF stateDelay(palletGripTime) THEN
 				nextState(roboArmStates.stLoadPalletSignal);				
@@ -935,9 +958,9 @@ CASE activeState OF
 // Освобождаване на тарата
 
 	roboArmStates.stEmptyPosRelease:	
-		io.rstY(ioImage.yPalletLoad24);
+		io.setSR(yPalletLoadFree, yPalletLoadGrip);
 		IF stateDelay(palletGripTime) THEN
-			io.setSR(ioImage.ySlide24_up, ioImage.ySlide24_down);
+			io.setSR(ySlideUp, ySlideDown);
 			nextState(roboArmStates.stEmptyPosSlideCheck);			
 		END_IF
 
@@ -945,7 +968,7 @@ CASE activeState OF
 // Проверка дали слайдера е горe
 
 	roboArmStates.stEmptyPosSlideCheck:
-		IF io.getSR(ioImage.xSlide24_up, ioImage.xSlide24_down) THEN 
+		IF io.getSR(xSlideUp, xSlideDown) THEN 
 			nextState(roboArmStates.stEmptyPosSync);
 		    palletIn := FALSE;			
 		END_IF
@@ -2880,14 +2903,25 @@ END_VAR]]></Declaration>
       <LineId Id="12630" Count="4" />
       <LineId Id="14780" Count="0" />
       <LineId Id="14685" Count="0" />
-      <LineId Id="12635" Count="36" />
+      <LineId Id="12635" Count="24" />
+      <LineId Id="15096" Count="0" />
+      <LineId Id="12661" Count="10" />
       <LineId Id="14751" Count="1" />
-      <LineId Id="14754" Count="1" />
+      <LineId Id="14754" Count="0" />
+      <LineId Id="15098" Count="0" />
+      <LineId Id="14755" Count="0" />
       <LineId Id="14753" Count="0" />
       <LineId Id="14757" Count="0" />
-      <LineId Id="12672" Count="11" />
+      <LineId Id="12672" Count="9" />
+      <LineId Id="15099" Count="0" />
+      <LineId Id="12682" Count="1" />
       <LineId Id="12685" Count="0" />
-      <LineId Id="12687" Count="14" />
+      <LineId Id="12687" Count="7" />
+      <LineId Id="15084" Count="5" />
+      <LineId Id="12695" Count="2" />
+      <LineId Id="15090" Count="5" />
+      <LineId Id="12698" Count="3" />
+      <LineId Id="15106" Count="0" />
       <LineId Id="14761" Count="0" />
       <LineId Id="12702" Count="19" />
       <LineId Id="15005" Count="0" />
@@ -2901,7 +2935,9 @@ END_VAR]]></Declaration>
       <LineId Id="13863" Count="0" />
       <LineId Id="12736" Count="7" />
       <LineId Id="13864" Count="0" />
-      <LineId Id="12744" Count="84" />
+      <LineId Id="12744" Count="18" />
+      <LineId Id="15100" Count="0" />
+      <LineId Id="12764" Count="64" />
       <LineId Id="12833" Count="13" />
       <LineId Id="14545" Count="0" />
       <LineId Id="14274" Count="1" />
@@ -2984,7 +3020,9 @@ END_VAR]]></Declaration>
       <LineId Id="14765" Count="0" />
       <LineId Id="14517" Count="0" />
       <LineId Id="12980" Count="41" />
-      <LineId Id="13029" Count="16" />
+      <LineId Id="13029" Count="12" />
+      <LineId Id="15102" Count="0" />
+      <LineId Id="13043" Count="2" />
       <LineId Id="14775" Count="1" />
       <LineId Id="13046" Count="3" />
       <LineId Id="14118" Count="0" />
@@ -3000,7 +3038,8 @@ END_VAR]]></Declaration>
       <LineId Id="14195" Count="0" />
       <LineId Id="13092" Count="25" />
       <LineId Id="14762" Count="2" />
-      <LineId Id="13118" Count="14" />
+      <LineId Id="15103" Count="0" />
+      <LineId Id="13119" Count="13" />
       <LineId Id="13134" Count="2" />
       <LineId Id="14847" Count="0" />
       <LineId Id="14849" Count="1" />
@@ -3015,7 +3054,9 @@ END_VAR]]></Declaration>
       <LineId Id="13972" Count="0" />
       <LineId Id="13175" Count="0" />
       <LineId Id="13973" Count="0" />
-      <LineId Id="13176" Count="17" />
+      <LineId Id="13176" Count="4" />
+      <LineId Id="15104" Count="0" />
+      <LineId Id="13182" Count="11" />
       <LineId Id="13195" Count="0" />
       <LineId Id="14376" Count="0" />
       <LineId Id="14375" Count="0" />
@@ -3027,7 +3068,8 @@ END_VAR]]></Declaration>
       <LineId Id="13196" Count="29" />
       <LineId Id="14285" Count="0" />
       <LineId Id="13226" Count="15" />
-      <LineId Id="13243" Count="20" />
+      <LineId Id="15105" Count="0" />
+      <LineId Id="13244" Count="19" />
       <LineId Id="14525" Count="1" />
       <LineId Id="13264" Count="8" />
       <LineId Id="13274" Count="0" />

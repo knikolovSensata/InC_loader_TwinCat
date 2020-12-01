@@ -9,6 +9,7 @@ VAR_GLOBAL
 		roboRecipeNum               : DINT;             // Текущата рецепта с която роботa трябва да работи
 		loadPalletPos				: DINT;             // Гнездо във входата тара над което трябва да иде робота
 		unLoadPalletPos				: DINT;             // Гнездо в изходната тара над което трябва да иде робота	
+		rotPallet                   : BOOL;             // Неоходимо ли е да се завърти тарата на опеделен ъгъл при взимане от LoadStacker
 
 
 END_VAR]]></Declaration>

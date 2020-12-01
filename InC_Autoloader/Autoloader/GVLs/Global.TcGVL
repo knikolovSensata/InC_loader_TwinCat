@@ -26,6 +26,7 @@ VAR_GLOBAL
 	purgeDoneIL      : BOOL;                  // PURGE процедурата е завършила - сигнализира вх. инсъртър
 	purgeDoneIU      : BOOL;                  // PURGE процедурата е завършила - сигнализира изх. инсъртър
 	gnLostDPPackets  : INT;                   // Не се ползва
+	loadPalletCount  : DINT;                  // Брой заредени палети - номер 1 се смята първата на плочата на стакера
 	
 	
 	
