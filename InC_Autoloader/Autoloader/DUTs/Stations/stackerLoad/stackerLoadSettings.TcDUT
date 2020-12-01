@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="stackerLoadSettings" Id="{b72d7445-e04e-4972-ab96-f824c857434d}">
     <Declaration><![CDATA[TYPE stackerLoadSettings :
-STRUCT
+STRUCT PERSISTENT
 	
 	axisLength                :   REAL   := 625; 		   // макс ход на оста на стакера за модел HEX 24
 	axisWorkSpeed             :	  REAL   := 200; 	       // скорост 

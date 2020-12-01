@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="inserterLoadSettings" Id="{dd3edc0a-2cec-4808-b42e-e5abaed07431}">
     <Declaration><![CDATA[TYPE inserterLoadSettings :
-STRUCT
+STRUCT PERSISTENT
 	
 	axisWorkSpeed             :	  REAL   := 2000; 	   // скорост 
 	axisAcc					  :   REAL   := 2;         // ускр.
