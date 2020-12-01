@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="dataRequestRobot" Id="{a536e752-6cb6-4780-b60e-5e93ce5198c0}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 
@@ -24,11 +24,7 @@ TYPE dataRequestRobot :
 	roboPrg_Unload,
 	roboPrg_LoadStacker,
 	roboPrg_UnloadStacker,
-	roboPrg_EmptyPlace,
-	roboPrg_LoadToEmptyPlace,
-	roboPrg_EmptyPlaceToUnload,
-	roboPrg_LoadToUnload
-	
+	roboPrg_EmptyPlace
 	
 )DINT;
 END_TYPE

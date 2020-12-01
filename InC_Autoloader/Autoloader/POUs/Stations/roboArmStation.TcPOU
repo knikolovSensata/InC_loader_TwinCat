@@ -540,7 +540,7 @@ CASE activeState OF
 
 	roboArmStates.stNextMoveSync:	
 	tempUnloadMove := TRUE;
- 	Stations.roboData := dataRequestRobot.roboPrg_LoadToUnload;
+ 	Stations.roboData := dataRequestRobot.roboPrg_UnloadStacker;
 		nextState(roboArmStates.stNextMoveCheck1);		
 	
 // *** Next Move - Move Check
@@ -783,7 +783,7 @@ CASE activeState OF
 
 	roboArmStates.stEmptyToUnloadMove:
 		emptyToUnloadStart := TRUE;	
-		Stations.roboData  := dataRequestRobot.roboPrg_EmptyPlaceToUnload;
+		Stations.roboData  := dataRequestRobot.roboPrg_UnloadStacker;
 		nextState(roboArmStates.stEmptyToUnloadMoveCheck);			
 
 // *** Empty to Unload - Move Check
@@ -933,7 +933,7 @@ CASE activeState OF
 // Робота се премества над чакащата поз.
 
 	roboArmStates.stEmptyPosMove:
-		Stations.roboData     := dataRequestRobot.roboPrg_LoadToEmptyPlace;
+		Stations.roboData     := dataRequestRobot.roboPrg_EmptyPlace;
 		nextState(roboArmStates.stEmptyPosMoveCheck);			
 	
 // *** Empty Pos  - Move Check

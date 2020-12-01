@@ -7,7 +7,6 @@ STRUCT
 	fixtureNum     : INT    := 48;                    // Брой сензори в тара
 	waitPos24      : BOOL   := FALSE;                 // Чакащата позиция е HEX24
 	waitPos27      : BOOL   := TRUE;                  // Чакащата позиция е HEX27
-	rotAngle       : REAL   := 180.0;                 // Ъгъл на завъртане
 
 END_STRUCT
 END_TYPE
