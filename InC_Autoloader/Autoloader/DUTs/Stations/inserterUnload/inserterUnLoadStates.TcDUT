@@ -57,6 +57,9 @@ TYPE inserterUnLoadStates :
 		stReleaseSyncRobot, 
 		stReleaseGripOpen,
 		stReleaseGripCheck,
+		stReleaseDriveOn,
+		stReleaseDriveMove,
+		stReleaseDriveCheck,
 		stReleaseLoadDone,
 		stReleaseDone,
 		

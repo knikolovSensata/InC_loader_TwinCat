@@ -25,6 +25,7 @@ VAR
 	
 	initRotPos			   : REAL; 									   // Начално завъртане
 	workRotPos             : REAL;                                     // Завъртане за може робота да вземе сензора
+	afterOpenRot	       : REAL;                                     
 	
 	gripTime			   : TIME := T#250MS;                          // Време за ход на грипера                                     
 	gripTimeOut            : TIME := T#2S;                             // Време за отваряне/затваряне на гриперите
@@ -187,7 +188,7 @@ CASE activeState OF
 			
 		initRotPos     := Stations.insertUnloadSetting.rotParams[Global.recipe].initRot;
 		workRotPos     := Stations.insertUnloadSetting.rotParams[Global.recipe].workRot;
-
+		afterOpenRot   := Stations.insertUnloadSetting.rotParams[Global.recipe].afterOpenRot;
 		
 		IF Stations.insertUnLoadDrive.Error THEN
 			Stations.insertUnLoadDrive.DoReset  := TRUE;
@@ -526,10 +527,58 @@ CASE activeState OF
 
 	inserterUnloadStates.stReleaseGripCheck:
 		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
-			nextState(inserterUnloadStates.stReleaseLoadDone);				
+			IF Stations.insertUnLoadDrive.Enabled AND NOT Stations.insertUnLoadDrive.Error THEN
+				nextState(inserterUnloadStates.stReleaseDriveMove);	
+			ELSE
+			    nextState(inserterUnloadStates.stReleaseDriveOn);			
+			END_IF				
 		END_IF
-		timeOutError(gripTimeOut, inserterUnloadStates.stErrGripNotOpen);			
+		timeOutError(gripTimeOut, inserterUnloadStates.stErrGripNotOpen);		
+
+// *** Pos - Drive On
+// Захранване на мотора ако не е пуснат 
+
+	inserterUnloadStates.stReleaseDriveOn:
+		IF Stations.insertUnLoadDrive.Error THEN
+			Stations.insertUnLoadDrive.DoReset  := TRUE;
+		ELSE
+			Stations.insertUnLoadDrive.DoReset  := FALSE;
+			Stations.insertUnLoadDrive.DoEnable := TRUE;
+			IF stateDelay(driveEnTime) THEN
+				nextState(inserterUnloadStates.stReleaseDriveMove);
+			END_IF
+		END_IF
+		timeOutError(driveEnTime*2, inserterUnloadStates.stErrDriveErr);
+
+// *** Pos - Drive Move
+// Завърта мотора на поз. за взимане на сензора от робота
+
+	inserterUnloadStates.stReleaseDriveMove:
+		IF Stations.insertUnLoadDrive.Enabled AND NOT Stations.insertUnLoadDrive.Error THEN	
+			Stations.insertUnLoadDrive.TargetVelocity      := Stations.insertUnLoadSetting.axisWorkSpeed;
+			Stations.insertUnLoadDrive.TargetAcceleration  := Stations.insertUnLoadSetting.axisAcc;
+			Stations.insertUnLoadDrive.TargetPrecision     := Stations.insertUnLoadSetting.axisPres;
+			Stations.insertUnLoadDrive.TargetPosition      := afterOpenRot;
+		    Stations.insertUnLoadDrive.DoMove              := TRUE;	
+			IF stateDelay(drivePosTime) THEN		
+				nextState(inserterUnloadStates.stReleaseDriveCheck);
+			END_IF	
+		ELSE
+			setError(inserterUnloadStates.stErrDriveErr);
+	   END_IF	
 		
+// *** Pos - Drive Check
+// Проверка дали мотора си е завършил хода
+
+	inserterUnloadStates.stReleaseDriveCheck:
+		IF Stations.insertUnLoadDrive.TargetReached AND NOT Stations.insertUnLoadDrive.Error THEN
+			Stations.insertUnLoadDrive.DoMove := FALSE;
+			nextState(inserterUnloadStates.stReleaseLoadDone);	
+		ELSIF NOT Stations.insertUnLoadDrive.TargetReached AND Stations.insertUnLoadDrive.Error THEN
+			setError(inserterUnloadStates.stErrDriveErr);
+		END_IF	
+		timeOutError(driveMoveTimeOut, inserterUnloadStates.stErrDriveTimeOut);	
+
 // *** Release - Load Done
 // Грипера се е отворил и сензора е захванат успешно от робота
 
@@ -682,7 +731,14 @@ axisLinMot       ( TargetPosition 		   := Stations.insertUnloadDrive.TargetPosit
       </Implementation>
     </Action>
     <LineIds Name="insertUnloadStation">
-      <LineId Id="2329" Count="614" />
+      <LineId Id="2329" Count="488" />
+      <LineId Id="2988" Count="3" />
+      <LineId Id="2818" Count="2" />
+      <LineId Id="2981" Count="0" />
+      <LineId Id="2992" Count="41" />
+      <LineId Id="2982" Count="0" />
+      <LineId Id="2979" Count="0" />
+      <LineId Id="2822" Count="121" />
       <LineId Id="50" Count="0" />
     </LineIds>
     <LineIds Name="insertUnloadStation.drivesControl">

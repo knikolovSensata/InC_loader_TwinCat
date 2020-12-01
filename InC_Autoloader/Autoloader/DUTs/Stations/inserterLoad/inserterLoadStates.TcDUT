@@ -36,6 +36,9 @@ TYPE inserterLoadStates :
 		stPrepareDone,
 		
 		stLoadStart,
+		stLoadDriveOn,
+		stLoadDriveMove,
+		stLoadDriveCheck,
 		stLoadGripCheck,
 		stLoadRobotSync,
 		stLoadDone,
