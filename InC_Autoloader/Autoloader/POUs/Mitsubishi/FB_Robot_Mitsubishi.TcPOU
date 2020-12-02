@@ -402,13 +402,17 @@ FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
 	out => PacketManager.StatusPacket.CurrentSpeed);
 	
 sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
-FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
-	out => PacketManager.StatusPacket.CurrentCorrectionID);
-	
-sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
 //Product ID
 FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
 	out => PacketManager.StatusPacket.CurrentProductID);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentGripperID);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTrayOrient);
 	
 sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
 FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
@@ -421,29 +425,33 @@ FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
 sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
 FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
 	out => PacketManager.StatusPacket.CurrentTargetSpeed);
-	
-sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
-FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
-	out => PacketManager.StatusPacket.CurrentTargetCorrectionID);
-// Shietfuck bp
 // ----
 sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
 FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
 	out => PacketManager.StatusPacket.CurrentTargetProductID);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTargetGripperID);
+	
+sLastRecPacket := RIGHT(sLastRecPacket, LEN(sLastRecPacket) - 8);
+FB_HEXSTR_TO_DINT(in := LEFT(sLastRecPacket, 8),
+	out => PacketManager.StatusPacket.CurrentTargetTrayOrient);
 
 Robot.nDependencyState := PacketManager.StatusPacket.CurrentState;
-
 Robot.nCurrentProgram := PacketManager.StatusPacket.CurrentProgram;
 Robot.nCurrentTrayPosition := PacketManager.StatusPacket.CurrentTrayPosition;
 Robot.nCurrentSpeed := PacketManager.StatusPacket.CurrentSpeed;
-Robot.nCurrentCorrectionID := PacketManager.StatusPacket.CurrentCorrectionID;
 Robot.nCurrentProductID := PacketManager.StatusPacket.CurrentProductID;
+Robot.nCurrentGripperID := PacketManager.StatusPacket.CurrentGripperID;
+Robot.nCurrentTrayOrient := PacketManager.StatusPacket.CurrentTrayOrient;
 
 Robot.nCurrentTargetProgram := PacketManager.StatusPacket.CurrentTargetProgram;
 Robot.nCurrentTargetTrayPosition := PacketManager.StatusPacket.CurrentTargetTrayPosition;
 Robot.nCurrentTargetSpeed := PacketManager.StatusPacket.CurrentTargetSpeed;
-Robot.nCurrentTargetCorrectionID := PacketManager.StatusPacket.CurrentTargetCorrectionID;
-Robot.nCurrentTargetProductID := PacketManager.StatusPacket.CurrentTargetProductID;]]></ST>
+Robot.nCurrentTargetProductID := PacketManager.StatusPacket.CurrentTargetProductID;
+Robot.nCurrentTargetGripperID := PacketManager.StatusPacket.CurrentTargetGripperID;
+Robot.nCurrentTargetTrayOrient := PacketManager.StatusPacket.CurrentTargetTrayOrient;]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_ResetAllRequests" Id="{a48c0b22-9cd2-43f3-b1f2-f715fd720300}">
@@ -470,6 +478,7 @@ Robot.bDoCloseGripperA:=FALSE;
 Robot.bDoOpenGripperB:=FALSE;
 Robot.bDoCloseGripperB:=FALSE;
 Robot.bDoConfirmDependency := FALSE;
+Robot.bDoStartProgram :=FALSE;
 
 //Control Package bits -! Very important!
 PacketManager.ControlPacket.Reset := FALSE;
@@ -481,7 +490,8 @@ PacketManager.ControlPacket.OpenGripperA := FALSE;
 PacketManager.ControlPacket.CloseGripperA := FALSE;
 PacketManager.ControlPacket.OpenGripperB := FALSE;
 PacketManager.ControlPacket.CloseGripperB := FALSE;
-PacketManager.ControlPacket.End := FALSE;]]></ST>
+PacketManager.ControlPacket.End := FALSE;
+PacketManager.SettingsPacket.StartProgram := FALSE;]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_ResetTimeoutTimer" Id="{7fa12f97-90f9-43d4-af57-e2fff1612fb5}">
@@ -526,8 +536,11 @@ END_IF]]></ST>
         <ST><![CDATA[PacketManager.SettingsPacket.StartProgram := TRUE;
 PacketManager.SettingsPacket.TargetProgram := Robot.nTargetProgram;
 PacketManager.SettingsPacket.TargetTrayPosition := Robot.nTargetTrayPosition;
-PacketManager.SettingsPacket.TargetProductID := Robot.nTargetCorrectionID;
 PacketManager.SettingsPacket.TargetSpeed := Robot.nTargetSpeed;
+PacketManager.SettingsPacket.TargetProductID := Robot.nTargetProductID;
+PacketManager.SettingsPacket.TargetGripperID := Robot.nTargetGripperID;
+PacketManager.SettingsPacket.TargetTrayOrientation := Robot.nTargetTrayOrientation;
+
 
 fbSend(PacketAddress := ADR(PacketManager.SettingsPacket),
 	SizeOfPacket := SIZEOF(PacketManager.SettingsPacket),
@@ -897,14 +910,17 @@ END_IF]]></ST>
       <LineId Id="113" Count="0" />
       <LineId Id="64" Count="1" />
       <LineId Id="89" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="66" Count="1" />
-      <LineId Id="90" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="104" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="83" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="126" Count="1" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="135" Count="0" />
       <LineId Id="91" Count="0" />
       <LineId Id="71" Count="1" />
       <LineId Id="92" Count="0" />
@@ -913,21 +929,26 @@ END_IF]]></ST>
       <LineId Id="93" Count="0" />
       <LineId Id="117" Count="0" />
       <LineId Id="75" Count="1" />
-      <LineId Id="94" Count="0" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="77" Count="1" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="95" Count="0" />
+      <LineId Id="94" Count="1" />
       <LineId Id="79" Count="1" />
       <LineId Id="18" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="132" Count="1" />
+      <LineId Id="131" Count="0" />
       <LineId Id="9" Count="0" />
       <LineId Id="70" Count="0" />
-      <LineId Id="10" Count="2" />
-      <LineId Id="20" Count="1" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="20" Count="0" />
       <LineId Id="19" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="138" Count="0" />
       <LineId Id="14" Count="3" />
-      <LineId Id="22" Count="0" />
       <LineId Id="1" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="129" Count="0" />
     </LineIds>
     <LineIds Name="FB_Robot_Mitsubishi.A_ResetAllRequests">
       <LineId Id="29" Count="0" />
@@ -944,12 +965,13 @@ END_IF]]></ST>
       <LineId Id="40" Count="1" />
       <LineId Id="43" Count="0" />
       <LineId Id="42" Count="0" />
-      <LineId Id="44" Count="0" />
+      <LineId Id="44" Count="1" />
       <LineId Id="23" Count="1" />
       <LineId Id="19" Count="0" />
       <LineId Id="25" Count="3" />
       <LineId Id="30" Count="0" />
       <LineId Id="36" Count="3" />
+      <LineId Id="47" Count="0" />
     </LineIds>
     <LineIds Name="FB_Robot_Mitsubishi.A_ResetTimeoutTimer">
       <LineId Id="1" Count="0" />
@@ -980,7 +1002,10 @@ END_IF]]></ST>
       <LineId Id="2" Count="0" />
       <LineId Id="15" Count="0" />
       <LineId Id="17" Count="0" />
-      <LineId Id="19" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="20" Count="0" />
       <LineId Id="4" Count="0" />
       <LineId Id="27" Count="2" />
       <LineId Id="34" Count="0" />

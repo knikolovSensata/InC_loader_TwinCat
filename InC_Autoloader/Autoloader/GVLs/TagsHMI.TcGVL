@@ -14,6 +14,21 @@ VAR_GLOBAL
 		LoadStackerSignal           : BOOL;             // Входният стакер има нужда да се зареди с тари
 		UnloadStackerSignal         : BOOL; 			// Изходният стакер има нужда да се зареди с тари 
 
+		// Нови
+		activeEmg                   : BOOL;
+		doorsOpen                   : BOOL;
+		noAir                       : BOOL;
+		robotEmgActive              : BOOL;
+		robotNoCom                  : BOOL;
+		robotError                  : BOOL;
+		
+		// Ще ги обсъдим
+		manualStackerLoad           : BOOL;
+		manualStackerUnload         : BOOL;
+		manualInserterLoad          : BOOL;
+		manualInserterUnload        : BOOL;
+		manualRobot                 : BOOL;
+		manualMachine               : BOOL;
 
 END_VAR]]></Declaration>
   </GVL>

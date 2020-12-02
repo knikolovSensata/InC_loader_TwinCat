@@ -50,7 +50,7 @@ VAR_GLOBAL
 	
 	//======================================== Robot====================================================
 	gstRobotMitsubishi: ST_Robot_Mitsubishi := (												
-		nRobotPort := 10004,					// nRobotPort := 10004,
+		nRobotPort := 10004,
 		bToggleEnable := TRUE,
 		bToggleConnect := FALSE,
 		bDoServoOn := FALSE,
@@ -58,7 +58,9 @@ VAR_GLOBAL
 		nTargetTrayPosition := 0,
 		nTargetProgram := 1,
 		nTargetSpeed := 90,
-		nTargetCorrectionID := 0,
+		nTargetProductID := 1,
+		nTargetGripperID := 1,
+		nTargetTrayOrientation := 1,
 		bLastPacketConfirmed := TRUE);																	// Robot Mitsubishi station.	
 	gstRobotMitsubishiPacketManager	: ST_Robot_Misubishi_Packet_Manager;
     

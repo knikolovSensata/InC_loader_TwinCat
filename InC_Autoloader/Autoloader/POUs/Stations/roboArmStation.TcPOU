@@ -65,9 +65,9 @@ VAR
 	rotTimeOut             : TIME := T#2S;                             // Време за завъртане на сензора	
 	slideTime              : TIME := T#2S;                             // Време за сваляне/качване на слайдера за тара
 	palletGripTime         : TIME := T#500MS;                          // Време за захващатане на тара от "мекия" грипер
-	robotHomeTime          : TIME := T#20S;                            // Време за ресетване на робота - изпълнение на HOME
+	robotHomeTime          : TIME := T#45S;                            // Време за ресетване на робота - изпълнение на HOME
 	robotMoveTime		   : TIME := T#10S;                            // Макс. време за ход на робота
-	robotRecipeTime        : TIME := T#1S;                             // Време за зареждане на рецепта в робота
+	robotResetTime         : TIME := T#1S;                             // Време за рестарт на робота
 	sensorTime             : TIME := T#250MS;                          // Време за отчитане на сигнал от лазерната ролетка
 	rotAfterTime		   : TIME := T#1S;                             // След ход на робота, след това време за обръща сензора
 	
@@ -117,14 +117,36 @@ CASE activeState OF
 //  Инициализация на станцията
 
 	roboArmStates.stInit:
-		
 		depWait(globalDeps.depRoboInitDone);
+		IF TagsRobot.robotError THEN
+			nextState(roboArmStates.stRobotReset);	
+		ELSE 
+			Stations.roboData := dataRequestRobot.done;
+			nextState(roboArmStates.stRobotResetDone);
+		END_IF
+			
 		
-		IF resetActive THEN
-			nextState(roboArmStates.stResetStart);
-		ELSE
-			nextState(roboArmStates.stNextRobotState);	
-		END_IF		
+// *** Robot Reset 
+//  Ресерване на грешката в робота
+
+	roboArmStates.stRobotReset:
+		Stations.roboData := dataRequestRobot.roboInit;
+		nextState(roboArmStates.stRobotResetDone);		
+
+// *** Robot Reset Done
+
+	roboArmStates.stRobotResetDone:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			IF resetActive THEN
+				nextState(roboArmStates.stResetStart);
+			ELSE
+				nextState(roboArmStates.stNextRobotState);	
+			END_IF							
+		END_IF
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotResetTime, roboArmStates.stErrRobotTimeOut);
 		
 // *** Next Robot State
 		
@@ -364,7 +386,7 @@ CASE activeState OF
 		IF Stations.roboData = dataRequestRobot.error THEN
 			nextState(roboArmStates.stErrRobot);
 		END_IF
-		timeOutError(robotRecipeTime, roboArmStates.stErrRobotRecipeTimeOut);
+		timeOutError(robotMoveTime, roboArmStates.stErrRobot);
 
 // *** Init - Sync Stations
 // Робота се е ресетнал - сега могат да се движат и останали станций
@@ -2898,7 +2920,24 @@ END_VAR]]></Declaration>
     <LineIds Name="roboArmStation">
       <LineId Id="12463" Count="1" />
       <LineId Id="14759" Count="0" />
-      <LineId Id="12465" Count="135" />
+      <LineId Id="12465" Count="36" />
+      <LineId Id="12503" Count="0" />
+      <LineId Id="15262" Count="0" />
+      <LineId Id="15242" Count="0" />
+      <LineId Id="15263" Count="3" />
+      <LineId Id="12504" Count="0" />
+      <LineId Id="15236" Count="0" />
+      <LineId Id="15238" Count="2" />
+      <LineId Id="15237" Count="0" />
+      <LineId Id="15243" Count="4" />
+      <LineId Id="15241" Count="0" />
+      <LineId Id="15252" Count="0" />
+      <LineId Id="15254" Count="3" />
+      <LineId Id="15253" Count="0" />
+      <LineId Id="15251" Count="0" />
+      <LineId Id="15259" Count="2" />
+      <LineId Id="15258" Count="0" />
+      <LineId Id="12510" Count="90" />
       <LineId Id="14683" Count="0" />
       <LineId Id="12601" Count="1" />
       <LineId Id="15004" Count="0" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="E_Communication_Send_States" Id="{7ab92a7d-af87-4604-9375-0bf490cbd0b8}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}

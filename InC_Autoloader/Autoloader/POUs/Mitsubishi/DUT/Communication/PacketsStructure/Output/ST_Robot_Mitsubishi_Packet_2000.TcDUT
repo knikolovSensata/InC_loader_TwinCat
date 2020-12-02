@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="ST_Robot_Mitsubishi_Packet_2000" Id="{23c9b91d-6e88-4c67-a34a-95356a3ab8c1}">
     <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_2000 :
 STRUCT
@@ -47,7 +47,9 @@ STRUCT
 	TargetTrayPosition				: DINT;		// The station of interest to be worked with.
 	TargetProgram					: DINT;		// The program to be executed.
 	TargetSpeed						: DINT;		// The speed overdrive to be set.
-	TargetProductID					: DINT;		// Targer Tray Variation
+	TargetProductID					: DINT;		// Targer Product ID
+	TargetGripperID					: DINT;		// Targer Tray Variation
+	TargetTrayOrientation			: DINT;		// Targer Tray Orientation
 END_STRUCT
 END_TYPE
 ]]></Declaration>

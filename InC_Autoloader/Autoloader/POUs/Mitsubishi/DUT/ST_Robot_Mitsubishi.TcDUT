@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="ST_Robot_Mitsubishi" Id="{ebc3f03c-3c03-43b5-9250-4e36a23157c2}">
     <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi :
 STRUCT
@@ -24,14 +24,16 @@ STRUCT
 	nCurrentProgram					: DINT;															// The current robot program.
 	nCurrentTrayPosition			: DINT;															// The current station to work with.
 	nCurrentSpeed					: DINT;															// The current speed overdive.
-	nCurrentCorrectionID			: DINT;															// The current correction ID if selected.
 	nCurrentProductID				: DINT;
+	nCurrentGripperID				: DINT;															// The current gripper ID if selected.
+	nCurrentTrayOrient				: DINT;
 	nCurrentTargetProgram			: DINT;															// The target robot program.
 	nCurrentTargetTrayPosition		: DINT;															// The target station to work with.
 	nCurrentTargetSpeed				: DINT;															// The target speed overdive.
-	nCurrentTargetCorrectionID		: DINT;															// The target correction ID if set.
 	nCurrentTargetProductID			: DINT;
-	
+	nCurrentTargetGripperID			: DINT;	
+	nCurrentTargetTrayOrient		: DINT;	
+		
 	nLastReceivedPacketID			: DINT;															// The ID of the last packet received.
 	bLastPacketConfirmed			: BOOL;		// Not Used													// Had the last sent packet been confirmed.
 	
@@ -56,15 +58,18 @@ STRUCT
 	bDoChangeTargetCorrection		: BOOL;															// Change the target correction.
 	bDoChangeTargetProductID		: BOOL;															// Change the target product ID.
 	bDoConfirmDependency			: BOOL;															// Confirm the dependency state.
-	bToggleEnable					: BOOL;		//Not Used												// Use to enable operation of the state machine.
+	bToggleEnable					: BOOL;		//Not Used											// Use to enable operation of the state machine.
 	bToggleConnect					: BOOL;															// Use to start/stop the socket communication.
 	
 // Settings
 	nTargetTrayPosition				: DINT;															// The station of interest to be worked with.
 	nTargetProgram					: DINT;															// The program to be executed.
 	nTargetSpeed					: DINT;															// The speed overdrive to be set.
-	nTargetCorrectionID				: DINT;															// The target correction id.
-	nLastSentPacketID				: DINT;		// Not Used													// The id of the last sent packet to the robot.
+	nTargetProductID				: DINT;															// The target product id.
+	nTargetGripperID				: DINT;															// The target gripper id.
+	nTargetTrayOrientation			: DINT;															// The target tray orient.
+
+	nLastSentPacketID				: DINT;		// Not Used											// The id of the last sent packet to the robot.
 	
 	sRobotAddress					: T_IPv4Addr;														// The IPv4 address of the robot server.
 	nRobotPort						: UDINT;														// The port of the robot server.

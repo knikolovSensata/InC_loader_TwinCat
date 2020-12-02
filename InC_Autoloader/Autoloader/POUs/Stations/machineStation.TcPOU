@@ -36,6 +36,16 @@ END_VAR
 
 zumer();                  // Упр. на сигният зумер
 
+// Сигнали за HMI
+
+	TagsHMI.activeEmg       := io.getX(ioImage.xEmgBnt);
+	TagsHMI.doorsOpen       := io.getX(ioImage.xDoors);         
+	TagsHMI.noAir           := io.getX(ioImage.xAirOk);            
+	TagsHMI.robotEmgActive  := io.getX(ioImage.xRobotEmgOk);            
+	TagsHMI.robotNoCom      := TagsRobot.robotComOnline;    
+	TagsHMI.robotError      := TagsRobot.robotError;    
+
+
 errorPuls(CLK := Global.machError); 
 
 IF NOT io.getX(ioImage.xDoors) AND io.getX(ioImage.xAirOk) AND io.getX(ioImage.xEmgBnt) THEN
@@ -56,6 +66,19 @@ ELSIF NOT io.getX(ioImage.xAirOk)  THEN
 	setDisplayState(machineDisplayStates.dStNoAirSupplay);
 	setEmg(emgOrAlarm := TRUE);	
 	
+END_IF
+
+IF NOT io.getX(ioImage.xRobotEmgOk) AND TagsRobot.robotComOnline THEN
+ 	Global.emgStop   := TRUE; 	                   //  Авариен стоп  на робота
+	Global.RobotEMG  := TRUE;				      
+	setDisplayState(machineDisplayStates.dStMachineRobotEMG);
+	setEmg(emgOrAlarm := TRUE);	
+	
+ELSIF io.getX(ioImage.xRobotEmgOk) AND NOT TagsRobot.robotComOnline THEN
+ 	Global.emgStop     := TRUE; 	               //  Липса на комуникация с робота
+	Global.RobotNoCom  := TRUE;				      
+	setDisplayState(machineDisplayStates.dStMachineRobotNoCom);
+	setEmg(emgOrAlarm := TRUE);		
 END_IF
 
 IF errorPuls.Q THEN
@@ -93,12 +116,16 @@ CASE activeState OF
 		Global.emgStopSignal := TRUE;
 		resetTimer(IN := resetSig, PT := resetTime);
 		
-		IF io.getX(ioImage.xDoors) AND io.getX(ioImage.xAirOk) AND io.getX(ioImage.xEmgBnt) THEN
-			resetSig := TRUE;
-			IF resetTimer.Q THEN	
-				resetSig      := FALSE;
-				nextState(machineStates.stInit);
-			END_IF
+		IF      io.getX(ioImage.xDoors) 
+			AND io.getX(ioImage.xAirOk) 
+			AND io.getX(ioImage.xEmgBnt) 
+			AND io.getX(ioImage.xRobotEmgOk)
+            AND TagsRobot.robotComOnline  THEN
+				resetSig := TRUE;
+				IF resetTimer.Q THEN	
+					resetSig      := FALSE;
+					nextState(machineStates.stInit);
+				END_IF
 		END_IF	
 
 //  *** Init 
@@ -334,7 +361,7 @@ END_VAR
                     <v n="OutCommented">false</v>
                     <l2 n="NetworkItems">
                       <o t="BoxTreeDemux">
-                        <v n="VarId">6</v>
+                        <v n="VarId">8</v>
                         <o n="Input" t="BoxTreeBox">
                           <v n="BoxType">"AND"</v>
                           <o n="Instance" t="Operand">
@@ -447,7 +474,7 @@ END_VAR
                           <v n="Extensible">false</v>
                         </o>
                         <o n="RValue" t="BoxTreeDemux">
-                          <v n="VarId">6</v>
+                          <v n="VarId">8</v>
                           <n n="Input" />
                           <v n="Id">148L</v>
                         </o>
@@ -480,14 +507,14 @@ END_VAR
                           <v n="Extensible">false</v>
                         </o>
                         <o n="RValue" t="BoxTreeDemux">
-                          <v n="VarId">6</v>
+                          <v n="VarId">8</v>
                           <n n="Input" />
                           <v n="Id">149L</v>
                         </o>
                         <v n="Id">151L</v>
                       </o>
                       <o t="BoxTreeBox">
-                        <v n="BoxType">"MOVE"</v>
+                        <v n="BoxType">"EXECUTE"</v>
                         <o n="Instance" t="Operand">
                           <n n="Operand" />
                           <v n="Type">""</v>
@@ -502,45 +529,25 @@ END_VAR
                           <v n="LValue">false</v>
                           <v n="Boolean">false</v>
                           <v n="IsInstance">true</v>
-                          <v n="Id">158L</v>
+                          <v n="Id">168L</v>
                         </o>
                         <o n="OutputItems" t="OutputItemList">
-                          <l2 n="OutputItems" cet="Operand">
+                          <l2 n="OutputItems">
                             <n />
-                            <o>
-                              <v n="Operand">"zumerBeep"</v>
-                              <v n="Type">"INT"</v>
-                              <v n="Comment">""</v>
-                              <v n="SymbolComment">""</v>
-                              <v n="Address">""</v>
-                              <o n="Flags" t="Flags">
-                                <v n="Flags">0</v>
-                                <v n="Fixed">false</v>
-                                <v n="Extensible">false</v>
-                              </o>
-                              <v n="LValue">true</v>
-                              <v n="Boolean">false</v>
-                              <v n="IsInstance">false</v>
-                              <v n="Id">160L</v>
-                            </o>
                           </l2>
                         </o>
                         <o n="Flags" t="Flags">
                           <v n="Flags">0</v>
-                          <v n="Fixed">false</v>
+                          <v n="Fixed">true</v>
                           <v n="Extensible">false</v>
                         </o>
                         <n n="InputFlags" />
-                        <l2 n="InputItems">
-                          <o t="BoxTreeDemux">
-                            <v n="VarId">6</v>
-                            <n n="Input" />
-                            <v n="Id">157L</v>
-                          </o>
-                          <o t="BoxTreeOperand">
-                            <o n="Operand" t="Operand">
-                              <v n="Operand">"0"</v>
-                              <v n="Type">"INT"</v>
+                        <l2 n="InputItems" cet="BoxTreeBox">
+                          <o>
+                            <v n="BoxType">"MOVE"</v>
+                            <o n="Instance" t="Operand">
+                              <n n="Operand" />
+                              <v n="Type">""</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -551,10 +558,87 @@ END_VAR
                               </o>
                               <v n="LValue">false</v>
                               <v n="Boolean">false</v>
-                              <v n="IsInstance">false</v>
-                              <v n="Id">162L</v>
+                              <v n="IsInstance">true</v>
+                              <v n="Id">158L</v>
                             </o>
-                            <v n="Id">161L</v>
+                            <o n="OutputItems" t="OutputItemList">
+                              <l2 n="OutputItems" cet="Operand">
+                                <n />
+                                <o>
+                                  <v n="Operand">"zumerBeep"</v>
+                                  <v n="Type">"INT"</v>
+                                  <v n="Comment">""</v>
+                                  <v n="SymbolComment">""</v>
+                                  <v n="Address">""</v>
+                                  <o n="Flags" t="Flags">
+                                    <v n="Flags">0</v>
+                                    <v n="Fixed">false</v>
+                                    <v n="Extensible">false</v>
+                                  </o>
+                                  <v n="LValue">true</v>
+                                  <v n="Boolean">false</v>
+                                  <v n="IsInstance">false</v>
+                                  <v n="Id">160L</v>
+                                </o>
+                              </l2>
+                            </o>
+                            <o n="Flags" t="Flags">
+                              <v n="Flags">0</v>
+                              <v n="Fixed">false</v>
+                              <v n="Extensible">false</v>
+                            </o>
+                            <n n="InputFlags" />
+                            <l2 n="InputItems">
+                              <o t="BoxTreeDemux">
+                                <v n="VarId">8</v>
+                                <n n="Input" />
+                                <v n="Id">157L</v>
+                              </o>
+                              <o t="BoxTreeOperand">
+                                <o n="Operand" t="Operand">
+                                  <v n="Operand">"0"</v>
+                                  <v n="Type">"INT"</v>
+                                  <v n="Comment">""</v>
+                                  <v n="SymbolComment">""</v>
+                                  <v n="Address">""</v>
+                                  <o n="Flags" t="Flags">
+                                    <v n="Flags">0</v>
+                                    <v n="Fixed">false</v>
+                                    <v n="Extensible">false</v>
+                                  </o>
+                                  <v n="LValue">false</v>
+                                  <v n="Boolean">false</v>
+                                  <v n="IsInstance">false</v>
+                                  <v n="Id">162L</v>
+                                </o>
+                                <v n="Id">161L</v>
+                              </o>
+                            </l2>
+                            <o n="InputParam" t="ParamList">
+                              <l2 n="Names" cet="String">
+                                <v>EN</v>
+                              </l2>
+                              <l2 n="Types" cet="String">
+                                <v>BOOL</v>
+                              </l2>
+                            </o>
+                            <o n="OutputParam" t="ParamList">
+                              <l2 n="Names" cet="String">
+                                <v>ENO</v>
+                                <v></v>
+                              </l2>
+                              <l2 n="Types" cet="String">
+                                <v>BOOL</v>
+                                <v></v>
+                              </l2>
+                            </o>
+                            <v n="CallType" t="Operator">Move</v>
+                            <v n="EN">true</v>
+                            <v n="ENO">true</v>
+                            <n n="STSnippet" />
+                            <v n="ContainsExtensibleInputs">false</v>
+                            <v n="ProvidesSTSnippet">false</v>
+                            <v n="Id">159L</v>
                           </o>
                         </l2>
                         <o n="InputParam" t="ParamList">
@@ -568,20 +652,31 @@ END_VAR
                         <o n="OutputParam" t="ParamList">
                           <l2 n="Names" cet="String">
                             <v>ENO</v>
-                            <v></v>
                           </l2>
                           <l2 n="Types" cet="String">
                             <v>BOOL</v>
-                            <v></v>
                           </l2>
                         </o>
-                        <v n="CallType" t="Operator">Move</v>
+                        <v n="CallType" t="Operator">None</v>
                         <v n="EN">true</v>
                         <v n="ENO">true</v>
-                        <n n="STSnippet" />
+                        <o n="STSnippet" t="STSnippet">
+                          <o n="STSnippet" t="STImplementationObject">
+                            <o n="TextDocument" t="TextDocument">
+                              <a n="TextLines" cet="TextLine">
+                                <o>
+                                  <v n="Id">167L</v>
+                                  <n n="Tag" />
+                                  <v n="Text">"io.rstY(ioImage.yZumer);"</v>
+                                </o>
+                              </a>
+                            </o>
+                          </o>
+                          <v n="Id">169L</v>
+                        </o>
                         <v n="ContainsExtensibleInputs">false</v>
-                        <v n="ProvidesSTSnippet">false</v>
-                        <v n="Id">159L</v>
+                        <v n="ProvidesSTSnippet">true</v>
+                        <v n="Id">170L</v>
                       </o>
                     </l2>
                     <l2 n="Connectors" />
@@ -1558,7 +1653,7 @@ END_VAR
                     <v n="Id">112L</v>
                   </o>
                 </l2>
-                <v n="BranchCounter">6</v>
+                <v n="BranchCounter">8</v>
                 <v n="ValidIds">true</v>
               </o>
             </Data>
@@ -1591,6 +1686,11 @@ END_VAR
       <LineId Id="692" Count="2" />
       <LineId Id="1321" Count="0" />
       <LineId Id="1320" Count="0" />
+      <LineId Id="1473" Count="1" />
+      <LineId Id="1476" Count="4" />
+      <LineId Id="1475" Count="0" />
+      <LineId Id="1482" Count="0" />
+      <LineId Id="1472" Count="0" />
       <LineId Id="1063" Count="0" />
       <LineId Id="1062" Count="0" />
       <LineId Id="695" Count="4" />
@@ -1601,7 +1701,19 @@ END_VAR
       <LineId Id="701" Count="4" />
       <LineId Id="1069" Count="0" />
       <LineId Id="707" Count="0" />
-      <LineId Id="713" Count="2" />
+      <LineId Id="713" Count="0" />
+      <LineId Id="1454" Count="0" />
+      <LineId Id="1453" Count="0" />
+      <LineId Id="1457" Count="0" />
+      <LineId Id="1460" Count="0" />
+      <LineId Id="1459" Count="0" />
+      <LineId Id="1455" Count="0" />
+      <LineId Id="1471" Count="0" />
+      <LineId Id="1456" Count="0" />
+      <LineId Id="1462" Count="2" />
+      <LineId Id="1461" Count="0" />
+      <LineId Id="1465" Count="0" />
+      <LineId Id="714" Count="1" />
       <LineId Id="1071" Count="0" />
       <LineId Id="1322" Count="0" />
       <LineId Id="718" Count="0" />
@@ -1612,7 +1724,9 @@ END_VAR
       <LineId Id="1246" Count="2" />
       <LineId Id="733" Count="8" />
       <LineId Id="1036" Count="0" />
-      <LineId Id="742" Count="5" />
+      <LineId Id="742" Count="3" />
+      <LineId Id="1466" Count="3" />
+      <LineId Id="746" Count="1" />
       <LineId Id="753" Count="0" />
       <LineId Id="757" Count="0" />
       <LineId Id="761" Count="1" />

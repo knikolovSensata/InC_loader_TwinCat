@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="ST_Robot_Mitsubishi_Packet_1000" Id="{946f7ff7-c764-449a-800c-b66bef71f143}">
     <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_1000 :
 STRUCT	
@@ -49,14 +49,16 @@ STRUCT
 	CurrentProgram					: DINT;															// The currently selected robot program.
 	CurrentTrayPosition				: DINT;															// The currently selected station to work with.
 	CurrentSpeed					: DINT;															// The current speed overdive.
-	CurrentCorrectionID				: DINT;															// The current correction ID if selected.
 	CurrentProductID				: DINT;															// The current product ID if any.
+	CurrentGripperID				: DINT;															// The current gripper ID if selected.
+	CurrentTrayOrient				: DINT;
 	
 	CurrentTargetProgram			: DINT;															// The current target robot program.			// | These could be moved in a separate packet.
 	CurrentTargetTrayPosition		: DINT;															// The current target robot station.			// |
 	CurrentTargetSpeed				: DINT;															// The current target robot speed override.		// |
-	CurrentTargetCorrectionID		: DINT;															// The current target robot correction ID.		// |
 	CurrentTargetProductID			: DINT;															// The current target product ID.
+	CurrentTargetGripperID			: DINT;															// The current target robot gripper ID.		// |
+	CurrentTargetTrayOrient			: DINT;															// The current target robot gripper ID.		// 
 END_STRUCT
 END_TYPE
 ]]></Declaration>

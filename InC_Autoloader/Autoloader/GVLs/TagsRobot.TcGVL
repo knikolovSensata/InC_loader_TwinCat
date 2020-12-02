@@ -11,7 +11,9 @@ VAR_GLOBAL
 		unLoadPalletPos				: DINT;             // Гнездо в изходната тара над което трябва да иде робота	
 		rotPallet                   : DINT;             // Необходимо ли е да се завърти тарата на определен ъгъл при взимане от LoadStacker
 
-
+		robotComOnline 			    : BOOL;
+		robotError                  : BOOL;
+		
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <POU Name="ROBOT" Id="{604af032-2a87-4ce8-af05-065565ae1cd2}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Robot
 VAR
@@ -13,29 +13,32 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[	Stations.gstRobotMitsubishi.sRobotAddress := '192.168.0.20';
-	//gstRobotMitsubishi.bAutomaticMode := NOT IO_CONVEYOR.iMAINTENANCE_KEY;
-	fbRobot(Robot := Stations.gstRobotMitsubishi,
-		PacketManager := Stations.gstRobotMitsubishiPacketManager);
+      <ST><![CDATA[Stations.gstRobotMitsubishi.sRobotAddress := '192.168.0.20';
+Stations.gstRobotMitsubishi.nRobotPort := 10004;
+Stations.gstRobotMitsubishi.bAutomaticMode := TRUE;
+fbRobot(Robot := Stations.gstRobotMitsubishi,
+	PacketManager := Stations.gstRobotMitsubishiPacketManager);
 		
 rtRobot_ProgramStarted(IN:=NOT Stations.gstRobotMitsubishi.bReady 
-						AND NOT Stations.gstRobotMitsubishi.bProgramCompleted, PT:=T#50MS);
+						AND NOT Stations.gstRobotMitsubishi.bProgramCompleted, PT:=T#30MS);
 rtRobot_ProgramCompleted(IN:= Stations.gstRobotMitsubishi.bReady AND Stations.gstRobotMitsubishi.bProgramCompleted 
-							AND Stations.gstRobotMitsubishi.nDependencyState = 0, PT:=T#10MS);
+							AND Stations.gstRobotMitsubishi.nDependencyState = 0, PT:=T#30MS);
 
 // If robot error
-IF Stations.gstRobotMitsubishi.bError AND nCurrentState > E_RobotStates.STATE_INIT_CHECK_ROBOT_ERROR_DONE 
+IF Stations.gstRobotMitsubishi.bError 
+AND nCurrentState > E_RobotStates.STATE_INIT_CHECK_ROBOT_ERROR_DONE 
 AND nCurrentState < E_RobotStates.STATE_ERROR THEN
 	nLastState:=nCurrentState;
 	nCurrentState:=E_RobotStates.STATE_ERROR;
 END_IF
+//Statuses
+TagsRobot.robotError := Stations.gstRobotMitsubishi.bError;
+TagsRobot.robotComOnline := Stations.gstRobotMitsubishi.bOnline;
 
 // Robot Settings
-IF Stations.roboSetings.roboArmParams[Global.recipe].waitPos24 THEN
-	Stations.gstRobotMitsubishi.nTargetCorrectionID := 	0;			
-ELSIF Stations.roboSetings.roboArmParams[Global.recipe].waitPos27 THEN
-	Stations.gstRobotMitsubishi.nTargetCorrectionID := 	1; 			
-END_IF
+Stations.gstRobotMitsubishi.nTargetProductID := TagsRobot.roboRecipeNum;
+Stations.gstRobotMitsubishi.nTargetGripperID := 1;		//TBD Setting for GipperID
+Stations.gstRobotMitsubishi.nTargetTrayOrientation := TagsRobot.rotPallet;
 		
 CASE nCurrentState OF
 	E_RobotStates.STATE_WAITING_FOR_INIT:
@@ -95,27 +98,10 @@ CASE nCurrentState OF
 		IF NOT Stations.gstRobotMitsubishi.bReady OR NOT Stations.gstRobotMitsubishi.bExecuting THEN
 			Stations.gstRobotMitsubishi.bDoStart:=TRUE;
 			nLastState := nCurrentState;
-			nCurrentState :=E_RobotStates.STATE_INIT_CHECK_ROBOT_READY_DONE;	
-		ELSIF Stations.gstRobotMitsubishi.bBusy THEN
-			Stations.gstRobotMitsubishi.bDoReset := TRUE;
-			nLastState := nCurrentState;
-			nCurrentState :=E_RobotStates.STATE_INIT_CHECK_ROBOT_BUSY;	
+			nCurrentState :=E_RobotStates.STATE_INIT_CHECK_ROBOT_READY_DONE;		
 		ELSE
 			nLastState := nCurrentState;
 			nCurrentState :=E_RobotStates.STATE_INIT_CHECK_ROBOT_SERVOON;	
-		END_IF
-	
-	E_RobotStates.STATE_INIT_CHECK_ROBOT_BUSY:
-		gbTimerTimeoutRobot(IN:=TRUE,PT:=T#2000MS);
-		IF Stations.gstRobotMitsubishi.nCurrentState = E_Robot_Mitsubishi_States.STATE_OPERATIONAL THEN
-			gbTimerTimeoutRobot(IN:=FALSE);
-			Stations.gstRobotMitsubishi.bDoStart := TRUE;
-			nLastState := nCurrentState;
-			nCurrentState :=E_RobotStates.STATE_INIT_CHECK_ROBOT_READY_DONE;
-		ELSIF gbTimerTimeoutRobot.Q THEN
-			gbTimerTimeoutRobot(IN:=FALSE);
-			nLastState := nCurrentState;
-			nCurrentState :=E_RobotStates.STATE_INIT_ROBOT_TOGGLE;
 		END_IF
 	
 	E_RobotStates.STATE_INIT_CHECK_ROBOT_READY_DONE:
@@ -149,13 +135,23 @@ CASE nCurrentState OF
 	
 	E_RobotStates.STATE_WAITING_FOR_COMMAND:		
 		IF Stations.roboData <> dataRequestRobot.done
-		AND Stations.roboData <> dataRequestRobot.error THEN
+		AND Stations.roboData <> dataRequestRobot.error 
+		AND Stations.roboData <> dataRequestRobot.roboInit THEN
 			Stations.gstRobotMitsubishi.nTargetProgram := Stations.roboData;
-			Stations.gstRobotMitsubishi.bDoStartProgram := TRUE;
-			IF rtRobot_ProgramStarted.Q THEN
-				nLastState := nCurrentState;
-				nCurrentState := E_RobotStates.STATE_PROGRAM_DONE;
+			IF Stations.roboData = dataRequestRobot.roboPrg_SensorLoad THEN
+				Stations.gstRobotMitsubishi.nTargetTrayPosition := TagsRobot.loadPalletPos;
+			ELSIF Stations.roboData = dataRequestRobot.roboPrg_SensorUnload THEN
+				Stations.gstRobotMitsubishi.nTargetTrayPosition := TagsRobot.unLoadPalletPos;
 			END_IF
+			Stations.gstRobotMitsubishi.bDoStartProgram := TRUE;
+			nLastState := nCurrentState;
+			nCurrentState := E_RobotStates.STATE_WAITING_START_PRG;
+		END_IF
+		
+	E_RobotStates.STATE_WAITING_START_PRG:
+		IF rtRobot_ProgramStarted.Q THEN
+			nLastState := nCurrentState;
+			nCurrentState := E_RobotStates.STATE_PROGRAM_DONE;
 		END_IF
 		
 	E_RobotStates.STATE_PROGRAM_DONE:
@@ -185,26 +181,34 @@ END_IF]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="ROBOT">
-      <LineId Id="6" Count="2" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="224" Count="1" />
+      <LineId Id="8" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="25" Count="3" />
-      <LineId Id="165" Count="3" />
+      <LineId Id="165" Count="2" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="168" Count="0" />
       <LineId Id="170" Count="1" />
       <LineId Id="20" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="244" Count="0" />
+      <LineId Id="246" Count="0" />
       <LineId Id="187" Count="0" />
       <LineId Id="186" Count="0" />
-      <LineId Id="189" Count="0" />
-      <LineId Id="192" Count="1" />
-      <LineId Id="196" Count="0" />
-      <LineId Id="188" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="247" Count="0" />
       <LineId Id="10" Count="2" />
       <LineId Id="18" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="61" Count="0" />
-      <LineId Id="63" Count="95" />
+      <LineId Id="63" Count="51" />
+      <LineId Id="119" Count="3" />
+      <LineId Id="136" Count="22" />
       <LineId Id="62" Count="0" />
       <LineId Id="38" Count="1" />
       <LineId Id="174" Count="0" />
@@ -212,8 +216,19 @@ END_IF]]></ST>
       <LineId Id="15" Count="0" />
       <LineId Id="36" Count="1" />
       <LineId Id="175" Count="0" />
-      <LineId Id="49" Count="4" />
-      <LineId Id="46" Count="1" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="210" Count="1" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="232" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="228" Count="2" />
+      <LineId Id="227" Count="0" />
       <LineId Id="54" Count="1" />
       <LineId Id="57" Count="3" />
       <LineId Id="56" Count="0" />

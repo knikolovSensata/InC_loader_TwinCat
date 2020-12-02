@@ -14,7 +14,9 @@ TYPE machineDisplayStates :
 	dStMachineIsStopped,
 	dStAutoRun,
 	dStMachineStandBy,
-	dStMachinePurgeActive
+	dStMachinePurgeActive,
+	dStMachineRobotEMG,
+	dStMachineRobotNoCom
 	
 )DINT;
 END_TYPE

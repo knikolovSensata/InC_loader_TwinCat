@@ -17,6 +17,8 @@ TYPE roboArmStates :
 		
 		stPowerUp    :=    1000,
 		stInitDone,
+		stRobotReset,
+		stRobotResetDone,
 		stStationStop,
 		stNextRobotState,
 		
@@ -169,7 +171,8 @@ TYPE roboArmStates :
 		stErrRobotRecipeTimeOut,
 		stErrNoPalletWaitPos,
 		stErrPalletOnWaitPos,
-		stErrNoPalletUnload
+		stErrNoPalletUnload,
+		stErrRobotCom
 
 )DINT;
 END_TYPE

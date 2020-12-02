@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.2">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <DUT Name="ST_Robot_Mitsubishi_Packet_2010" Id="{c74f73e7-657f-4bc7-8cb2-29d928661309}">
     <Declaration><![CDATA[TYPE ST_Robot_Mitsubishi_Packet_2010 :
 STRUCT
