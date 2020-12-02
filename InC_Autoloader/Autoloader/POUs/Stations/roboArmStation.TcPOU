@@ -43,6 +43,8 @@ VAR
 	initWaitLStacker       : BOOL;
 	tempUnloadMove         : BOOL;
 	checkLoadStacker       : BOOL;
+	waitPosPalletRot       : DINT := 0;
+	palletRotTypeWaitPos   : DINT;
 	
 	xWaitPos               : REFERENCE TO imageIO;                     // В зависимост от рецептата се използва само едната чакаща поз. 
 	xSlideUp               : REFERENCE TO imageIO;
@@ -573,7 +575,8 @@ CASE activeState OF
 		
 			IF palletOnEmptyPos THEN
 				IF io.getX(xWaitPos) THEN 
-			    	Stations.roboData := dataRequestRobot.roboPrg_EmptyPlace;	
+					TagsRobot.rotPallet := palletRotTypeWaitPos;
+			    	Stations.roboData   := dataRequestRobot.roboPrg_EmptyPlace;	
 					nextState(roboArmStates.stNextMoveEmptyCheck);	
 				ELSE									// На чакащата поз. е трябвало да има тара, но няма !
 					IF typeHEX24 THEN
@@ -621,7 +624,12 @@ CASE activeState OF
 // Робота отива над вх. стакер
 
 	roboArmStates.stNextMoveLoadMove:		
-			Stations.roboData := dataRequestRobot.roboPrg_LoadStacker;	
+		IF (Global.loadPalletCount MOD 2) = 0 THEN
+			TagsRobot.rotPallet := Consts.ROT_PALLET;
+		ELSE
+			TagsRobot.rotPallet := Consts.TRANS_PALLET;
+		END_IF
+			Stations.roboData   := dataRequestRobot.roboPrg_LoadStacker;	
 			nextState(roboArmStates.stNextMoveLoadMoveCheck);			
 
 // *** Next Move - Load Check
@@ -651,6 +659,11 @@ CASE activeState OF
 	roboArmStates.stNextMoveLoadEmpty:		
 		IF loadFixtures = 0 AND unLoadFixtures > 0 THEN	
 			IF NOT io.getX(xWaitPos) THEN
+				IF (Global.loadPalletCount MOD 2) = 0 THEN
+					TagsRobot.rotPallet := Consts.ROT_PALLET;
+				ELSE
+					TagsRobot.rotPallet := Consts.TRANS_PALLET;
+				END_IF
 				Stations.roboData := dataRequestRobot.roboPrg_LoadStacker;				
 				nextState(roboArmStates.stNextMoveCheck2);	
 			ELSE 
@@ -710,6 +723,7 @@ CASE activeState OF
 		IF io.getX(xWaitPos) THEN
 			lamp24On 		   := FALSE;
 			lamp27On           := FALSE;	
+			TagsRobot.rotPallet:= palletRotTypeWaitPos;
 		    Stations.roboData  := dataRequestRobot.roboPrg_EmptyPlace;
 			nextState(roboArmStates.stMoveToEmptyMoveCheck);	
 		ELSE
@@ -1000,7 +1014,8 @@ CASE activeState OF
 // *** Empty Pos - Done
 
 	roboArmStates.stEmptyPosDone:		
-		emptyPosStart    := FALSE;			
+		emptyPosStart        := FALSE;	
+		palletRotTypeWaitPos := TagsRobot.rotPallet;		
 		nextState(roboArmStates.stNextMoveStart);			
 		
 // *** Load - Start
@@ -2972,6 +2987,7 @@ END_VAR]]></Declaration>
       <LineId Id="14351" Count="0" />
       <LineId Id="12899" Count="0" />
       <LineId Id="14353" Count="0" />
+      <LineId Id="15223" Count="0" />
       <LineId Id="12900" Count="1" />
       <LineId Id="14361" Count="0" />
       <LineId Id="14363" Count="5" />
@@ -2997,6 +3013,8 @@ END_VAR]]></Declaration>
       <LineId Id="13935" Count="0" />
       <LineId Id="13941" Count="0" />
       <LineId Id="13936" Count="0" />
+      <LineId Id="15227" Count="3" />
+      <LineId Id="15226" Count="0" />
       <LineId Id="13938" Count="2" />
       <LineId Id="13942" Count="4" />
       <LineId Id="13975" Count="0" />
@@ -3010,6 +3028,8 @@ END_VAR]]></Declaration>
       <LineId Id="13931" Count="0" />
       <LineId Id="12947" Count="6" />
       <LineId Id="14536" Count="0" />
+      <LineId Id="15232" Count="3" />
+      <LineId Id="15231" Count="0" />
       <LineId Id="12954" Count="1" />
       <LineId Id="14537" Count="2" />
       <LineId Id="12956" Count="23" />
@@ -3019,7 +3039,9 @@ END_VAR]]></Declaration>
       <LineId Id="14766" Count="5" />
       <LineId Id="14765" Count="0" />
       <LineId Id="14517" Count="0" />
-      <LineId Id="12980" Count="41" />
+      <LineId Id="12980" Count="17" />
+      <LineId Id="15224" Count="0" />
+      <LineId Id="12998" Count="23" />
       <LineId Id="13029" Count="12" />
       <LineId Id="15102" Count="0" />
       <LineId Id="13043" Count="2" />
@@ -3079,6 +3101,7 @@ END_VAR]]></Declaration>
       <LineId Id="14529" Count="0" />
       <LineId Id="14535" Count="0" />
       <LineId Id="13285" Count="4" />
+      <LineId Id="15205" Count="0" />
       <LineId Id="13291" Count="47" />
       <LineId Id="14677" Count="0" />
       <LineId Id="14680" Count="0" />
