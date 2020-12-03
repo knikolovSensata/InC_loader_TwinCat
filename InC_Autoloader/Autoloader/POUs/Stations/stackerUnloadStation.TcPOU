@@ -517,7 +517,6 @@ CASE activeState OF
 			unlockPalletStart   := FALSE;
 			Global.startZumer   := TRUE;
 			Global.uStackerFull := TRUE;
-			nextState(stackerUnloadStates.stResetOpenLocks);
 		ELSE
 			IF moveDone AND moveInit THEN
 				currentPos := currentPos + 1;
@@ -858,7 +857,8 @@ axisFesto          ( axis				:= Stations.sUnloadAxis,
       <LineId Id="5153" Count="0" />
       <LineId Id="4591" Count="161" />
       <LineId Id="5154" Count="0" />
-      <LineId Id="4753" Count="110" />
+      <LineId Id="4753" Count="51" />
+      <LineId Id="4806" Count="57" />
       <LineId Id="5155" Count="0" />
       <LineId Id="4864" Count="248" />
       <LineId Id="9" Count="0" />

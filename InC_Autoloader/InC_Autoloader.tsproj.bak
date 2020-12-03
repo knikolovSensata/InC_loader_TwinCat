@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.4">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.7">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{1AA458C6-5E59-4D41-7B2F-916D31BBD436}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..512] OF BYTE</Name>
@@ -377,7 +377,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{18071995-0000-0000-0000-00200000000F}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..14] OF BIT</Name>
+			<Name GUID="{18071995-0000-0000-0000-00200000000F}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..14] OF BIT</Name>
 			<BitSize>15</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
 			<ArrayInfo>
@@ -416,7 +416,7 @@
 						<Name>PlcTask Inputs</Name>
 						<Var>
 							<Name>Global.INPUT_IMAGE</Name>
-							<Comment><![CDATA[      IO Image]]></Comment>
+							<Comment><![CDATA[ Входен и изходен масив за IO Image]]></Comment>
 							<Type GUID="{1AA458C6-5E59-4D41-7B2F-916D31BBD436}">ARRAY [0..512] OF BYTE</Type>
 						</Var>
 						<Var>
@@ -889,8 +889,8 @@
 							</Pdo>
 							<EtherCATp>
 								<Device>
-									<Us PowerSupply="true" MinVoltage="19.4" DevCurrent="0.003" DevLoadType="1"/>
-									<Up PowerSupply="true" MinVoltage="19.4" DevCurrent="0.003" DevLoadType="1"/>
+									<Us/>
+									<Up/>
 								</Device>
 								<Port/>
 								<Port>
@@ -1049,12 +1049,8 @@
 						<CoeProfile ProfileNo="18355081"/>
 						<EtherCATp>
 							<Device>
-								<Us DevCurrent="0.08">
-									<Load Name="Sensor Supply"/>
-								</Us>
-								<Up>
-									<Load Name="Actor Quiescent Supply"/>
-								</Up>
+								<Us/>
+								<Up/>
 							</Device>
 							<Port>
 								<Us Resistance="0.108"/>
@@ -1211,12 +1207,8 @@
 						<CoeProfile ProfileNo="18355081"/>
 						<EtherCATp>
 							<Device>
-								<Us DevCurrent="0.08">
-									<Load Name="Sensor Supply"/>
-								</Us>
-								<Up>
-									<Load Name="Actor Quiescent Supply"/>
-								</Up>
+								<Us/>
+								<Up/>
 							</Device>
 							<Port>
 								<Us Resistance="0.108"/>
@@ -2303,8 +2295,8 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2002-0850-0120-500821000403}" Id="#x02030020"/>
 		<MappingInfo Identifier="{00000000-2002-0850-0120-500810000403}" Id="#x02030010"/>
+		<MappingInfo Identifier="{00000000-2002-0850-0120-500821000403}" Id="#x02030020"/>
 		<OwnerA Name="TIPC^Autoloader^Autoloader Instance">
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 10 (EPP2316-0003)">
 				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 1"/>
