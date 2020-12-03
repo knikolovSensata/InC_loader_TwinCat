@@ -462,8 +462,8 @@ CASE activeState OF
 			IF TagsHMI.camResult <> camResult.null THEN
 				
 				CASE TagsHMI.camResult OF 
-						camResult.turnCCW : workRotPos := ccwRotPos;
-						camResult.turnCW  : workRotPos := cwRotPos;
+						camResult.turnCCW : workRotPos := camRotPos + ccwRotPos;
+						camResult.turnCW  : workRotPos := camRotPos + cwRotPos;
 				END_CASE
 				nextState(inserterLoadStates.stRotDone);
 				
