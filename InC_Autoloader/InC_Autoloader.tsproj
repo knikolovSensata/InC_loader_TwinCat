@@ -322,7 +322,80 @@
 				<BitOffs>512</BitOffs>
 			</SubItem>
 		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-002000000005}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..4] OF BIT</Name>
+			<BitSize>5</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>5</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-002000000002}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..1] OF BIT</Name>
+			<BitSize>2</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>2</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-002000000008}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..0] OF BYTE</Name>
+			<BitSize>8</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>1</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-00200000000A}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..9] OF BIT</Name>
+			<BitSize>10</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>10</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-002000000001}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..0] OF BIT</Name>
+			<BitSize>1</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>1</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-00200000000E}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..13] OF BIT</Name>
+			<BitSize>14</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>14</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-00200000000F}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..14] OF BIT</Name>
+			<BitSize>15</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>15</Elements>
+			</ArrayInfo>
+		</DataType>
 	</DataTypes>
+	<ImageDatas>
+		<ImageData Id="1000">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1001">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1002">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080c0c0c0808080ff00ffff00ffff00ff241cedff00ffff00ffff00ffff00ffff00ffff00ffff00ff808080241ced808080c0c0c0241ced241ced241ced241ced241ced241cedff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080c0c0c0808080ff00ffff00ffff00ff241cedff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1003">424dbe000000000000004e00000028000000100000000e000000010004000000000070000000c30e0000c30e00000600000006000000000000000000ff00ff00ff00808080000080ff0000ff000022222222222222220000000000000000030303030000011005050505000001100000000000000000000000000000000003030303000001100505050500000110000000000000000044444422222222224444442222222222444444222222222244444422222222224444442222222222</ImageData>
+		<ImageData Id="1004">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffecececc8c7c7eeeeeefefefefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffefefef1f1f0bebebc918f8fa7a6a5f9f9f9fffffffffffffffffffffffffffffffffffffffffffffffffdfdfdf4f4f3dcdddad2d3cfc4c5c2bdbebc9f9f9ef8f8f7ffffffffffffffffffffffffffffffffffffebeaeaededede3e3e1d0d1cdd1d2ced3d4d0bfc1beaaacaacbcccafcfcfcffffffffffffffffffffffffffffffffffffb4b2b1b2b2b1d3d4d0d1d2ced1d2ced4d5d0b8baba8d9492b6bcb6fbfbfaffffffffffffffffffffffffffffffffffffb3b1b0b4b4b1d3d4d0d1d2ced1d2ced5d5d1afb2b27a8180a3a7a2f9faf9ffffffffffffffffffffffffffffffffffffb3b1b0bbbab8d3d4d0d1d2ced1d2ced5d5d1b1b3b1777b7c9b9c9bf9f9f9ffffffffffffffffffffffffffffffffffffb3b1b0bbbab8d3d4d0d1d2ced1d2ced3d4d0c9cac6b9b8b4bfbfbcfafbfaffffffffffffffffffffffffffffffffffffb3b1b0bbbab8d3d4d0d1d2ced1d2cecbcec9c0c3bfcbcac5dad3cefcfcfbffffffffffffffffffffffffffffffffffffb3b1b0b3b3b0d4d5d1c9cac7aeafac939c9895a398b1b8ade7e9e7fefefeffffffffffffffffffffffffffffffffffffb3b1b0aeadabc1c2bfa2a5a16f716d7b7a7ac3c4c0f0f1efffffffffffffffffffffffffffffffffffffffffffffffffb1afaeb5b5b5b3b4b2a3a89fb9beb6e4e4e4fefefeffffffffffffffffffffffffffffffffffffffffffffffffffffffa7a5a5a3a19ec5c4c4eeefeefbfcfbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5f5bfbdb9ebebebffffffffffffffffffffffffffffffffffffffffffffffffffffff</ImageData>
+		<ImageData Id="1005">424de6000000000000007600000028000000100000000e000000010004000000000070000000130b0000130b00000000000000000000105210001884180031313100424242005a5a5a0063a5630063ad63006bb56b007b7b7b0084848400849484008cad8c008cb58c00a5b5a500b5b5b500ffffff00ffffff9898ffffffffffff8888ffffffffffff8888ffffffffffffeee9ffffffffffffeedaffffffffffffed77ffffffffffffee77ffffffffffffeeacffffffffffffe244ffffffffffffe344ffffffffffffb75bffffffffffff7107ffffffffffff7107ffffffffffffc65cffffff</ImageData>
+		<ImageData Id="1006">424de6000000000000007600000028000000100000000e000000010004000000000070000000ea0e0000ea0e000000000000000000000000000000008000008000000080800080000000800080008080000080808000c0c0c0000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00777f7f7f77f77f777fff7f7f7ff77f77777f878f77f77f777fff7f7ff7f7ff77777f7f7f77f77f77fffffffffffffffff8888888888888888877777777777777777887888888888777788786ccccc66778788786ccccc6677f78878666666687887ff7fffffffff7ff77777777777777</ImageData>
+		<ImageData Id="1007">424de6000000000000007600000028000000100000000e000000010004000000000070000000c30e0000c30e000010000000100000000000ff00ff00ff00ff000000ffff000000ff000000ffff0000008000800080008000000080800000008000000080800080808000c0c0c000ffffff00000000001111111111111111fffffffffffffffffcfcfcfcfffff44ff4f4f4f4fffff44ffffffffffffffffffffffffffffffffffcfcfcfcfffff44ff4f4f4f4fffff44fffffffffffffffff55555511111111115555551111111111555555111111111155555511111111115555551111111111</ImageData>
+	</ImageDatas>
 	<Project ProjectGUID="{DE05A637-3AA8-4885-9616-7915B0F8DDF4}" Target64Bit="true" ShowHideConfigurations="#x106">
 		<System>
 			<Tasks>
@@ -493,5 +566,1929 @@
 				</Instance>
 			</Project>
 		</Plc>
+		<Io>
+			<Device Id="1" DevType="111" DevFlags="#x0003" AmsPort="28673" AmsNetId="169.254.245.124.2.1" RemoteName="Device 1 (EtherCAT)">
+				<Name>Device 1 (EtherCAT)</Name>
+				<AddressInfo>
+					<Pnp>
+						<DeviceDesc>EtherCat (TwinCAT-Intel PCI Ethernet Adapter (Gigab</DeviceDesc>
+						<DeviceName>\DEVICE\{69805D2D-4521-48D7-915A-C7AF6299E639}</DeviceName>
+						<DeviceData>3cecef02d90f</DeviceData>
+					</Pnp>
+				</AddressInfo>
+				<Image Id="1" AddrType="9" ImageType="3">
+					<Name>Image</Name>
+				</Image>
+				<Box Id="1" BoxType="9099">
+					<Name>Term 1 (EK1100)</Name>
+					<ImageId>1000</ImageId>
+					<EtherCAT SlaveType="1" PdiType="#x0d00" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x044c2c52" RevisionNo="#x00120000" PortPhys="305" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EK1100 EtherCAT Coupler (2A E-Bus)" Desc="EK1100" PortABoxInfo="#x00ffffff"/>
+					<Box Id="2" BoxType="9099">
+						<Name>Term 2 (EL1008)</Name>
+						<ImageId>7</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x03f03052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL1008 8Ch. Dig. Input 24V, 3ms" Desc="EL1008" PortABoxInfo="#x01000001">
+							<SyncMan>001001000000010004000000000000000100001000010000</SyncMan>
+							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box Id="3" BoxType="9099">
+						<Name>Term 3 (EL1008)</Name>
+						<ImageId>7</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x03f03052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL1008 8Ch. Dig. Input 24V, 3ms" Desc="EL1008" PortABoxInfo="#x01000002">
+							<SyncMan>001001000000010004000000000000000100001000010000</SyncMan>
+							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box Id="4" BoxType="9099">
+						<Name>Term 4 (EL1008)</Name>
+						<ImageId>7</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x03f03052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL1008 8Ch. Dig. Input 24V, 3ms" Desc="EL1008" PortABoxInfo="#x01000003">
+							<SyncMan>001001000000010004000000000000000100001000010000</SyncMan>
+							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box Id="5" BoxType="9099">
+						<Name>Term 5 (EL2808)</Name>
+						<ImageId>1001</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x0af83052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2808 8Ch. Dig. Output 24V, 0.5A" Desc="EL2808" PortABoxInfo="#x01000004">
+							<SyncMan>000f01004400010003000000010001000100000f44090000</SyncMan>
+							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1604" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1605" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1606" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1607" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box Id="6" BoxType="9099">
+						<Name>Term 6 (EL2808)</Name>
+						<ImageId>1001</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x0af83052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2808 8Ch. Dig. Output 24V, 0.5A" Desc="EL2808" PortABoxInfo="#x01000005">
+							<SyncMan>000f01004400010003000000010001000100000f44090000</SyncMan>
+							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1604" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1605" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1606" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1607" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box Id="7" BoxType="9099">
+						<Name>Term 7 (EL2808)</Name>
+						<ImageId>1001</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x0af83052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2808 8Ch. Dig. Output 24V, 0.5A" Desc="EL2808" PortABoxInfo="#x01000006">
+							<SyncMan>000f01004400010003000000010001000100000f44090000</SyncMan>
+							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1604" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1605" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1606" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1607" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box Id="8" BoxType="9099">
+						<Name>Term 8 (EK1310)</Name>
+						<ImageId>1002</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x2104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x051e2c52" RevisionNo="#x00110000" RepeatSupport="true" PortPhys="19" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EK1310 EtherCAT P extension with feed-in" Desc="EK1310" PortABoxInfo="#x01000007">
+							<SyncMan>001001000000010004000000000000000000001000000000</SyncMan>
+							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+							<Pdo Name="Status Us" Index="#x1a00" Flags="#x0011" SyncMan="0">
+								<Entry Name="Undervoltage" Index="#x6000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Status Up" Index="#x1a01" Flags="#x0011" SyncMan="0">
+								<Entry Name="Undervoltage" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<EtherCATp>
+								<Device>
+									<Us/>
+									<Up/>
+								</Device>
+								<Port/>
+								<Port>
+									<Us PowerSupply="true" Resistance="0.048"/>
+									<Up PowerSupply="true" Resistance="0.048"/>
+								</Port>
+								<PowerSupply>
+									<Us MaxCurrent="3"/>
+									<Up MaxCurrent="3"/>
+								</PowerSupply>
+							</EtherCATp>
+						</EtherCAT>
+					</Box>
+				</Box>
+				<Box Id="9" BoxType="9099" BoxFlags="#x00000020">
+					<Name>Box 9 (EPP2316-0003)</Name>
+					<ImageId>1003</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0405" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x647656c9" RevisionNo="#x00120003" InfoDataAddr="true" TimeoutMailbox2="2000" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EPP2316-0003 8 Ch. Dig. In, 10µs, 8Ch. Dig. Out 24V, 0,5A, Diagnostic, 10-Pole Plug Connector" Desc="EPP2316-0003" PortABoxInfo="#x01000008">
+						<SyncMan>001000012600010001000000800000010001001026010000</SyncMan>
+						<SyncMan>001100012200010002000000800000010001001122010000</SyncMan>
+						<SyncMan>001204002400010003000000000000000400001224010000</SyncMan>
+						<SyncMan>001906002000010004000000000000000600001920010000</SyncMan>
+						<Fmmu>0000000000000000001200020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001900010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<BootStrapData>0010f400f410f400</BootStrapData>
+						<DcMode>53796e6368726f6e00000000000000004672656552756e2f534d2d53796e6368726f6e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000050c30000000000070100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="DIG Inputs" Index="#x1a00" Flags="#x0010" SyncMan="3">
+							<Entry Name="Input 1" Index="#x6000" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 2" Index="#x6000" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 3" Index="#x6000" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 4" Index="#x6000" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 5" Index="#x6000" Sub="#x05">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 6" Index="#x6000" Sub="#x06">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 7" Index="#x6000" Sub="#x07">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 8" Index="#x6000" Sub="#x08">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000005}">ARRAY [0..4] OF BIT</Type>
+							</Entry>
+							<Entry Name="Sync error" Index="#x6000" Sub="#x0e">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000002}">ARRAY [0..1] OF BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Diag Inputs" Index="#x1a01" Flags="#x0010" SyncMan="3">
+							<Entry Name="Diag Input 1" Index="#x6001" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 2" Index="#x6001" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 3" Index="#x6001" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 4" Index="#x6001" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 5" Index="#x6001" Sub="#x05">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 6" Index="#x6001" Sub="#x06">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 7" Index="#x6001" Sub="#x07">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 8" Index="#x6001" Sub="#x08">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000008}">ARRAY [0..0] OF BYTE</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Inputs Device" Index="#x1a02" Flags="#x0011" SyncMan="3">
+							<Entry Name="Safe state active" Index="#xf600" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Error channel 1" Index="#xf600" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Error channel 2" Index="#xf600" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-00200000000A}">ARRAY [0..9] OF BIT</Type>
+							</Entry>
+							<Entry Name="Sync error" Index="#xf600" Sub="#x0e">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
+							</Entry>
+							<Entry Name="TxPDO Toggle" Index="#xf600" Sub="#x10">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Outputs" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="2">
+							<Entry Name="Output 1" Index="#x7000" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 2" Index="#x7000" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 3" Index="#x7000" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 4" Index="#x7000" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 5" Index="#x7000" Sub="#x05">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 6" Index="#x7000" Sub="#x06">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 7" Index="#x7000" Sub="#x07">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 8" Index="#x7000" Sub="#x08">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000008}">ARRAY [0..0] OF BYTE</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Outputs Device" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="2">
+							<Entry Name="Set safe state" Index="#xf700" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Reset outputs" Index="#xf700" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-00200000000E}">ARRAY [0..13] OF BIT</Type>
+							</Entry>
+						</Pdo>
+						<CoeProfile ProfileNo="18355081"/>
+						<EtherCATp>
+							<Device>
+								<Us/>
+								<Up/>
+							</Device>
+							<Port>
+								<Us Resistance="0.108"/>
+								<Up Resistance="0.108"/>
+							</Port>
+							<Port>
+								<Us Resistance="0.108"/>
+								<Up Resistance="0.108"/>
+							</Port>
+						</EtherCATp>
+					</EtherCAT>
+				</Box>
+				<Box Id="10" BoxType="9099" BoxFlags="#x00000020">
+					<Name>Box 10 (EPP2316-0003)</Name>
+					<ImageId>1003</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0405" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x647656c9" RevisionNo="#x00120003" InfoDataAddr="true" TimeoutMailbox2="2000" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EPP2316-0003 8 Ch. Dig. In, 10µs, 8Ch. Dig. Out 24V, 0,5A, Diagnostic, 10-Pole Plug Connector" Desc="EPP2316-0003" PortABoxInfo="#x01000009">
+						<SyncMan>001000012600010001000000800000010001001026010000</SyncMan>
+						<SyncMan>001100012200010002000000800000010001001122010000</SyncMan>
+						<SyncMan>001204002400010003000000000000000400001224010000</SyncMan>
+						<SyncMan>001906002000010004000000000000000600001920010000</SyncMan>
+						<Fmmu>0000000000000000001200020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001900010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<BootStrapData>0010f400f410f400</BootStrapData>
+						<DcMode>53796e6368726f6e00000000000000004672656552756e2f534d2d53796e6368726f6e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000050c30000000000070100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="DIG Inputs" Index="#x1a00" Flags="#x0010" SyncMan="3">
+							<Entry Name="Input 1" Index="#x6000" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 2" Index="#x6000" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 3" Index="#x6000" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 4" Index="#x6000" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 5" Index="#x6000" Sub="#x05">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 6" Index="#x6000" Sub="#x06">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 7" Index="#x6000" Sub="#x07">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Input 8" Index="#x6000" Sub="#x08">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000005}">ARRAY [0..4] OF BIT</Type>
+							</Entry>
+							<Entry Name="Sync error" Index="#x6000" Sub="#x0e">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000002}">ARRAY [0..1] OF BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Diag Inputs" Index="#x1a01" Flags="#x0010" SyncMan="3">
+							<Entry Name="Diag Input 1" Index="#x6001" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 2" Index="#x6001" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 3" Index="#x6001" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 4" Index="#x6001" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 5" Index="#x6001" Sub="#x05">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 6" Index="#x6001" Sub="#x06">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 7" Index="#x6001" Sub="#x07">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Diag Input 8" Index="#x6001" Sub="#x08">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000008}">ARRAY [0..0] OF BYTE</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Inputs Device" Index="#x1a02" Flags="#x0011" SyncMan="3">
+							<Entry Name="Safe state active" Index="#xf600" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Error channel 1" Index="#xf600" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Error channel 2" Index="#xf600" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-00200000000A}">ARRAY [0..9] OF BIT</Type>
+							</Entry>
+							<Entry Name="Sync error" Index="#xf600" Sub="#x0e">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
+							</Entry>
+							<Entry Name="TxPDO Toggle" Index="#xf600" Sub="#x10">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Outputs" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="2">
+							<Entry Name="Output 1" Index="#x7000" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 2" Index="#x7000" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 3" Index="#x7000" Sub="#x03">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 4" Index="#x7000" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 5" Index="#x7000" Sub="#x05">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 6" Index="#x7000" Sub="#x06">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 7" Index="#x7000" Sub="#x07">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Output 8" Index="#x7000" Sub="#x08">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-002000000008}">ARRAY [0..0] OF BYTE</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="DIG Outputs Device" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="2">
+							<Entry Name="Set safe state" Index="#xf700" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry Name="Reset outputs" Index="#xf700" Sub="#x02">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-00200000000E}">ARRAY [0..13] OF BIT</Type>
+							</Entry>
+						</Pdo>
+						<CoeProfile ProfileNo="18355081"/>
+						<EtherCATp>
+							<Device>
+								<Us/>
+								<Up/>
+							</Device>
+							<Port>
+								<Us Resistance="0.108"/>
+								<Up Resistance="0.108"/>
+							</Port>
+							<Port>
+								<Us Resistance="0.108"/>
+								<Up Resistance="0.108"/>
+							</Port>
+						</EtherCATp>
+					</EtherCAT>
+				</Box>
+				<Box Id="11" BoxType="9099">
+					<Name>Box 11 (CMMT-AS)</Name>
+					<ImageId>1004</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0c80" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="47" EoeType="1" FoeType="1" VendorId="#x0000001d" ProductCode="#x007b1a95" RevisionNo="#x00000003" SerialNo="#xf0680e9c" InfoDataAddr="true" PortPhys="17" IdentificationAdo="308" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="CMMT-AS" Desc="CMMT-AS" PortABoxInfo="#x02000001">
+						<SyncMan>001200022600010001000000000000000002001226010000</SyncMan>
+						<SyncMan>001400022200010002000000000000000002001422010000</SyncMan>
+						<SyncMan>001018006400010003000000000000000000001064010000</SyncMan>
+						<SyncMan>00110e002000010004000000000000000000001120010000</SyncMan>
+						<Fmmu>0000000000000000001000020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001100010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
+						<BootStrapData>0010000400180004</BootStrapData>
+						<DcMode>44634f6666000000000000000000000044634f6666000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="Inputs" Index="#x1a00" Flags="#x0002" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque actual value" Index="#x6077">
+								<Type>INT</Type>
+							</Entry>
+							<Entry>
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Diag History" Index="#x1af0" Flags="#x0010">
+							<Entry Name="New Message Available" Index="#x10f3" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-00200000000F}">ARRAY [0..14] OF BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Timestamp" Index="#x1af1" Flags="#x0010">
+							<Entry Name="Timestamp" Index="#x10f8">
+								<Type>ULINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Outputs" Index="#x1600" InOut="1" Flags="#x0002" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Profile velocity" Index="#x6081">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Velocity offset" Index="#x60b1">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque offset" Index="#x60b2">
+								<Type>INT</Type>
+							</Entry>
+							<Entry>
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="12" BoxType="9099">
+					<Name>Box 12 (CMMT-AS)</Name>
+					<ImageId>1004</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0c80" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="47" EoeType="1" FoeType="1" VendorId="#x0000001d" ProductCode="#x007b1a95" RevisionNo="#x00000003" SerialNo="#xf0680e9c" InfoDataAddr="true" PortPhys="17" IdentificationAdo="308" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="CMMT-AS" Desc="CMMT-AS" PortABoxInfo="#x0100000b">
+						<SyncMan>001200022600010001000000000000000002001226010000</SyncMan>
+						<SyncMan>001400022200010002000000000000000002001422010000</SyncMan>
+						<SyncMan>001018006400010003000000000000000000001064010000</SyncMan>
+						<SyncMan>00110e002000010004000000000000000000001120010000</SyncMan>
+						<Fmmu>0000000000000000001000020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001100010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
+						<BootStrapData>0010000400180004</BootStrapData>
+						<DcMode>44634f6666000000000000000000000044634f6666000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="Inputs" Index="#x1a00" Flags="#x0002" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque actual value" Index="#x6077">
+								<Type>INT</Type>
+							</Entry>
+							<Entry>
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Diag History" Index="#x1af0" Flags="#x0010">
+							<Entry Name="New Message Available" Index="#x10f3" Sub="#x04">
+								<Type>BIT</Type>
+							</Entry>
+							<Entry>
+								<Type GUID="{18071995-0000-0000-0000-00200000000F}">ARRAY [0..14] OF BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Timestamp" Index="#x1af1" Flags="#x0010">
+							<Entry Name="Timestamp" Index="#x10f8">
+								<Type>ULINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Outputs" Index="#x1600" InOut="1" Flags="#x0002" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Profile velocity" Index="#x6081">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Velocity offset" Index="#x60b1">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque offset" Index="#x60b2">
+								<Type>INT</Type>
+							</Entry>
+							<Entry>
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="13" BoxType="9099" BoxFlags="#x00000020">
+					<Name>Box 13 (C1150-EC-XC-1S)</Name>
+					<ImageId>1005</ImageId>
+					<EtherCAT SlaveType="3" AdsServerAddress="a9fef57c020ef503" PdiType="#x0408" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="13" VendorId="#x4c4e5449" ProductCode="#x0096094f" RevisionNo="#x00010007" InfoDataAddr="true" InfoDataNetId="true" GenerateOwnNetId="true" InitializeOwnNetId="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="C1150-EC-XC-1S V1.7b5" Desc="C1150-EC-XC-1S" PortABoxInfo="#x0100000c">
+						<SyncMan>001a80002600010001000000200080008000001a26010000</SyncMan>
+						<SyncMan>001c80002200010002000000200080008000001c22010000</SyncMan>
+						<SyncMan>001118006400010003000000000000011800001164010000</SyncMan>
+						<SyncMan>001512002000010004000000000000011200001520010000</SyncMan>
+						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001500010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="Cylic Mode Inputs" Index="#x1a02" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<ExcludePdo>#x1b13</ExcludePdo>
+							<ExcludePdo>#x1b15</ExcludePdo>
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value (units)" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="User Defined Inputs" Index="#x1a20" Flags="#x0000"/>
+						<Pdo Name="Default Inputs" Index="#x1b00" Flags="#x0010" SyncMan="3">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<ExcludePdo>#x1b03</ExcludePdo>
+							<ExcludePdo>#x1b04</ExcludePdo>
+							<ExcludePdo>#x1b05</ExcludePdo>
+							<ExcludePdo>#x1b13</ExcludePdo>
+							<ExcludePdo>#x1b14</ExcludePdo>
+							<ExcludePdo>#x1b15</ExcludePdo>
+							<Entry Name="StateVar" Index="#x1b62">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="StatusWord" Index="#x1d51">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="WarnWord" Index="#x1d8e">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ActualPosition" Index="#x1b8d">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="NC Inputs" Index="#x1b01" Flags="#x0010">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b03</ExcludePdo>
+							<ExcludePdo>#x1b04</ExcludePdo>
+							<ExcludePdo>#x1b05</ExcludePdo>
+							<ExcludePdo>#x1b13</ExcludePdo>
+							<ExcludePdo>#x1b14</ExcludePdo>
+							<ExcludePdo>#x1b15</ExcludePdo>
+							<Entry Name="StateVar" Index="#x1b62">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="StatusWord" Index="#x1d51">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="WarnWord" Index="#x1d8e">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ActualPosition" Index="#x1b8d">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="StateVar" Index="#x1b03" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="StateVar" Index="#x1b62" Sub="#x01">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Status Word" Index="#x1b04" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="Status Word" Index="#x1d51" Sub="#x01">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="WarnWord" Index="#x1b05" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="WarnWord" Index="#x1d8e" Sub="#x03">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Config Module" Index="#x1b08" Flags="#x0010">
+							<Entry Name="Config Status Word" Index="#x1b09">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Index In" Index="#x1b0a">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Value In" Index="#x1b0b">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemVel" Index="#x1b10" Flags="#x0010">
+							<Entry Name="DemandVelocity" Index="#x1b8b">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input ActVel" Index="#x1b11" Flags="#x0010">
+							<Entry Name="ActualVelocity" Index="#x1b8e">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input ActVelFilt" Index="#x1b12" Flags="#x0010">
+							<Entry Name="ActualVelocityFilt" Index="#x1baf">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemandPosition" Index="#x1b13" Flags="#x0010">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input ActualPosition" Index="#x1b14" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="ActualPosition" Index="#x1b8d">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemandCurrent" Index="#x1b15" Flags="#x0010">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemCurrFilt" Index="#x1b16" Flags="#x0010">
+							<Entry Name="DemandCurrentFilt" Index="#x1b98">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input Command Table Var 1" Index="#x1b20" Flags="#x0010">
+							<Entry Name="Command Table Var 1" Index="#x1e72">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input Command Table Var 2" Index="#x1b21" Flags="#x0010">
+							<Entry Name="Command Table Var 2" Index="#x1e73">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Position Mode" Index="#x1602" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Position Velocity Mode" Index="#x1603" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Position Velocity Torque Mode" Index="#x1604" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Torque Mode" Index="#x1606" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="User Defined Outputs" Index="#x1620" InOut="1" Flags="#x0000"/>
+						<Pdo Name="Default Outputs" Index="#x1700" InOut="1" Flags="#x0010" SyncMan="2">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Control Word" Index="#x1d52">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Header" Index="#x1db0">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 1" Index="#x1e40">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 2" Index="#x1e41">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 3" Index="#x1e42">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 4" Index="#x1e43">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 5" Index="#x1e44">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="NC Outputs" Index="#x1701" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Control Word" Index="#x1d52">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Setpoint Position" Index="#x1e80">
+								<Type>LREAL</Type>
+							</Entry>
+							<Entry Name="Setpoint Velocity" Index="#x1e81">
+								<Type>LREAL</Type>
+							</Entry>
+							<Entry Name="Setpoint Acceleration" Index="#x1e82">
+								<Type>LREAL</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Control Word" Index="#x1703" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<Entry Name="Control Word" Index="#x1703" Sub="#x01">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Motion Command Intf #6" Index="#x1704" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<Entry Name="Motion Command Header" Index="#x1704" Sub="#x02">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 1" Index="#x1704" Sub="#x03">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Config Module" Index="#x1708" InOut="1" Flags="#x0010">
+							<Entry Name="Config Control Word" Index="#x1709">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Index Out" Index="#x170a">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Value Out" Index="#x170b">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Max Current Set A" Index="#x1710" InOut="1" Flags="#x0010">
+							<Entry Name="Max Current Set A" Index="#x13a6">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<CoeProfile ProfileNo="5001"/>
+					</EtherCAT>
+				</Box>
+				<Box Id="14" BoxType="9099" BoxFlags="#x00000020">
+					<Name>Box 14 (C1150-EC-XC-1S)</Name>
+					<ImageId>1005</ImageId>
+					<EtherCAT SlaveType="3" AdsServerAddress="a9fef57c020ff603" PdiType="#x0408" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="13" VendorId="#x4c4e5449" ProductCode="#x0096094f" RevisionNo="#x00010007" InfoDataAddr="true" InfoDataNetId="true" GenerateOwnNetId="true" InitializeOwnNetId="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="C1150-EC-XC-1S V1.7b5" Desc="C1150-EC-XC-1S" PortABoxInfo="#x0100000d">
+						<SyncMan>001a80002600010001000000200080008000001a26010000</SyncMan>
+						<SyncMan>001c80002200010002000000200080008000001c22010000</SyncMan>
+						<SyncMan>001118006400010003000000000000011800001164010000</SyncMan>
+						<SyncMan>001512002000010004000000000000011200001520010000</SyncMan>
+						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001500010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="Cylic Mode Inputs" Index="#x1a02" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<ExcludePdo>#x1b13</ExcludePdo>
+							<ExcludePdo>#x1b15</ExcludePdo>
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value (units)" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="User Defined Inputs" Index="#x1a20" Flags="#x0000"/>
+						<Pdo Name="Default Inputs" Index="#x1b00" Flags="#x0010" SyncMan="3">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<ExcludePdo>#x1b03</ExcludePdo>
+							<ExcludePdo>#x1b04</ExcludePdo>
+							<ExcludePdo>#x1b05</ExcludePdo>
+							<ExcludePdo>#x1b13</ExcludePdo>
+							<ExcludePdo>#x1b14</ExcludePdo>
+							<ExcludePdo>#x1b15</ExcludePdo>
+							<Entry Name="StateVar" Index="#x1b62">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="StatusWord" Index="#x1d51">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="WarnWord" Index="#x1d8e">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ActualPosition" Index="#x1b8d">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="NC Inputs" Index="#x1b01" Flags="#x0010">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b03</ExcludePdo>
+							<ExcludePdo>#x1b04</ExcludePdo>
+							<ExcludePdo>#x1b05</ExcludePdo>
+							<ExcludePdo>#x1b13</ExcludePdo>
+							<ExcludePdo>#x1b14</ExcludePdo>
+							<ExcludePdo>#x1b15</ExcludePdo>
+							<Entry Name="StateVar" Index="#x1b62">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="StatusWord" Index="#x1d51">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="WarnWord" Index="#x1d8e">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ActualPosition" Index="#x1b8d">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="StateVar" Index="#x1b03" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="StateVar" Index="#x1b62" Sub="#x01">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Status Word" Index="#x1b04" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="Status Word" Index="#x1d51" Sub="#x01">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="WarnWord" Index="#x1b05" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="WarnWord" Index="#x1d8e" Sub="#x03">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Config Module" Index="#x1b08" Flags="#x0010">
+							<Entry Name="Config Status Word" Index="#x1b09">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Index In" Index="#x1b0a">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Value In" Index="#x1b0b">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemVel" Index="#x1b10" Flags="#x0010">
+							<Entry Name="DemandVelocity" Index="#x1b8b">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input ActVel" Index="#x1b11" Flags="#x0010">
+							<Entry Name="ActualVelocity" Index="#x1b8e">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input ActVelFilt" Index="#x1b12" Flags="#x0010">
+							<Entry Name="ActualVelocityFilt" Index="#x1baf">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemandPosition" Index="#x1b13" Flags="#x0010">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="DemandPosition" Index="#x1b8a">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input ActualPosition" Index="#x1b14" Flags="#x0010">
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="ActualPosition" Index="#x1b8d">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemandCurrent" Index="#x1b15" Flags="#x0010">
+							<ExcludePdo>#x1a02</ExcludePdo>
+							<ExcludePdo>#x1b00</ExcludePdo>
+							<ExcludePdo>#x1b01</ExcludePdo>
+							<Entry Name="DemandCurrent" Index="#x1b93">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input DemCurrFilt" Index="#x1b16" Flags="#x0010">
+							<Entry Name="DemandCurrentFilt" Index="#x1b98">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input Command Table Var 1" Index="#x1b20" Flags="#x0010">
+							<Entry Name="Command Table Var 1" Index="#x1e72">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Input Command Table Var 2" Index="#x1b21" Flags="#x0010">
+							<Entry Name="Command Table Var 2" Index="#x1e73">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Position Mode" Index="#x1602" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Position Velocity Mode" Index="#x1603" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Position Velocity Torque Mode" Index="#x1604" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Cylic Torque Mode" Index="#x1606" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Mode of Operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Byte Padding">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="User Defined Outputs" Index="#x1620" InOut="1" Flags="#x0000"/>
+						<Pdo Name="Default Outputs" Index="#x1700" InOut="1" Flags="#x0010" SyncMan="2">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Control Word" Index="#x1d52">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Header" Index="#x1db0">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 1" Index="#x1e40">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 2" Index="#x1e41">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 3" Index="#x1e42">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 4" Index="#x1e43">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 5" Index="#x1e44">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="NC Outputs" Index="#x1701" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1703</ExcludePdo>
+							<ExcludePdo>#x1704</ExcludePdo>
+							<Entry Name="Control Word" Index="#x1d52">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Setpoint Position" Index="#x1e80">
+								<Type>LREAL</Type>
+							</Entry>
+							<Entry Name="Setpoint Velocity" Index="#x1e81">
+								<Type>LREAL</Type>
+							</Entry>
+							<Entry Name="Setpoint Acceleration" Index="#x1e82">
+								<Type>LREAL</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Control Word" Index="#x1703" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<Entry Name="Control Word" Index="#x1703" Sub="#x01">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Motion Command Intf #6" Index="#x1704" InOut="1" Flags="#x0010">
+							<ExcludePdo>#x1602</ExcludePdo>
+							<ExcludePdo>#x1603</ExcludePdo>
+							<ExcludePdo>#x1604</ExcludePdo>
+							<ExcludePdo>#x1606</ExcludePdo>
+							<ExcludePdo>#x1700</ExcludePdo>
+							<ExcludePdo>#x1701</ExcludePdo>
+							<Entry Name="Motion Command Header" Index="#x1704" Sub="#x02">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Motion Command Par 1" Index="#x1704" Sub="#x03">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Config Module" Index="#x1708" InOut="1" Flags="#x0010">
+							<Entry Name="Config Control Word" Index="#x1709">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Index Out" Index="#x170a">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Config Value Out" Index="#x170b">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Max Current Set A" Index="#x1710" InOut="1" Flags="#x0010">
+							<Entry Name="Max Current Set A" Index="#x13a6">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<CoeProfile ProfileNo="5001"/>
+					</EtherCAT>
+				</Box>
+				<Box Id="15" BoxType="9099">
+					<Name>Box 15 (EX260-SEC1)</Name>
+					<ImageId>1006</ImageId>
+					<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000114" ProductCode="#x01000001" RevisionNo="#x00010002" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EX260-SEC1 EtherCAT SI Unit (32DO_PNP) Rev1.2" Desc="EX260-SEC1" PortABoxInfo="#x0100000e">
+						<SyncMan>000f01004400010003000000000000000000000f44090000</SyncMan>
+						<SyncMan>010f01004400010003000000000000000000010f44090000</SyncMan>
+						<SyncMan>020f01004400010003000000000000000000020f44090000</SyncMan>
+						<SyncMan>030f01004400010003000000000000000000030f44090000</SyncMan>
+						<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+						<Pdo Name="Byte 0" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+							<Entry Name="Output" Index="#x3101" Sub="#x01">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Byte 1" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="1">
+							<Entry Name="Output" Index="#x3101" Sub="#x02">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Byte 2" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="2">
+							<Entry Name="Output" Index="#x3101" Sub="#x03">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Byte 3" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="3">
+							<Entry Name="Output" Index="#x3101" Sub="#x04">
+								<Type>USINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="16" BoxType="9099">
+					<Name>Box 16 (EP1008-0001)</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="1" PdiType="#x0304" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x03f04052" RevisionNo="#x00120001" RepeatSupport="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EP1008-0001 8 Ch. Dig. Input 24V, 3ms, M8" Desc="EP1008-0001" PortABoxInfo="#x0100000f">
+						<SyncMan>001001000000010004000000010001000100001000010000</SyncMan>
+						<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+						<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6000" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6010" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6020" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6030" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6040" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6050" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6060" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6070" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="17" BoxType="9099">
+					<Name>Box 17 (EP1008-0001)</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="1" PdiType="#x0304" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x03f04052" RevisionNo="#x00120001" RepeatSupport="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EP1008-0001 8 Ch. Dig. Input 24V, 3ms, M8" Desc="EP1008-0001" PortABoxInfo="#x01000010">
+						<SyncMan>001001000000010004000000010001000100001000010000</SyncMan>
+						<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+						<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6000" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6010" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6020" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6030" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6040" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6050" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6060" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6070" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="18" BoxType="9099">
+					<Name>Box 18 (EP1008-0001)</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="1" PdiType="#x0304" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x03f04052" RevisionNo="#x00120001" RepeatSupport="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EP1008-0001 8 Ch. Dig. Input 24V, 3ms, M8" Desc="EP1008-0001" PortABoxInfo="#x01000011">
+						<SyncMan>001001000000010004000000010001000100001000010000</SyncMan>
+						<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+						<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6000" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6010" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6020" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6030" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6040" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6050" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6060" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+							<Entry Name="Input" Index="#x6070" Sub="#x01">
+								<Type>BIT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<EtherCAT EnableVirtualSwitch="true" MaxSwitchPorts="3" MaxSwitchFrames="140"/>
+			</Device>
+		</Io>
 	</Project>
+	<Mappings>
+		<MappingInfo Identifier="{00000000-2002-0850-0120-500810000403}" Id="#x02030010"/>
+		<MappingInfo Identifier="{00000000-2002-0850-0120-500821000403}" Id="#x02030020"/>
+		<OwnerA Name="TIPC^Autoloader^Autoloader Instance">
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 10 (EPP2316-0003)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 2" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 3" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 4" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 5" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 6" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 7" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[10]" VarB="DIG Inputs^Input 8" Size="1" OffsA="7"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 1"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 2" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 3" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 4" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 5" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 6" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 7" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[10]" VarB="DIG Outputs^Output 8" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 11 (CMMT-AS)">
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.AdsAddr_In" VarB="InfoData^AdsAddr"/>
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.ModesOfOperationDisplay_In" VarB="Inputs^Modes of operation display"/>
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.PositionActualValue_In" VarB="Inputs^Position actual value"/>
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.SlaveState_In" VarB="InfoData^State"/>
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.Statusword_In" VarB="Inputs^Statusword"/>
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.TorqueActualValue_In" VarB="Inputs^Torque actual value"/>
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.VelocityActualValue_In" VarB="Inputs^Velocity actual value"/>
+				<Link VarA="PlcTask Inputs^Stations.sLoadAxis.WcState_In" VarB="WcState^WcState"/>
+				<Link VarA="PlcTask Outputs^Stations.sLoadAxis.Controlword_Out" VarB="Outputs^Controlword"/>
+				<Link VarA="PlcTask Outputs^Stations.sLoadAxis.ModesOfOperation_Out" VarB="Outputs^Modes of operation"/>
+				<Link VarA="PlcTask Outputs^Stations.sLoadAxis.ProfileVelocity_Out" VarB="Outputs^Profile velocity"/>
+				<Link VarA="PlcTask Outputs^Stations.sLoadAxis.TargetPosition_Out" VarB="Outputs^Target position"/>
+				<Link VarA="PlcTask Outputs^Stations.sLoadAxis.TargetTorque_Out" VarB="Outputs^Target torque"/>
+				<Link VarA="PlcTask Outputs^Stations.sLoadAxis.TargetVelocity_Out" VarB="Outputs^Target velocity"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 12 (CMMT-AS)">
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.AdsAddr_In" VarB="InfoData^AdsAddr"/>
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.ModesOfOperationDisplay_In" VarB="Inputs^Modes of operation display"/>
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.PositionActualValue_In" VarB="Inputs^Position actual value"/>
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.SlaveState_In" VarB="InfoData^State"/>
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.Statusword_In" VarB="Inputs^Statusword"/>
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.TorqueActualValue_In" VarB="Inputs^Torque actual value"/>
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.VelocityActualValue_In" VarB="Inputs^Velocity actual value"/>
+				<Link VarA="PlcTask Inputs^Stations.sUnloadAxis.WcState_In" VarB="WcState^WcState"/>
+				<Link VarA="PlcTask Outputs^Stations.sUnloadAxis.Controlword_Out" VarB="Outputs^Controlword"/>
+				<Link VarA="PlcTask Outputs^Stations.sUnloadAxis.ModesOfOperation_Out" VarB="Outputs^Modes of operation"/>
+				<Link VarA="PlcTask Outputs^Stations.sUnloadAxis.ProfileVelocity_Out" VarB="Outputs^Profile velocity"/>
+				<Link VarA="PlcTask Outputs^Stations.sUnloadAxis.TargetPosition_Out" VarB="Outputs^Target position"/>
+				<Link VarA="PlcTask Outputs^Stations.sUnloadAxis.TargetTorque_Out" VarB="Outputs^Target torque"/>
+				<Link VarA="PlcTask Outputs^Stations.sUnloadAxis.TargetVelocity_Out" VarB="Outputs^Target velocity"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 13 (C1150-EC-XC-1S)">
+				<Link VarA="PlcTask Inputs^Stations.insertLoadAxis.DrvToPlc^ComActualPosition" VarB="Default Inputs^ActualPosition"/>
+				<Link VarA="PlcTask Inputs^Stations.insertLoadAxis.DrvToPlc^ComDemandPosition" VarB="Default Inputs^DemandPosition"/>
+				<Link VarA="PlcTask Inputs^Stations.insertLoadAxis.DrvToPlc^StateVar" VarB="Default Inputs^StateVar"/>
+				<Link VarA="PlcTask Inputs^Stations.insertLoadAxis.DrvToPlc^StatusWord" VarB="Default Inputs^StatusWord"/>
+				<Link VarA="PlcTask Inputs^Stations.insertLoadAxis.DrvToPlc^WarnWord" VarB="Default Inputs^WarnWord"/>
+				<Link VarA="PlcTask Outputs^Stations.insertLoadAxis.PlcToDrv^ControlWord" VarB="Default Outputs^Control Word"/>
+				<Link VarA="PlcTask Outputs^Stations.insertLoadAxis.PlcToDrv^MCHeader" VarB="Default Outputs^Motion Command Header"/>
+				<Link VarA="PlcTask Outputs^Stations.insertLoadAxis.PlcToDrv^MCParaDWord_00_03" VarB="Default Outputs^Motion Command Par 1"/>
+				<Link VarA="PlcTask Outputs^Stations.insertLoadAxis.PlcToDrv^MCParaDWord_04_07" VarB="Default Outputs^Motion Command Par 2"/>
+				<Link VarA="PlcTask Outputs^Stations.insertLoadAxis.PlcToDrv^MCParaDWord_08_11" VarB="Default Outputs^Motion Command Par 3"/>
+				<Link VarA="PlcTask Outputs^Stations.insertLoadAxis.PlcToDrv^MCParaDWord_12_15" VarB="Default Outputs^Motion Command Par 4"/>
+				<Link VarA="PlcTask Outputs^Stations.insertLoadAxis.PlcToDrv^MCParaDWord_16_19" VarB="Default Outputs^Motion Command Par 5"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 14 (C1150-EC-XC-1S)">
+				<Link VarA="PlcTask Inputs^Stations.insertUnLoadAxis.DrvToPlc^ComActualPosition" VarB="Default Inputs^ActualPosition"/>
+				<Link VarA="PlcTask Inputs^Stations.insertUnLoadAxis.DrvToPlc^ComDemandPosition" VarB="Default Inputs^DemandPosition"/>
+				<Link VarA="PlcTask Inputs^Stations.insertUnLoadAxis.DrvToPlc^StateVar" VarB="Default Inputs^StateVar"/>
+				<Link VarA="PlcTask Inputs^Stations.insertUnLoadAxis.DrvToPlc^StatusWord" VarB="Default Inputs^StatusWord"/>
+				<Link VarA="PlcTask Inputs^Stations.insertUnLoadAxis.DrvToPlc^WarnWord" VarB="Default Inputs^WarnWord"/>
+				<Link VarA="PlcTask Outputs^Stations.insertUnLoadAxis.PlcToDrv^ControlWord" VarB="Default Outputs^Control Word"/>
+				<Link VarA="PlcTask Outputs^Stations.insertUnLoadAxis.PlcToDrv^MCHeader" VarB="Default Outputs^Motion Command Header"/>
+				<Link VarA="PlcTask Outputs^Stations.insertUnLoadAxis.PlcToDrv^MCParaDWord_00_03" VarB="Default Outputs^Motion Command Par 1"/>
+				<Link VarA="PlcTask Outputs^Stations.insertUnLoadAxis.PlcToDrv^MCParaDWord_04_07" VarB="Default Outputs^Motion Command Par 2"/>
+				<Link VarA="PlcTask Outputs^Stations.insertUnLoadAxis.PlcToDrv^MCParaDWord_08_11" VarB="Default Outputs^Motion Command Par 3"/>
+				<Link VarA="PlcTask Outputs^Stations.insertUnLoadAxis.PlcToDrv^MCParaDWord_12_15" VarB="Default Outputs^Motion Command Par 4"/>
+				<Link VarA="PlcTask Outputs^Stations.insertUnLoadAxis.PlcToDrv^MCParaDWord_16_19" VarB="Default Outputs^Motion Command Par 5"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 15 (EX260-SEC1)">
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[150]" VarB="Byte 0^Output"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[151]" VarB="Byte 1^Output"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[152]" VarB="Byte 2^Output"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 16 (EP1008-0001)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 2^Input" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 3^Input" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 4^Input" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 5^Input" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 6^Input" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 7^Input" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[16]" VarB="Channel 8^Input" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 17 (EP1008-0001)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 2^Input" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 3^Input" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 4^Input" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 5^Input" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 6^Input" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 7^Input" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[17]" VarB="Channel 8^Input" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 18 (EP1008-0001)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 2^Input" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 3^Input" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 4^Input" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 5^Input" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 6^Input" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 7^Input" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[18]" VarB="Channel 8^Input" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 9 (EPP2316-0003)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 2" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 3" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 4" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 5" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 6" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 7" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[9]" VarB="DIG Inputs^Input 8" Size="1" OffsA="7"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 1"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 2" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 3" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 4" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 5" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 6" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 7" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[9]" VarB="DIG Outputs^Output 8" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 2 (EL1008)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 2^Input" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 3^Input" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 4^Input" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 5^Input" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 6^Input" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 7^Input" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[2]" VarB="Channel 8^Input" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1008)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 2^Input" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 3^Input" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 4^Input" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 5^Input" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 6^Input" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 7^Input" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[3]" VarB="Channel 8^Input" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1008)">
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 2^Input" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 3^Input" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 4^Input" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 5^Input" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 6^Input" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 7^Input" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Inputs^Global.INPUT_IMAGE[4]" VarB="Channel 8^Input" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL2808)">
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 1^Output"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 2^Output" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 3^Output" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 4^Output" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 5^Output" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 6^Output" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 7^Output" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[5]" VarB="Channel 8^Output" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 6 (EL2808)">
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 1^Output"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 2^Output" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 3^Output" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 4^Output" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 5^Output" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 6^Output" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 7^Output" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[6]" VarB="Channel 8^Output" Size="1" OffsA="7"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 7 (EL2808)">
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 1^Output"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 2^Output" Size="1" OffsA="1"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 3^Output" Size="1" OffsA="2"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 4^Output" Size="1" OffsA="3"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 5^Output" Size="1" OffsA="4"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 6^Output" Size="1" OffsA="5"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 7^Output" Size="1" OffsA="6"/>
+				<Link VarA="PlcTask Outputs^Global.OUTPUT_IMAGE[7]" VarB="Channel 8^Output" Size="1" OffsA="7"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
 </TcSmProject>
