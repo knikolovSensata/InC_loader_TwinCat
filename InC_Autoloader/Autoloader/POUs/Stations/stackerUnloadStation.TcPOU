@@ -118,10 +118,11 @@ CASE activeState OF
 
 	stackerUnloadStates.stReady:
 		setDisplayState(stackerUnLoadDisplayStates.dStStandBy);
-		depNextState(Stations.machineStBase,  globalDeps.depMachineStopping,      stackerUnloadStates.stStackerStopped);
-		depNextState(Stations.machineStBase,  globalDeps.depMachineStop,          stackerUnloadStates.stStackerStopped);		
-		depNextState(Stations.roboStBase,     globalDeps.depRoboUnLodPalletFull,  stackerUnloadStates.stMoveUpStart);
-	    depNextState(Stations.machineStBase,  globalDeps.depMacinePurgeStackers,  stackerUnloadStates.stUnloadPurgeStart);		
+		depNextState(Stations.machineStBase,  globalDeps.depMachineStopping,          stackerUnloadStates.stStackerStopped);
+		depNextState(Stations.machineStBase,  globalDeps.depMachineStop,              stackerUnloadStates.stStackerStopped);		
+		depNextState(Stations.roboStBase,     globalDeps.depRoboUnLodPalletFull,      stackerUnloadStates.stMoveUpStart);
+		depNextState(Stations.roboStBase,     globalDeps.depRobotClearUnLoadStacker,  stackerUnloadStates.stMoveUpStart);
+	    depNextState(Stations.machineStBase,  globalDeps.depMacinePurgeStackers,      stackerUnloadStates.stUnloadPurgeStart);		
 		depWait(globalDeps.depSUnloadRobotUnloadGrip);
 		nextState(stackerUnloadStates.stLockPalletStart);
 		
@@ -385,7 +386,6 @@ CASE activeState OF
 
 	stackerUnloadStates.stPrepareDone:		
 		prepareDone         := TRUE;
-		Global.uStackerFull := FALSE;
 		nextState(stackerUnloadStates.stReady);		
 	
 // *** Move up - Start
@@ -450,6 +450,9 @@ CASE activeState OF
 
 	stackerUnloadStates.stMoveUpDone:	
 		moveUpStart := FALSE;	
+		IF Global.lStackerEmpty THEN
+			nextState(stackerUnloadStates.stResetStart);
+		END_IF
 		nextState(stackerUnloadStates.stUnlockPalletStart);
 		
 // *** Unlock Pallet - Start
@@ -516,7 +519,6 @@ CASE activeState OF
 		IF currentPos = posCount THEN                         // Стакера е пълен
 			unlockPalletStart   := FALSE;
 			Global.startZumer   := TRUE;
-			Global.uStackerFull := TRUE;
 		ELSE
 			IF moveDone AND moveInit THEN
 				currentPos := currentPos + 1;
@@ -851,13 +853,18 @@ axisFesto          ( axis				:= Stations.sUnloadAxis,
       </Implementation>
     </Action>
     <LineIds Name="stackerUnloadStation">
-      <LineId Id="4333" Count="112" />
+      <LineId Id="4333" Count="78" />
+      <LineId Id="5195" Count="0" />
+      <LineId Id="4412" Count="33" />
       <LineId Id="5152" Count="0" />
       <LineId Id="4446" Count="144" />
       <LineId Id="5153" Count="0" />
-      <LineId Id="4591" Count="161" />
+      <LineId Id="4591" Count="82" />
+      <LineId Id="4675" Count="63" />
+      <LineId Id="5196" Count="2" />
+      <LineId Id="4739" Count="13" />
       <LineId Id="5154" Count="0" />
-      <LineId Id="4753" Count="51" />
+      <LineId Id="4753" Count="50" />
       <LineId Id="4806" Count="57" />
       <LineId Id="5155" Count="0" />
       <LineId Id="4864" Count="248" />

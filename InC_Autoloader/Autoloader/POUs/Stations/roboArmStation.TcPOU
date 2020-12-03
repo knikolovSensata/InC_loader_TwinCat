@@ -519,14 +519,12 @@ CASE activeState OF
 	roboArmStates.stNextMoveStart:
 		nextMoveStart := TRUE;
         resetActive   := TRUE;
-		IF NOT Global.lStackerEmpty THEN
-			IF checkLoadStacker AND loadFixtures = 0 THEN
-				 depWait(globalDeps.depSLoadStationReady);
-		   		 nextState(roboArmStates.stNextMoveWaitLStacker);	
-			ELSE
-				nextState(roboArmStates.stNextMovePalletCheck);
-	   		END_IF	
-		END_IF
+		IF checkLoadStacker AND loadFixtures = 0 THEN
+			 depWait(globalDeps.depSLoadStationReady);
+		   	 nextState(roboArmStates.stNextMoveWaitLStacker);	
+		ELSE
+			nextState(roboArmStates.stNextMovePalletCheck);
+	   	END_IF	
 		
 // *** Next Move  - Wait Load Stacker
 // Изчаква се вх. стакер да си свърши работата
@@ -544,7 +542,7 @@ CASE activeState OF
 	roboArmStates.stNextMovePalletCheck:
 		checkLoadStacker := FALSE;
 		IF palletIn THEN
-			IF unLoadFixtures > 0 OR Global.uStackerFull THEN
+			IF unLoadFixtures > 0 OR Global.lStackerEmpty THEN
 				nextMoveStart := FALSE;
 				nextState(roboArmStates.stEmptyPosStart);				
 			ELSE
@@ -635,12 +633,8 @@ CASE activeState OF
 
 	roboArmStates.stNextMovePalletOnUload:
 		nextMoveStart := FALSE;	
-		IF NOT Global.uStackerFull THEN
-			nextState(roboArmStates.stMoveToEmptySliderDown);
-		ELSE
-	    	moveToEmptyStart   := TRUE;			
-		END_IF
-			
+		nextState(roboArmStates.stMoveToEmptySliderDown);
+
 // *** Next Move - Load 
 // Робота отива над вх. стакер
 
@@ -1036,8 +1030,12 @@ CASE activeState OF
 
 	roboArmStates.stEmptyPosDone:		
 		emptyPosStart        := FALSE;	
-		palletRotTypeWaitPos := TagsRobot.rotPallet;		
-		nextState(roboArmStates.stNextMoveStart);			
+		palletRotTypeWaitPos := TagsRobot.rotPallet;	
+		IF Global.lStackerEmpty THEN
+			depSignal(globalDeps.depRobotClearUnLoadStacker);
+		ELSE	
+			nextState(roboArmStates.stNextMoveStart);
+		END_IF			
 		
 // *** Load - Start
 // Робота се мести на входния стакер и чрез лазерната си ролетка
@@ -2993,13 +2991,11 @@ END_VAR]]></Declaration>
       <LineId Id="15100" Count="0" />
       <LineId Id="12764" Count="64" />
       <LineId Id="12833" Count="13" />
-      <LineId Id="14545" Count="0" />
       <LineId Id="14274" Count="1" />
       <LineId Id="14277" Count="0" />
       <LineId Id="14276" Count="0" />
       <LineId Id="12847" Count="0" />
       <LineId Id="14278" Count="0" />
-      <LineId Id="14546" Count="0" />
       <LineId Id="14269" Count="0" />
       <LineId Id="14271" Count="2" />
       <LineId Id="14270" Count="0" />
@@ -3043,10 +3039,7 @@ END_VAR]]></Declaration>
       <LineId Id="12910" Count="0" />
       <LineId Id="12940" Count="4" />
       <LineId Id="14583" Count="0" />
-      <LineId Id="14581" Count="0" />
       <LineId Id="12946" Count="0" />
-      <LineId Id="14582" Count="0" />
-      <LineId Id="14585" Count="1" />
       <LineId Id="13928" Count="0" />
       <LineId Id="13932" Count="0" />
       <LineId Id="13935" Count="0" />
@@ -3141,7 +3134,11 @@ END_VAR]]></Declaration>
       <LineId Id="14535" Count="0" />
       <LineId Id="13285" Count="4" />
       <LineId Id="15205" Count="0" />
-      <LineId Id="13291" Count="47" />
+      <LineId Id="15341" Count="1" />
+      <LineId Id="15347" Count="0" />
+      <LineId Id="15346" Count="0" />
+      <LineId Id="15345" Count="0" />
+      <LineId Id="13292" Count="46" />
       <LineId Id="14677" Count="0" />
       <LineId Id="14680" Count="0" />
       <LineId Id="14679" Count="0" />

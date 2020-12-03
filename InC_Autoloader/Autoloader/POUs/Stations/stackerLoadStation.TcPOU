@@ -253,7 +253,6 @@ CASE activeState OF
 		 purgeStart                := FALSE;	
 		 resetDone                 := TRUE;
          palletsLoadDone           := FALSE;		
-		 TagsHMI.LoadStackerSignal := TRUE;	 
 		 depWait(globalDeps.depSLoadPurgeDone);
 	
 // *** Pallets Load - Start
@@ -469,11 +468,14 @@ CASE activeState OF
 		IF moveDone THEN
 			currentPos := currentPos - 1;
 		END_IF
+		IF currentPos = 1 THEN
+			Global.startZumer    := TRUE;
+			Global.lStackerEmpty := TRUE;
+			TagsHMI.LoadStackerSignal := TRUE;	 
+		END_IF
 		IF currentPos < 0 THEN
 			currentPos           := 0;
 			palletsLoadDone      := FALSE;
-			Global.startZumer    := TRUE;
-			Global.lStackerEmpty := TRUE;
 			nextState(stackerLoadStates.stResetDone);
   	    ELSE
 			Stations.sLoadDrive.TargetPosition     := axisPosArr[currentPos];
@@ -521,6 +523,7 @@ CASE activeState OF
 // Има стигнала тара на върха на стакера
 	stackerLoadStates.stPreparePalletDone:
 		preparePalletDone := TRUE;
+		TagsHMI.LoadStackerSignal := FALSE;		
 		nextState(stackerLoadStates.stMoveDownStart);
 
 // *** Move Down - Start
@@ -928,15 +931,23 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       <LineId Id="9503" Count="0" />
       <LineId Id="8737" Count="63" />
       <LineId Id="9547" Count="0" />
-      <LineId Id="8801" Count="71" />
+      <LineId Id="8801" Count="26" />
+      <LineId Id="8829" Count="43" />
       <LineId Id="9504" Count="0" />
       <LineId Id="8873" Count="71" />
       <LineId Id="9548" Count="0" />
       <LineId Id="8945" Count="38" />
       <LineId Id="9505" Count="0" />
-      <LineId Id="8984" Count="81" />
+      <LineId Id="8984" Count="56" />
+      <LineId Id="9586" Count="1" />
+      <LineId Id="9591" Count="1" />
+      <LineId Id="9588" Count="0" />
+      <LineId Id="9041" Count="2" />
+      <LineId Id="9046" Count="19" />
       <LineId Id="9549" Count="0" />
-      <LineId Id="9066" Count="38" />
+      <LineId Id="9066" Count="25" />
+      <LineId Id="9593" Count="0" />
+      <LineId Id="9092" Count="12" />
       <LineId Id="9506" Count="0" />
       <LineId Id="9105" Count="115" />
       <LineId Id="9507" Count="0" />

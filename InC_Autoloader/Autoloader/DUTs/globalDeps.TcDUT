@@ -54,6 +54,7 @@ TYPE globalDeps :
 	depRoboULoadOnPos,
 	depRoboLoadSensor,
 	depRoboStartLoadStacker,
+	depRobotClearUnLoadStacker,
 	
 	// За inserter load station
 	depILoadInitDone,
