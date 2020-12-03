@@ -373,7 +373,6 @@ CASE activeState OF
 		io.setSR(yPalletLoadFree, yPalletLoadGrip);
 		palletOnEmptyPos        := TRUE;		
 		TagsRobot.roboRecipeNum := Global.recipe;
-		Stations.roboData       := dataRequestRobot.roboRecipe;
 		nextState(roboArmStates.stInitRecipeCheck);		
 
 // *** Init - Recipe Check
@@ -2977,7 +2976,8 @@ END_VAR]]></Declaration>
       <LineId Id="12698" Count="3" />
       <LineId Id="15106" Count="0" />
       <LineId Id="14761" Count="0" />
-      <LineId Id="12702" Count="19" />
+      <LineId Id="12702" Count="0" />
+      <LineId Id="12704" Count="17" />
       <LineId Id="15005" Count="0" />
       <LineId Id="12722" Count="4" />
       <LineId Id="15006" Count="0" />

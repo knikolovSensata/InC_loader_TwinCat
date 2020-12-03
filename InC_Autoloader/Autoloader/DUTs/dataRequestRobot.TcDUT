@@ -11,7 +11,6 @@ TYPE dataRequestRobot :
 	done       := Consts.NO_REQUEST,
 	error      := Consts.REQUEST_ERROR,
 	
-	roboRecipe     := 99,               // Заражда репта на робота - номера и се намира в TagsHMI.RoboRecipeNum (1-15)
 	roboInit		:= 100,				// Зарежда MAINPROGRAM и изчаква робота да е в READY
 	
 	roboPrg_Home   := 1,
