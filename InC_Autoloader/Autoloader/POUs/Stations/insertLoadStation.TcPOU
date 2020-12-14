@@ -30,7 +30,7 @@ VAR
     ccwRotPos              : REAL;     
 	beforeGripPos          : REAL;                                 
 	
-	gripTime			   : TIME := T#250MS;                          // Време за ход на грипера
+	gripTime			   : TIME := T#350MS;                          // Време за ход на грипера
 	gripTimeOut            : TIME := T#2S;                             // Време за отваряне/затваряне на гриперите
 	insertTimeOut          : TIME := T#3S;                             // Време за движене нагоре/надолу на inserter 
     driveMoveTimeOut	   : TIME := T#4S;                             // Време за ход на мотора
@@ -66,9 +66,9 @@ CASE activeState OF
 //  Инициализация след подaване на захранване
 
 	inserterLoadStates.stPowerUp:
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+		//IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
 			setError(inserterLoadStates.stErrInitSensor);
-		END_IF
+	//	END_IF
 		nextState(inserterLoadStates.stInit);
 
 //  *** Init 
@@ -361,11 +361,12 @@ CASE activeState OF
 // *** Load - Gripper Check
 // Проверява се дали се е затворил грипера на инсъртъра
 
-	inserterLoadStates.stLoadGripCheck:		
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+	inserterLoadStates.stLoadGripCheck:	
+		// За сега не може да се настрой сензора на затворено пол. - затова е заместен с чисто закъснение	
+		// IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
 			nextState(inserterLoadStates.stLoadRobotSync);	
-		END_IF	
-		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);		
+		// END_IF	
+		// timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);		
 		
 // *** Load - Robo Sync
 // Дава се сигнал робота да си отвори грипера
@@ -392,13 +393,12 @@ CASE activeState OF
 // Ако е затворен грипера, пуска мотора 
 
 	inserterLoadStates.stRotGripCheck:
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
-			IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN
-				nextState(inserterLoadStates.stRotDriveMove);	
-			ELSE
-			    nextState(inserterLoadStates.stRotDriveOn);			
-			END_IF
-		END_IF	
+		// За сега не може да се настрой сензора на затворено пол. 
+		IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN
+			nextState(inserterLoadStates.stRotDriveMove);	
+		ELSE
+			nextState(inserterLoadStates.stRotDriveOn);			
+		END_IF
 		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);
 		
 // *** Rot - Drive On
@@ -494,13 +494,14 @@ CASE activeState OF
 // *** Pos - Grip Check
 
 	inserterLoadStates.stPosGripCheck:
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
-			IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN
-				nextState(inserterLoadStates.stPosDriveMove);	
-			ELSE
-			    nextState(inserterLoadStates.stPosDriveOn);			
-			END_IF
-		END_IF	
+		// За сега не може да се настрой сензора на затворено пол. - затова е заместен с чисто закъснение
+		// IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+		IF Stations.insertLoadDrive.Enabled AND NOT Stations.insertLoadDrive.Error THEN
+			nextState(inserterLoadStates.stPosDriveMove);	
+		ELSE
+			nextState(inserterLoadStates.stPosDriveOn);			
+		END_IF
+		// END_IF	
 		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);	
 		
 // *** Pos - Drive On
@@ -565,9 +566,10 @@ CASE activeState OF
 // Проверява се дали грипера е затворен
 
 	inserterLoadStates.stInsertGripCheck:
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+	// За сега не може да се настрой сензора на затворено пол.
+		//IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
 			nextState(inserterLoadStates.stInsertNestCheck);		
-		END_IF
+		//END_IF
 		timeOutError(gripTimeOut, inserterLoadStates.stErrGripNotClose);
 		
 // *** Insert - Nest Check
@@ -853,10 +855,22 @@ axisLinMot       ( TargetPosition 		   := Stations.insertLoadDrive.TargetPositio
       <LineId Id="3716" Count="3" />
       <LineId Id="3708" Count="0" />
       <LineId Id="3665" Count="0" />
-      <LineId Id="3179" Count="99" />
+      <LineId Id="3179" Count="3" />
+      <LineId Id="3767" Count="0" />
+      <LineId Id="3183" Count="29" />
+      <LineId Id="3808" Count="0" />
+      <LineId Id="3214" Count="4" />
+      <LineId Id="3220" Count="58" />
       <LineId Id="3280" Count="15" />
       <LineId Id="3726" Count="0" />
-      <LineId Id="3296" Count="320" />
+      <LineId Id="3296" Count="18" />
+      <LineId Id="3812" Count="0" />
+      <LineId Id="3811" Count="0" />
+      <LineId Id="3316" Count="4" />
+      <LineId Id="3810" Count="0" />
+      <LineId Id="3322" Count="63" />
+      <LineId Id="3813" Count="0" />
+      <LineId Id="3386" Count="230" />
       <LineId Id="96" Count="0" />
     </LineIds>
     <LineIds Name="insertLoadStation.drivesControl">

@@ -6,12 +6,12 @@
 
 TYPE dataRequestRobot :
 (
-// Програмите са спрямо InC_Autoloader_RobotMives_v02.docx 	
+	
 
 	done       := Consts.NO_REQUEST,
 	error      := Consts.REQUEST_ERROR,
 	
-	roboInit		:= 100,				// Зарежда MAINPROGRAM и изчаква робота да е в READY
+	roboInit	   := 100,				// Зарежда MAINPROGRAM и изчаква робота да е в READY
 	
 	roboPrg_Home   := 1,
 	roboPrg_SensorLoad,
@@ -23,7 +23,8 @@ TYPE dataRequestRobot :
 	roboPrg_Unload,
 	roboPrg_LoadStacker,
 	roboPrg_UnloadStacker,
-	roboPrg_EmptyPlace
+	roboPrg_EmptyPlace,
+	roboPrg_HomeWithPallet
 	
 )DINT;
 END_TYPE

@@ -27,7 +27,7 @@ VAR
 	workRotPos             : REAL;                                     // Завъртане за може робота да вземе сензора
 	afterOpenRot	       : REAL;                                     
 	
-	gripTime			   : TIME := T#250MS;                          // Време за ход на грипера                                     
+	gripTime			   : TIME := T#350MS;                          // Време за ход на грипера                                     
 	gripTimeOut            : TIME := T#2S;                             // Време за отваряне/затваряне на гриперите
 	insertTimeOut          : TIME := T#3S;                             // Време за движене нагоре/надолу на inserter
     driveMoveTimeOut	   : TIME := T#4S;                             // Време за ход на мотора
@@ -60,9 +60,9 @@ CASE activeState OF
 //  Инициализация след подaване на захранване
 
 	inserterUnloadStates.stPowerUp:
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+	  //	IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
 			setError(inserterUnloadStates.stErrInitSensor);
-		END_IF
+	//	END_IF
 		nextState(inserterUnloadStates.stInit);
 
 //  *** Init 
@@ -342,7 +342,7 @@ CASE activeState OF
 
 	inserterUnloadStates.stMoveDownGripCheck:		
 		IF io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) AND 
-		   io.getSR(ioImage.xInsert_up, ioImage.xInsert_down) THEN
+		  io.getSR(ioImage.xInsert_up, ioImage.xInsert_down) THEN
 		   		io.setSR(ioImage.yInsert_down, ioImage.yInsert_up);
 				nextState(inserterUnloadStates.stMoveDownCheck);
 		ELSE
@@ -389,8 +389,8 @@ CASE activeState OF
 				nextState(inserterUnloadStates.stUnloadSensorGripCheck2);
 		ELSE
 			IF stateDelay(insertTimeOut) THEN
-				IF NOT io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
-					setError(inserterUnloadStates.stErrGripNotOpen);
+			   IF NOT io.getSR(ioImage.xGrip_open, ioImage.xGrip_close) THEN
+				      setError(inserterUnloadStates.stErrGripNotOpen);
 				ELSIF io.getSR(ioImage.xInsert_down, ioImage.xInsert_up) THEN
 					setError(inserterUnloadStates.stErrInsertNotDown);
 				END_IF
@@ -401,11 +401,13 @@ CASE activeState OF
 // Проверка  дали грипера се е затворил 
 
 	inserterUnloadStates.stUnloadSensorGripCheck2:
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) AND stateDelay(gripTime) THEN
+	 // За сега не може да се настрой сензора на затворено пол. - затова е заместен с чисто закъснение	
+	 //	IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) AND stateDelay(gripTime) THEN
+		IF  stateDelay(gripTime) THEN
 			io.setSR(ioImage.yInsert_up, ioImage.yInsert_down);
 			nextState(inserterUnloadStates.stUnloadSensorMoveCheck);
 		END_IF	
-		timeOutError(gripTimeOut, inserterUnloadStates.stErrGripNotClose);			
+     //		timeOutError(gripTimeOut, inserterUnloadStates.stErrGripNotClose);			
 	
 // *** Unload Sensor - Move Check
 // Проверка  дали инсертера е горе
@@ -433,9 +435,10 @@ CASE activeState OF
 
 // *** Pos - Grip Check
 
-	inserterUnloadStates.stPosGripCheck:		
-		IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) AND 
-		   io.getSR(ioImage.xInsert_up, ioImage.xInsert_down) THEN
+	inserterUnloadStates.stPosGripCheck:
+	    //  За сега не може да се настрой сензора на затворено пол.	
+		// IF io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) AND 
+		IF io.getSR(ioImage.xInsert_up, ioImage.xInsert_down) THEN
 				IF Stations.insertUnloadDrive.Enabled AND NOT Stations.insertUnloadDrive.Error THEN
 					nextState(inserterUnloadStates.stPosDriveMove);
 				ELSE
@@ -443,7 +446,9 @@ CASE activeState OF
 				END_IF
 		ELSE
 			IF stateDelay(insertTimeOut) THEN
-				IF NOT io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+		     //  За сега не може да се настрой сензора на затворено пол.		
+			//	IF NOT io.getSR(ioImage.xGrip_close, ioImage.xGrip_open) THEN
+				IF FALSE THEN	
 					setError(inserterUnloadStates.stErrGripNotClose);
 				ELSIF io.getSR(ioImage.xInsert_up, ioImage.xInsert_down) THEN
 					setError(inserterUnloadStates.stErrInsertNotUp);
@@ -731,7 +736,21 @@ axisLinMot       ( TargetPosition 		   := Stations.insertUnloadDrive.TargetPosit
       </Implementation>
     </Action>
     <LineIds Name="insertUnloadStation">
-      <LineId Id="2329" Count="488" />
+      <LineId Id="2329" Count="309" />
+      <LineId Id="3114" Count="0" />
+      <LineId Id="2640" Count="40" />
+      <LineId Id="3115" Count="0" />
+      <LineId Id="2682" Count="9" />
+      <LineId Id="3069" Count="0" />
+      <LineId Id="2692" Count="0" />
+      <LineId Id="3070" Count="0" />
+      <LineId Id="2693" Count="31" />
+      <LineId Id="3071" Count="0" />
+      <LineId Id="2725" Count="8" />
+      <LineId Id="3073" Count="0" />
+      <LineId Id="2734" Count="0" />
+      <LineId Id="3072" Count="0" />
+      <LineId Id="2735" Count="82" />
       <LineId Id="2988" Count="3" />
       <LineId Id="2818" Count="2" />
       <LineId Id="2981" Count="0" />

@@ -41,8 +41,7 @@ zumer();                  // Упр. на сигният зумер
 	TagsHMI.activeEmg       := io.getX(ioImage.xEmgBnt);
 	TagsHMI.doorsOpen       := io.getX(ioImage.xDoors);         
 	TagsHMI.noAir           := io.getX(ioImage.xAirOk);            
-	TagsHMI.robotEmgActive  := io.getX(ioImage.xRobotEmgOk);            
-	TagsHMI.robotNoCom      := TagsRobot.robotComOnline;    
+	TagsHMI.robotEmgActive  := io.getX(ioImage.xRobotEmgOk);               
 	TagsHMI.robotError      := TagsRobot.robotError;    
 
 
@@ -68,16 +67,10 @@ ELSIF NOT io.getX(ioImage.xAirOk)  THEN
 	
 END_IF
 
-IF NOT io.getX(ioImage.xRobotEmgOk) AND TagsRobot.robotComOnline THEN
+IF NOT io.getX(ioImage.xRobotEmgOk)  THEN
  	Global.emgStop   := TRUE; 	                   //  Авариен стоп  на робота
 	Global.RobotEMG  := TRUE;				      
 	setDisplayState(machineDisplayStates.dStMachineRobotEMG);
-	setEmg(emgOrAlarm := TRUE);	
-	
-ELSIF io.getX(ioImage.xRobotEmgOk) AND NOT TagsRobot.robotComOnline THEN
- 	Global.emgStop     := TRUE; 	               //  Липса на комуникация с робота
-	Global.RobotNoCom  := TRUE;				      
-	setDisplayState(machineDisplayStates.dStMachineRobotNoCom);
 	setEmg(emgOrAlarm := TRUE);		
 END_IF
 
@@ -119,8 +112,7 @@ CASE activeState OF
 		IF      io.getX(ioImage.xDoors) 
 			AND io.getX(ioImage.xAirOk) 
 			AND io.getX(ioImage.xEmgBnt) 
-			AND io.getX(ioImage.xRobotEmgOk)
-            AND TagsRobot.robotComOnline  THEN
+			AND io.getX(ioImage.xRobotEmgOk)  THEN
 				resetSig := TRUE;
 				IF resetTimer.Q THEN	
 					resetSig      := FALSE;
@@ -1688,7 +1680,6 @@ END_VAR
       <LineId Id="1320" Count="0" />
       <LineId Id="1473" Count="1" />
       <LineId Id="1476" Count="4" />
-      <LineId Id="1475" Count="0" />
       <LineId Id="1482" Count="0" />
       <LineId Id="1472" Count="0" />
       <LineId Id="1063" Count="0" />
@@ -1708,10 +1699,6 @@ END_VAR
       <LineId Id="1460" Count="0" />
       <LineId Id="1459" Count="0" />
       <LineId Id="1455" Count="0" />
-      <LineId Id="1471" Count="0" />
-      <LineId Id="1456" Count="0" />
-      <LineId Id="1462" Count="2" />
-      <LineId Id="1461" Count="0" />
       <LineId Id="1465" Count="0" />
       <LineId Id="714" Count="1" />
       <LineId Id="1071" Count="0" />
@@ -1725,7 +1712,7 @@ END_VAR
       <LineId Id="733" Count="8" />
       <LineId Id="1036" Count="0" />
       <LineId Id="742" Count="3" />
-      <LineId Id="1466" Count="3" />
+      <LineId Id="1466" Count="2" />
       <LineId Id="746" Count="1" />
       <LineId Id="753" Count="0" />
       <LineId Id="757" Count="0" />

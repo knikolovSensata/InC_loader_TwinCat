@@ -43,8 +43,10 @@ VAR
 	initWaitLStacker       : BOOL;
 	tempUnloadMove         : BOOL;
 	checkLoadStacker       : BOOL;
+	blockRunForLoad        : BOOL;	                                   // Изх. втакер е празен - робота на мръдва, докато не се заредят нови тари
 	waitPosPalletRot       : DINT := 0;
 	palletRotTypeWaitPos   : DINT;
+
 	
 	xWaitPos               : REFERENCE TO imageIO;                     // В зависимост от рецептата се използва само едната чакаща поз. 
 	xSlideUp               : REFERENCE TO imageIO;
@@ -69,8 +71,9 @@ VAR
 	robotMoveTime		   : TIME := T#10S;                            // Макс. време за ход на робота
 	robotResetTime         : TIME := T#1S;                             // Време за рестарт на робота
 	sensorTime             : TIME := T#250MS;                          // Време за отчитане на сигнал от лазерната ролетка
-	rotAfterTime		   : TIME := T#1S;                             // След ход на робота, след това време за обръща сензора
+	rotAfterTime		   : TIME := T#500MS;                             // След ход на робота, след това време за обръща сензора
 	
+
 END_VAR
 
 
@@ -117,12 +120,18 @@ CASE activeState OF
 //  Инициализация на станцията
 
 	roboArmStates.stInit:
-		depWait(globalDeps.depRoboInitDone);
-		IF TagsRobot.robotError THEN
-			nextState(roboArmStates.stRobotReset);	
-		ELSE 
-			Stations.roboData := dataRequestRobot.done;
-			nextState(roboArmStates.stRobotResetDone);
+		IF blockRunForLoad THEN
+			IF NOT Global.lStackLastPallet THEN
+				blockRunForLoad := FALSE;
+			END_IF
+		ELSE
+			depWait(globalDeps.depRoboInitDone);
+			IF TagsRobot.robotError THEN
+				nextState(roboArmStates.stRobotReset);	
+			ELSE 
+				Stations.roboData := dataRequestRobot.done;
+				nextState(roboArmStates.stRobotResetDone);
+			END_IF
 		END_IF
 			
 		
@@ -250,8 +259,7 @@ CASE activeState OF
 		Global.robotSafe := FALSE;		
 		depNextState(stations.machineStBase, globalDeps.depMachinePurgeRobot,  roboArmStates.stPurgeMove);	
 		IF Global.sensorOnIUnload THEN
-			nextState(roboArmStates.stUInsertStart);	
-			Global.sensorOnIUnload := FALSE;	
+			nextState(roboArmStates.stUInsertStart);		
 		END_IF
 		
 // *** Purge - Move
@@ -421,15 +429,16 @@ CASE activeState OF
 		initWaitLStacker   := FALSE;
 		Global.robotSafe   := FALSE;
     	loadFixtures       := fixturesCount;
+		Global.emptyLoadPallet    := FALSE;
 		nextState(roboArmStates.stMoveToEmptyStart);	
 		
 // *** Reset - Start
 // Робота се прибира на Home позицията си и в зависимост дали е взел сенсор или тара
 // се избира следващият state
 
-	roboArmStates.stResetStart:		
+	roboArmStates.stResetStart:	
 		resetActive := TRUE;
-		nextState(roboArmStates.stResetSlider);			
+		nextState(roboArmStates.stResetSlider);		
 	
 // *** Reset - Slider
 // Ако няма захваната тара робота вдига слайдера нагора 
@@ -517,14 +526,14 @@ CASE activeState OF
 // Тук се рещава какъв е следващият ход на робота на базата на ред условия
 
 	roboArmStates.stNextMoveStart:
-		nextMoveStart := TRUE;
+        nextMoveStart := TRUE;
         resetActive   := TRUE;
 		IF checkLoadStacker AND loadFixtures = 0 THEN
-			 depWait(globalDeps.depSLoadStationReady);
-		   	 nextState(roboArmStates.stNextMoveWaitLStacker);	
+			depWait(globalDeps.depSLoadStationReady);
+		   	nextState(roboArmStates.stNextMoveWaitLStacker);	
 		ELSE
 			nextState(roboArmStates.stNextMovePalletCheck);
-	   	END_IF	
+		END_IF	
 		
 // *** Next Move  - Wait Load Stacker
 // Изчаква се вх. стакер да си свърши работата
@@ -532,6 +541,7 @@ CASE activeState OF
 	roboArmStates.stNextMoveWaitLStacker:
 		checkLoadStacker := FALSE;		
 		loadFixtures     := fixturesCount;
+		Global.emptyLoadPallet  := FALSE;
 		nextState(roboArmStates.stNextMovePalletCheck);	
 
 // *** Next Move - Pallet Check
@@ -542,7 +552,7 @@ CASE activeState OF
 	roboArmStates.stNextMovePalletCheck:
 		checkLoadStacker := FALSE;
 		IF palletIn THEN
-			IF unLoadFixtures > 0 OR Global.lStackerEmpty THEN
+			IF unLoadFixtures > 0 OR Global.lStackLastPallet THEN
 				nextMoveStart := FALSE;
 				nextState(roboArmStates.stEmptyPosStart);				
 			ELSE
@@ -561,9 +571,22 @@ CASE activeState OF
 
 	roboArmStates.stNextMoveSync:	
 	tempUnloadMove := TRUE;
- 	Stations.roboData := dataRequestRobot.roboPrg_UnloadStacker;
-		nextState(roboArmStates.stNextMoveCheck1);		
-	
+ 	Stations.roboData := dataRequestRobot.roboPrg_HomeWithPallet;
+	nextState(roboArmStates.stNextMovePalletHome);
+
+//*** Next MOVE - Sync
+// ИЗходния стакер трява да е готов 
+
+	roboArmStates.stNextMovePalletHome:	
+		IF Stations.roboData = dataRequestRobot.done THEN	
+ 	        Stations.roboData := dataRequestRobot.roboPrg_UnloadStacker;			
+			nextState(roboArmStates.stNextMoveCheck1);
+		END_IF		
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);	
+		
 // *** Next Move - Move Check
 // Робота е занесъл празна тара над изх. стакер ?
 
@@ -594,7 +617,6 @@ CASE activeState OF
 		
 			IF palletOnEmptyPos THEN
 				IF io.getX(xWaitPos) THEN 
-					TagsRobot.rotPallet := palletRotTypeWaitPos;
 			    	Stations.roboData   := dataRequestRobot.roboPrg_EmptyPlace;	
 					nextState(roboArmStates.stNextMoveEmptyCheck);	
 				ELSE									// На чакащата поз. е трябвало да има тара, но няма !
@@ -639,13 +661,8 @@ CASE activeState OF
 // Робота отива над вх. стакер
 
 	roboArmStates.stNextMoveLoadMove:		
-		IF (Global.loadPalletCount MOD 2) = 0 THEN
-			TagsRobot.rotPallet := Consts.ROT_PALLET;
-		ELSE
-			TagsRobot.rotPallet := Consts.TRANS_PALLET;
-		END_IF
-			Stations.roboData   := dataRequestRobot.roboPrg_LoadStacker;	
-			nextState(roboArmStates.stNextMoveLoadMoveCheck);			
+		Stations.roboData   := dataRequestRobot.roboPrg_LoadStacker;	
+		nextState(roboArmStates.stNextMoveLoadMoveCheck);			
 
 // *** Next Move - Load Check
 // Робота трябва да е над вх. стакер
@@ -674,11 +691,6 @@ CASE activeState OF
 	roboArmStates.stNextMoveLoadEmpty:		
 		IF loadFixtures = 0 AND unLoadFixtures > 0 THEN	
 			IF NOT io.getX(xWaitPos) THEN
-				IF (Global.loadPalletCount MOD 2) = 0 THEN
-					TagsRobot.rotPallet := Consts.ROT_PALLET;
-				ELSE
-					TagsRobot.rotPallet := Consts.TRANS_PALLET;
-				END_IF
 				Stations.roboData := dataRequestRobot.roboPrg_LoadStacker;				
 				nextState(roboArmStates.stNextMoveCheck2);	
 			ELSE 
@@ -738,7 +750,6 @@ CASE activeState OF
 		IF io.getX(xWaitPos) THEN
 			lamp24On 		   := FALSE;
 			lamp27On           := FALSE;	
-			TagsRobot.rotPallet:= palletRotTypeWaitPos;
 		    Stations.roboData  := dataRequestRobot.roboPrg_EmptyPlace;
 			nextState(roboArmStates.stMoveToEmptyMoveCheck);	
 		ELSE
@@ -794,12 +805,23 @@ CASE activeState OF
 		nextState(roboArmStates.stEmptyToUnloadStart);		
 		
 // *** Empty to Unload - Start  
-// Преместване на захваната тара от чакащата поз. към изх. стакер
 
 	roboArmStates.stEmptyToUnloadStart:		
 		resetActive        := TRUE;
-		nextState(roboArmStates.stMoveToUnloadSync);
+		Stations.roboData  := dataRequestRobot.roboPrg_HomeWithPallet;
+		nextState(roboArmStates.stEmptyToPalletHome);
+		
+// *** Empty to Unload - Pallet Home
 
+	roboArmStates.stEmptyToPalletHome:		
+		IF Stations.roboData = dataRequestRobot.done THEN
+			nextState(roboArmStates.stMoveToUnloadSync);
+		END_IF
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);	
+			
 // *** Empty to Unload - Sync
 // Изходният стакер трябва да е готов преди да му се носи тара от робота
 
@@ -956,7 +978,24 @@ CASE activeState OF
 	roboArmStates.stEmptyPosStart:
 		emptyPosStart := TRUE;
 		resetActive   := TRUE;
-		nextState(roboArmStates.stEmptyPosMove);		
+		nextState(roboArmStates.stEmptyPosPalletHome);
+
+// *** Empty Pos  - Pallet Home
+
+	roboArmStates.stEmptyPosPalletHome:
+		Stations.roboData     := dataRequestRobot.roboPrg_HomeWithPallet;
+		nextState(roboArmStates.stEmptyPosPalletCheck);	
+
+// *** Empty Pos  - Pallet Home Check
+
+	roboArmStates.stEmptyPosPalletCheck:
+		IF Stations.roboData = dataRequestRobot.done THEN
+			nextState(roboArmStates.stEmptyPosMove);	
+		END_IF	
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);
 		
 // *** Empty Pos  - Move
 // Робота се премества над чакащата поз.
@@ -970,11 +1009,13 @@ CASE activeState OF
 
 	roboArmStates.stEmptyPosMoveCheck:	
 		IF Stations.roboData = dataRequestRobot.done THEN
-		    depSignal(globalDeps.depRoboStartLoadStacker);   
-			IF io.getX(xWaitPos) THEN
-				palletMiss := FALSE;
-			ELSE
-				palletMiss := TRUE;
+		    depSignal(globalDeps.depRoboStartLoadStacker);  
+			IF stateDelay(sensorTime) THEN 
+				IF io.getX(xWaitPos) THEN
+					palletMiss := FALSE;
+				ELSE
+					palletMiss := TRUE;
+				END_IF	
 			END_IF	
 			nextState(roboArmStates.stEmptyPosRelease);
 		END_IF		
@@ -1029,9 +1070,10 @@ CASE activeState OF
 // *** Empty Pos - Done
 
 	roboArmStates.stEmptyPosDone:		
-		emptyPosStart        := FALSE;	
-		palletRotTypeWaitPos := TagsRobot.rotPallet;	
-		IF Global.lStackerEmpty THEN
+		emptyPosStart   := FALSE;	
+		IF Global.emptyLoadPallet THEN
+			blockRunForLoad   := TRUE;
+			unLoadFixtures    := 0;
 			depSignal(globalDeps.depRobotClearUnLoadStacker);
 		ELSE	
 			nextState(roboArmStates.stNextMoveStart);
@@ -1044,32 +1086,50 @@ CASE activeState OF
 	roboArmStates.stLoadStart:			
 		loadStart   := TRUE;
 		resetActive := TRUE;	
+		IF loadFixtures = 0 THEN
+			loadStart := FALSE;
+			nextState(roboArmStates.stNextMoveStart);
+			IF Global.lStackLastPallet THEN
+				Global.emptyLoadPallet := TRUE;
+			END_IF
+		END_IF
 		nextState(roboArmStates.stLoadMove1);		
 		
 // *** Load - Move 1
 // Робота утива над следващата поз. на изходанта тара
 
-	roboArmStates.stLoadMove1:			
+	roboArmStates.stLoadMove1:		
 		TagsRobot.loadPalletPos := loadFixtures;
 		Stations.roboData       := dataRequestRobot.roboPrg_SensorLoad;	
-		nextState(roboArmStates.stLoadMoveCheck1);	
+		nextState(roboArmStates.stLoadMoveCheck1);
 
 // *** Load - Move Check1
 // Проверка дали робота е стигнал над зададенто гнездо
-// Ако там няма сензор се мести на следващото
-
+// Ако е там слиза надолу
+ 
 	roboArmStates.stLoadMoveCheck1:	
+    	IF Stations.roboData = dataRequestRobot.done AND io.getSR(ioImage.xRot_home, ioImage.xRot_back) THEN
+			Stations.roboData  := dataRequestRobot.roboPrg_SensorDown;			
+			nextState(roboArmStates.stLoadMoveCheck2);
+		ELSIF Stations.roboData = dataRequestRobot.done	AND NOT io.getSR(ioImage.xRot_home, ioImage.xRot_back) THEN
+			setError(roboArmStates.stErrRotNotTurn0);
+		END_IF
+		IF Stations.roboData = dataRequestRobot.error THEN
+			nextState(roboArmStates.stErrRobot);
+		END_IF
+		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);		
+
+// *** Load - Move Check1
+// Проверка дали има сензор в гнездото
+
+	roboArmStates.stLoadMoveCheck2:	
 		IF Stations.roboData = dataRequestRobot.done THEN
 			IF io.getX(ioImage.xLaser) THEN
 				nextState(roboArmStates.stLoadWaitCommand);			
 			ELSE
 				loadFixtures := loadFixtures - 1;
-				IF loadFixtures < 1 THEN
-					nextState(roboArmStates.stNextMoveStart);					
-				ELSE
-					nextState(roboArmStates.stLoadMove1);
-			    END_IF 
-		    END_IF
+				nextState(roboArmStates.stLoadMove1);
+			END_IF 
 		END_IF		
 		IF Stations.roboData = dataRequestRobot.error THEN
 			nextState(roboArmStates.stErrRobot);
@@ -1089,33 +1149,17 @@ CASE activeState OF
 		
 		IF Global.sensorOnIUnload THEN
 			nextState(roboArmStates.stUInsertStart);
-	        Global.sensorOnIUnload	:= FALSE;
 		    loadStart               := FALSE; 	
 		END_IF	
-
-// *** Load - Move 2
-// Има намерен сензор в гнездото и робота е извикам от Load Inserter
-// Робота слиза надолу да захване сензора с гриперат си
-
-	roboArmStates.stLoadMove2:
-		Stations.roboData     := dataRequestRobot.roboPrg_SensorDown;
-		nextState(roboArmStates.stLoadMoveCheck2);		
+	
 
 // *** Load - Move Check 2
-// Робота е слезнал на позиция за затваряне на грипера
+// Робота е намерил сензор, затваряне на грипера
 
-	roboArmStates.stLoadMoveCheck2:
-		IF Stations.roboData = dataRequestRobot.done THEN
-			io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
-			IF stateDelay(gripTime) THEN
-		   		 nextState(roboArmStates.stLoadGripCheck);		
-			END_IF		
-		END_IF		
-		IF Stations.roboData = dataRequestRobot.error THEN
-			nextState(roboArmStates.stErrRobot);
-		END_IF
-		timeOutError(robotMoveTime, roboArmStates.stErrRobotTimeOut);		
-
+	roboArmStates.stLoadMove2:
+		io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
+		nextState(roboArmStates.stLoadGripCheck);
+		
 // *** Load - Grip Check
 // Затворил ли е грипера ?
 
@@ -1151,22 +1195,12 @@ CASE activeState OF
 		nextState(roboArmStates.stUnloadMoveCheck1);	
 
 // *** Unload - Move Check1
-// За да постави роботе сензоре в гнездо на изх. тара, то трябва да е празно
+// Робота застава над поз. за поставяне на изходната тара
 
 	roboArmStates.stUnloadMoveCheck1:	
 		IF Stations.roboData = dataRequestRobot.done THEN
-			IF NOT io.getX(ioImage.xLaser) THEN
-				nextState(roboArmStates.stUnloadRotCheck);				
-			ELSE
-				unloadFixtures := unloadFixtures - 1;
-				IF unloadFixtures < 1 THEN
-					nextState(roboArmStates.stNextMoveStart);					
-				ELSE
-					nextState(roboArmStates.stUnloadMove1);
-			    END_IF 
-		    END_IF
+			nextState(roboArmStates.stUnloadRotCheck);			
 		END_IF	
-		
 		IF Stations.roboData = dataRequestRobot.error THEN
 			nextState(roboArmStates.stErrRobot);
 		END_IF
@@ -1190,8 +1224,7 @@ CASE activeState OF
 		IF Stations.roboData = dataRequestRobot.done THEN
 			io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
 		    nextState(roboArmStates.stUnloadGripCheck);				
-		END_IF	
-		
+		END_IF		
 		IF Stations.roboData = dataRequestRobot.error THEN
 			nextState(roboArmStates.stErrRobot);
 		END_IF
@@ -1295,7 +1328,7 @@ CASE activeState OF
 // Робота си отваря грипера
 
 	roboArmStates.stLInsertLockGripOpen:		
-		io.setSR(ioImage.xGrip_open, ioImage.xGrip_close);
+		io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
 		nextState(roboArmStates.stLInsertLockGripCheck);		
 	
 // *** Load Insert Lock - Grip Check
@@ -1351,11 +1384,12 @@ CASE activeState OF
         resetActive := FALSE;		
 		IF Global.sensorOnIUnload THEN 
 			nextState(roboArmStates.stUInsertStart);
-			Global.sensorOnIUnload := FALSE;
 		END_IF
 		IF loadFixtures > 0 THEN
+			io.setSR(ioImage.yRot_home, ioImage.yRot_back);
 			nextState(roboArmStates.stLoadStart);
 		ELSE
+			io.setSR(ioImage.yRot_home, ioImage.yRot_back);
 			nextState(roboArmStates.stNextMoveStart);
 		END_IF						
 	
@@ -1363,8 +1397,9 @@ CASE activeState OF
 // Робота трябва да вземе сензор на Unload Inserter
 
 	roboArmStates.stUInsertStart:			
-		uInsertStart  := TRUE;
-		resetActive   := TRUE;	
+		uInsertStart           := TRUE;
+		resetActive            := TRUE;	
+		Global.sensorOnIUnload := FALSE;
 		nextState(roboArmStates.stUInsertMove1);			
 		
 // *** Unload Insert - Move 1
@@ -1374,7 +1409,7 @@ CASE activeState OF
 		Stations.roboData   := dataRequestRobot.roboPrg_PreUnload;
 		IF stateDelay (rotAfterTime) THEN
 			io.setSR(ioImage.yRot_back, ioImage.yRot_home);
-			io.setSR(ioImage.xGrip_open, ioImage.xGrip_close);
+			io.setSR(ioImage.yGrip_open, ioImage.yGrip_close);
 	    	nextState(roboArmStates.stUInsertMoveCheck1);			
 		END_IF
 							
@@ -1443,7 +1478,7 @@ CASE activeState OF
 // Робота си затваря грипера
 
 	roboArmStates.stUInsertLockGripClose:		
-		io.setSR(ioImage.xGrip_close, ioImage.xGrip_open);
+		io.setSR(ioImage.yGrip_close, ioImage.yGrip_open);
 		IF stateDelay(gripTime) THEN
 			nextState(roboArmStates.stUInsertLockGripCheck);	
 		END_IF	
@@ -1535,6 +1570,7 @@ CASE activeState OF
 		uInsertStart          := FALSE;                           
 		uInsertLockStart      := FALSE;                          
 		uInsertBack           := FALSE;         
+		blockRunForLoad       := FALSE;
 		
 // *** ERRORS
 
@@ -2918,10 +2954,13 @@ END_VAR]]></Declaration>
       <LineId Id="12463" Count="1" />
       <LineId Id="14759" Count="0" />
       <LineId Id="12465" Count="36" />
+      <LineId Id="15514" Count="3" />
+      <LineId Id="15513" Count="0" />
       <LineId Id="12503" Count="0" />
       <LineId Id="15262" Count="0" />
       <LineId Id="15242" Count="0" />
       <LineId Id="15263" Count="3" />
+      <LineId Id="15518" Count="0" />
       <LineId Id="12504" Count="0" />
       <LineId Id="15236" Count="0" />
       <LineId Id="15238" Count="2" />
@@ -2941,9 +2980,7 @@ END_VAR]]></Declaration>
       <LineId Id="12603" Count="4" />
       <LineId Id="15003" Count="0" />
       <LineId Id="12608" Count="0" />
-      <LineId Id="14669" Count="1" />
-      <LineId Id="14672" Count="0" />
-      <LineId Id="14671" Count="0" />
+      <LineId Id="14669" Count="2" />
       <LineId Id="12610" Count="12" />
       <LineId Id="12624" Count="5" />
       <LineId Id="14852" Count="0" />
@@ -2987,10 +3024,14 @@ END_VAR]]></Declaration>
       <LineId Id="13863" Count="0" />
       <LineId Id="12736" Count="7" />
       <LineId Id="13864" Count="0" />
-      <LineId Id="12744" Count="18" />
+      <LineId Id="12744" Count="0" />
+      <LineId Id="15865" Count="0" />
+      <LineId Id="12745" Count="17" />
       <LineId Id="15100" Count="0" />
       <LineId Id="12764" Count="64" />
-      <LineId Id="12833" Count="13" />
+      <LineId Id="12833" Count="11" />
+      <LineId Id="15505" Count="0" />
+      <LineId Id="12846" Count="0" />
       <LineId Id="14274" Count="1" />
       <LineId Id="14277" Count="0" />
       <LineId Id="14276" Count="0" />
@@ -3000,7 +3041,9 @@ END_VAR]]></Declaration>
       <LineId Id="14271" Count="2" />
       <LineId Id="14270" Count="0" />
       <LineId Id="14284" Count="0" />
-      <LineId Id="14282" Count="1" />
+      <LineId Id="14282" Count="0" />
+      <LineId Id="15864" Count="0" />
+      <LineId Id="14283" Count="0" />
       <LineId Id="12848" Count="6" />
       <LineId Id="14372" Count="0" />
       <LineId Id="12855" Count="4" />
@@ -3013,7 +3056,15 @@ END_VAR]]></Declaration>
       <LineId Id="14188" Count="0" />
       <LineId Id="12866" Count="3" />
       <LineId Id="14189" Count="0" />
-      <LineId Id="12870" Count="7" />
+      <LineId Id="12870" Count="1" />
+      <LineId Id="16015" Count="0" />
+      <LineId Id="16017" Count="3" />
+      <LineId Id="16023" Count="0" />
+      <LineId Id="16029" Count="0" />
+      <LineId Id="16024" Count="4" />
+      <LineId Id="16016" Count="0" />
+      <LineId Id="16014" Count="0" />
+      <LineId Id="12873" Count="4" />
       <LineId Id="12879" Count="9" />
       <LineId Id="14190" Count="0" />
       <LineId Id="12889" Count="8" />
@@ -3022,7 +3073,6 @@ END_VAR]]></Declaration>
       <LineId Id="14351" Count="0" />
       <LineId Id="12899" Count="0" />
       <LineId Id="14353" Count="0" />
-      <LineId Id="15223" Count="0" />
       <LineId Id="12900" Count="1" />
       <LineId Id="14361" Count="0" />
       <LineId Id="14363" Count="5" />
@@ -3045,8 +3095,6 @@ END_VAR]]></Declaration>
       <LineId Id="13935" Count="0" />
       <LineId Id="13941" Count="0" />
       <LineId Id="13936" Count="0" />
-      <LineId Id="15227" Count="3" />
-      <LineId Id="15226" Count="0" />
       <LineId Id="13938" Count="2" />
       <LineId Id="13942" Count="4" />
       <LineId Id="13975" Count="0" />
@@ -3060,8 +3108,6 @@ END_VAR]]></Declaration>
       <LineId Id="13931" Count="0" />
       <LineId Id="12947" Count="6" />
       <LineId Id="14536" Count="0" />
-      <LineId Id="15232" Count="3" />
-      <LineId Id="15231" Count="0" />
       <LineId Id="12954" Count="1" />
       <LineId Id="14537" Count="2" />
       <LineId Id="12956" Count="23" />
@@ -3071,9 +3117,10 @@ END_VAR]]></Declaration>
       <LineId Id="14766" Count="5" />
       <LineId Id="14765" Count="0" />
       <LineId Id="14517" Count="0" />
-      <LineId Id="12980" Count="17" />
-      <LineId Id="15224" Count="0" />
-      <LineId Id="12998" Count="23" />
+      <LineId Id="12980" Count="31" />
+      <LineId Id="15963" Count="0" />
+      <LineId Id="13013" Count="7" />
+      <LineId Id="15948" Count="0" />
       <LineId Id="13029" Count="12" />
       <LineId Id="15102" Count="0" />
       <LineId Id="13043" Count="2" />
@@ -3082,9 +3129,18 @@ END_VAR]]></Declaration>
       <LineId Id="14118" Count="0" />
       <LineId Id="13050" Count="0" />
       <LineId Id="14119" Count="0" />
-      <LineId Id="13051" Count="7" />
-      <LineId Id="13060" Count="1" />
-      <LineId Id="14047" Count="5" />
+      <LineId Id="13051" Count="4" />
+      <LineId Id="13057" Count="1" />
+      <LineId Id="13060" Count="0" />
+      <LineId Id="15967" Count="0" />
+      <LineId Id="13061" Count="0" />
+      <LineId Id="15969" Count="0" />
+      <LineId Id="15971" Count="0" />
+      <LineId Id="15973" Count="1" />
+      <LineId Id="15977" Count="5" />
+      <LineId Id="15976" Count="0" />
+      <LineId Id="15970" Count="0" />
+      <LineId Id="14048" Count="4" />
       <LineId Id="14046" Count="0" />
       <LineId Id="13062" Count="4" />
       <LineId Id="14053" Count="0" />
@@ -3119,9 +3175,22 @@ END_VAR]]></Declaration>
       <LineId Id="14378" Count="0" />
       <LineId Id="14380" Count="0" />
       <LineId Id="14379" Count="0" />
-      <LineId Id="13196" Count="29" />
+      <LineId Id="13196" Count="16" />
+      <LineId Id="15985" Count="1" />
+      <LineId Id="15988" Count="2" />
+      <LineId Id="15983" Count="0" />
+      <LineId Id="15992" Count="0" />
+      <LineId Id="15995" Count="2" />
+      <LineId Id="15999" Count="0" />
+      <LineId Id="16013" Count="0" />
+      <LineId Id="16009" Count="3" />
+      <LineId Id="15993" Count="0" />
+      <LineId Id="13213" Count="12" />
       <LineId Id="14285" Count="0" />
-      <LineId Id="13226" Count="15" />
+      <LineId Id="15422" Count="0" />
+      <LineId Id="13226" Count="4" />
+      <LineId Id="15423" Count="0" />
+      <LineId Id="13231" Count="10" />
       <LineId Id="15105" Count="0" />
       <LineId Id="13244" Count="19" />
       <LineId Id="14525" Count="1" />
@@ -3133,29 +3202,61 @@ END_VAR]]></Declaration>
       <LineId Id="14529" Count="0" />
       <LineId Id="14535" Count="0" />
       <LineId Id="13285" Count="4" />
-      <LineId Id="15205" Count="0" />
-      <LineId Id="15341" Count="1" />
+      <LineId Id="15341" Count="0" />
+      <LineId Id="15501" Count="0" />
+      <LineId Id="15521" Count="0" />
+      <LineId Id="15342" Count="0" />
       <LineId Id="15347" Count="0" />
       <LineId Id="15346" Count="0" />
       <LineId Id="15345" Count="0" />
-      <LineId Id="13292" Count="46" />
+      <LineId Id="13292" Count="7" />
+      <LineId Id="15783" Count="1" />
+      <LineId Id="15782" Count="0" />
+      <LineId Id="15866" Count="2" />
+      <LineId Id="15785" Count="0" />
+      <LineId Id="13300" Count="8" />
+      <LineId Id="15600" Count="0" />
+      <LineId Id="15602" Count="1" />
+      <LineId Id="15601" Count="0" />
+      <LineId Id="15615" Count="0" />
+      <LineId Id="15599" Count="0" />
+      <LineId Id="15604" Count="1" />
+      <LineId Id="15607" Count="0" />
+      <LineId Id="15701" Count="1" />
+      <LineId Id="15606" Count="0" />
+      <LineId Id="15612" Count="2" />
+      <LineId Id="15611" Count="0" />
+      <LineId Id="13309" Count="1" />
+      <LineId Id="13312" Count="6" />
+      <LineId Id="15781" Count="0" />
+      <LineId Id="13323" Count="1" />
+      <LineId Id="13326" Count="12" />
       <LineId Id="14677" Count="0" />
       <LineId Id="14680" Count="0" />
       <LineId Id="14679" Count="0" />
       <LineId Id="14681" Count="0" />
       <LineId Id="14658" Count="0" />
       <LineId Id="14660" Count="0" />
-      <LineId Id="14664" Count="0" />
       <LineId Id="14674" Count="0" />
       <LineId Id="14659" Count="0" />
-      <LineId Id="13342" Count="5" />
-      <LineId Id="13349" Count="235" />
+      <LineId Id="13350" Count="5" />
+      <LineId Id="15616" Count="0" />
+      <LineId Id="13361" Count="0" />
+      <LineId Id="13365" Count="0" />
+      <LineId Id="13367" Count="38" />
+      <LineId Id="13407" Count="1" />
+      <LineId Id="13418" Count="23" />
+      <LineId Id="13443" Count="141" />
       <LineId Id="14653" Count="0" />
       <LineId Id="13586" Count="13" />
-      <LineId Id="14665" Count="1" />
-      <LineId Id="14668" Count="0" />
-      <LineId Id="14667" Count="0" />
-      <LineId Id="13601" Count="42" />
+      <LineId Id="14665" Count="2" />
+      <LineId Id="13601" Count="0" />
+      <LineId Id="15697" Count="0" />
+      <LineId Id="13602" Count="1" />
+      <LineId Id="15698" Count="0" />
+      <LineId Id="13604" Count="8" />
+      <LineId Id="15703" Count="0" />
+      <LineId Id="13613" Count="30" />
       <LineId Id="13645" Count="2" />
       <LineId Id="14859" Count="0" />
       <LineId Id="14862" Count="0" />
@@ -3172,7 +3273,9 @@ END_VAR]]></Declaration>
       <LineId Id="14868" Count="0" />
       <LineId Id="14873" Count="0" />
       <LineId Id="14872" Count="0" />
-      <LineId Id="13739" Count="104" />
+      <LineId Id="13739" Count="32" />
+      <LineId Id="15512" Count="0" />
+      <LineId Id="13772" Count="71" />
       <LineId Id="14542" Count="2" />
       <LineId Id="14540" Count="1" />
       <LineId Id="13844" Count="4" />

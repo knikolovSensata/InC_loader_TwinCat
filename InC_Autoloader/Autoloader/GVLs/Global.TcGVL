@@ -19,15 +19,15 @@ VAR_GLOBAL
 	recipe           : DINT;                  // избраната рецепта за работа
 	sensorStatus     : BOOL;                  // в гнездото под инсъртър 2 има сензор за разтоварване  
 	palletFail       : BOOL;                  // робота не е могъл да вземе или е изпуснал тара
-	lStackerEmpty    : BOOL; 				  // входният стакер няма повече палети
+	lStackLastPallet : BOOL; 				  // входният стакер няма повече палети
 	robotSafe        : BOOL;                  // робота е на безопастно място при инициализация
 	sensorOnIUnload  : BOOL;                  // има сензор в гнездото под изх. инсъртър
 	purgeDoneIL      : BOOL;                  // PURGE процедурата е завършила - сигнализира вх. инсъртър
 	purgeDoneIU      : BOOL;                  // PURGE процедурата е завършила - сигнализира изх. инсъртър
 	gnLostDPPackets  : INT;                   // Не се ползва
-	loadPalletCount  : DINT;                  // Брой заредени палети - номер 1 се смята първата на плочата на стакера
 	RobotEMG         : BOOL;
 	RobotNoCom       : BOOL;
+	emptyLoadPallet  : BOOL;
 	
 	
 	

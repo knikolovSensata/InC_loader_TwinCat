@@ -2,7 +2,6 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
   <POU Name="stackerLoadStation" Id="{d629424b-df49-4bf4-8024-35320db1671d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK stackerLoadStation EXTENDS stateMachine
-
 VAR_INPUT
 	
 	ioImage                : stackerLoadImage;
@@ -27,14 +26,19 @@ VAR
 	axisLen				   : REAL;				
 	currentPos 			   : DINT;					 				   // Текуща позиция
 	axisPosArr			   : ARRAY [0..Consts.MAX_AXIS_POS] OF REAL;   // Масив с позицийте на оста
+	xPalletOnTop           : REFERENCE TO imageIO;
 
 	cylinderTimeOut		   : TIME := T#2S;                             // Време за ход на цилиндър
 	driveEnTime		       : TIME := T#1S;							   // Време за enable на фесто drive
+	driveEnTimeX2		   : TIME := T#2S;							   // Време за enable на фесто drive
 	initMoveTimeOut		   : TIME := T#20S;                            // Време за ход до крайно горно положение
-	sensorTime 			   : TIME := T#250MS;                          // Време за реакция на оптичен сензор
+	sensorTime 			   : TIME := T#200MS;                          // Време за реакция на оптичен сензор
+	sensorTimeX2 		   : TIME := T#400MS;                          // Време за реакция на оптичен сензор
 	palletsLoadTimeOut	   : TIME := T#15S; 						   // Време за ход на зареждане на тари
 	palletMoveTimeOut	   : TIME := T#10S;                            // Време за преместване на 1 позиция
-	drivePosTime           : TIME := T#100MS;                          // Време за задаване на задание за позициониране	
+	drivePosTime           : TIME := T#1S;                          // Време за задаване на задание за позициониране	
+	driveStopTime          : TIME := T#1S;
+	
 
 END_VAR
 ]]></Declaration>
@@ -60,7 +64,7 @@ CASE activeState OF
 //  Инициализация след подaване на захранване
 
 	stackerLoadStates.stPowerUp:
-		IF io.getX(ioImage.xPalletOnTop) THEN
+		IF io.getX(ioImage.xPalletOnTop24) OR io.getX(ioImage.xPalletOnTop27) THEN
 			setError(stackerLoadStates.stErrRemovePallet);
 		END_IF
 		
@@ -106,6 +110,12 @@ CASE activeState OF
 			nextState(stackerLoadStates.stLoadPurgeStart);
 		END_IF
 		
+		IF Stations.roboSetings.roboArmParams[Global.recipe].waitPos24 THEN
+			xPalletOnTop REF= ioImage.xPalletOnTop24;
+		ELSIF Stations.roboSetings.roboArmParams[Global.recipe].waitPos27 THEN
+			xPalletOnTop REF= ioImage.xPalletOnTop27;
+		END_IF
+		
 		nextState(stackerLoadStates.stInitDone);
 		
 // *** Init Done
@@ -113,9 +123,9 @@ CASE activeState OF
 // станция е завършила своята инициализация
 
 	stackerLoadStates.stInitDone:
-		IF io.getX(ioImage.xPalletOnTop) THEN
+		IF io.getX(xPalletOnTop) THEN
 			nextState(stackerLoadStates.stReady);
-		ELSIF stateDelay(sensorTime * 2) AND NOT io.getX(ioImage.xPalletOnTop) THEN
+		ELSIF stateDelay(sensorTime) AND NOT io.getX(xPalletOnTop) THEN
 			nextState(stackerLoadStates.stPreparePalletStart);
 			preparePalletDone  := FALSE;		
 		END_IF	
@@ -199,7 +209,7 @@ CASE activeState OF
 				nextState(stackerLoadStates.stResetDriveMove);
 			END_IF
 		END_IF
-		timeOutError(driveEnTime*2, stackerLoadStates.stErrAxis);
+		timeOutError(driveEnTimeX2, stackerLoadStates.stErrAxis);
 
 // *** Reset - Init Drive
 // Премества стакера в горно положение
@@ -224,8 +234,7 @@ CASE activeState OF
 	stackerLoadStates.stResetCheckDrive:
 		IF Stations.sLoadDrive.TargetReached AND NOT Stations.sLoadDrive.Error THEN
 			Stations.sLoadDrive.DoMove := FALSE;
-			moveDone 				   := TRUE;
-			Global.loadPalletCount     := 0;			
+			moveDone 				   := TRUE;			
 			nextState(stackerLoadStates.stResetDone);	
 		ELSIF NOT Stations.sLoadDrive.TargetReached AND Stations.sLoadDrive.Error THEN
 			setError(stackerLoadStates.stInitMoveErr);
@@ -278,18 +287,19 @@ CASE activeState OF
 		
 	stackerLoadStates.stPalletsLoadCalcAxis:    
 	    axisLen       := Stations.sLoadSettings.pallet[Global.recipe].zeroPos;
-		axisPosArr[0] := Stations.sLoadSettings.pallet[Global.recipe].zeroPos;
-		currentPos 	  := 1;
-		posCount      := 1;
+		axisPosArr[0] := 0;
+		axisPosArr[1] := Stations.sLoadSettings.pallet[Global.recipe].zeroPos;
+		currentPos 	  := 2;
+		posCount      := 2;
 		
-		WHILE axisLen < Stations.sLoadSettings.axisLength AND currentPos < Consts.MAX_AXIS_POS DO
+		WHILE axisLen < Stations.sLoadSettings.axisLength AND currentPos <= Consts.MAX_AXIS_POS DO
 			axisLen    			   := axisLen + Stations.sLoadSettings.pallet[Global.recipe].size;
 			axisPosArr[currentPos] := axisLen;
 			currentPos  := currentPos + 1;
 		END_WHILE
 		
 		posCount     := currentPos;
-		currentPos   := 0;
+		currentPos   := 1;
 		nextState(stackerLoadStates.stPalletsLoadCheckTop);
 		
 // *** Load Pallets - Check Top
@@ -337,7 +347,7 @@ CASE activeState OF
 				nextState(stackerLoadStates.stLoadPalletsCalcPos);
 			END_IF
 		END_IF
-		timeOutError(driveEnTime * 2, stackerLoadStates.stErrAxis);	
+		timeOutError(driveEnTimeX2, stackerLoadStates.stErrAxis);	
 		
 //  *** Load Pallets  - Calc Pos
 // Изчислява следващата позиция 
@@ -345,7 +355,7 @@ CASE activeState OF
 // max. брой тази не се изчаква много после при движениет нагоре
 	
 		
-	stackerLoadStates.stLoadPalletsCalcPos:
+	stackerLoadStates.stLoadPalletsCalcPos:   
 		IF currentPos = posCount AND moveDone THEN
 			nextState(stackerLoadStates.stLoadPalletsMoveAgain);
 		ELSIF moveDone THEN
@@ -353,40 +363,40 @@ CASE activeState OF
 			IF currentPos >= posCount THEN
 				currentPos := posCount;
 			END_IF
-		END_IF
-		Stations.sLoadDrive.TargetPosition     := axisPosArr[currentPos];
-		Stations.sLoadDrive.TargetAcceleration := Stations.sLoadSettings.axisAcc;
-		Stations.sLoadDrive.TargetVelocity     := Stations.sLoadSettings.axisWorkSpeed;
-		Stations.sLoadDrive.DoMove             := TRUE;
-		moveDone						       := FALSE;
-		IF stateDelay(drivePosTime) THEN
+			Stations.sLoadDrive.TargetPosition     := axisPosArr[currentPos];
+			Stations.sLoadDrive.TargetAcceleration := Stations.sLoadSettings.axisAcc;
+			Stations.sLoadDrive.TargetVelocity     := Stations.sLoadSettings.axisWorkSpeed;
+			Stations.sLoadDrive.DoMove             := TRUE;
+			moveDone						       := FALSE;
 			nextState(stackerLoadStates.stLoadPalletsMoveDone);
-		END_IF	
+		END_IF
+
 		
 //  *** Load Pallets -  Move Done
 // Стакера е направил хода си 
 
 	stackerLoadStates.stLoadPalletsMoveDone:
+	IF stateDelay(drivePosTime) THEN
 		IF Stations.sLoadDrive.TargetReached AND NOT Stations.sLoadDrive.Error THEN
 			Stations.sLoadDrive.DoMove := FALSE;
 			moveDone			       := TRUE;
-			Global.loadPalletCount     := Global.loadPalletCount + Consts.LOAD_PALLETS_STEP;
 			nextState(stackerLoadStates.stLoadPalletsMoveAgain);	
 		ELSIF NOT Stations.sLoadDrive.TargetReached AND Stations.sLoadDrive.Error THEN
 			setError(stackerLoadStates.stErrPalletLoad);
 		END_IF	
-		timeOutError(palletsLoadTimeOut, stackerLoadStates.stErrPalletLoad);	
+	END_IF
+		timeOutError(palletsLoadTimeOut, stackerLoadStates.stErrPalletLoad);
 		
 //  *** Load Pallets - Move again
 // Проверка дали стакера да продължи надолу или е заредил тарите
 
 	stackerLoadStates.stLoadPalletsMoveAgain:
-		IF io.getX(ioImage.xPalletOnTop) AND currentPos <> posCount THEN
+		IF io.getX(xPalletOnTop) AND currentPos <> posCount THEN
 			nextState(stackerLoadStates.stLoadPalletsCalcPos);
-		ELSIF io.getX(ioImage.xPalletOnTop) AND currentPos = posCount THEN
+		ELSIF io.getX(xPalletOnTop) AND currentPos = posCount THEN
 			setError(stackerLoadStates.stErrRemovePallet);			
 		END_IF
-		IF stateDelay(sensorTime * 2) THEN
+		IF stateDelay(sensorTimeX2) THEN
 			nextState(stackerLoadStates.stLoadPalletsDone);			
 		END_IF
 		
@@ -394,7 +404,7 @@ CASE activeState OF
 // Всички тари са заредени
 
 	stackerLoadStates.stLoadPalletsDone:
-		palletsLoadDone := TRUE;	
+		palletsLoadDone      := TRUE;		
 		nextState(stackerLoadStates.stPreparePalletStart);
 		
 // *** Prepare Pallet - Start
@@ -459,7 +469,7 @@ CASE activeState OF
 				nextState(stackerLoadStates.stPreparePalletMove);
 			END_IF
 		END_IF
-		timeOutError(driveEnTime * 2, stackerLoadStates.stErrAxis);	
+		timeOutError(driveEnTimeX2, stackerLoadStates.stErrAxis);	
 			
 // *** Prapare Pallet - Move Up 
 // Прества стакера нагоре с 1 поз.
@@ -470,11 +480,10 @@ CASE activeState OF
 		END_IF
 		IF currentPos = 1 THEN
 			Global.startZumer    := TRUE;
-			Global.lStackerEmpty := TRUE;
 			TagsHMI.LoadStackerSignal := TRUE;	 
 		END_IF
-		IF currentPos < 0 THEN
-			currentPos           := 0;
+		IF currentPos < 1 THEN
+			currentPos           := 1;
 			palletsLoadDone      := FALSE;
 			nextState(stackerLoadStates.stResetDone);
   	    ELSE
@@ -496,8 +505,9 @@ CASE activeState OF
 		IF Stations.sLoadDrive.TargetReached AND NOT Stations.sLoadDrive.Error THEN
 			Stations.sLoadDrive.DoMove := FALSE;
 			moveDone			       := TRUE;
-			Global.loadPalletCount     := Global.loadPalletCount - 1;			
-			nextState(stackerLoadStates.stPreparePalletLock);	
+			IF stateDelay(driveStopTime) THEN
+				nextState(stackerLoadStates.stPreparePalletLock);
+			END_IF	
 		ELSIF NOT Stations.sLoadDrive.TargetReached AND Stations.sLoadDrive.Error THEN
 			setError(stackerLoadStates.stErrPalletMove);
 		END_IF	
@@ -507,10 +517,10 @@ CASE activeState OF
 // В завизимост от това дали има тара или не се прави нов ход или се зкл. терата
 
 	stackerLoadStates.stPreparePalletLock:
-		IF io.getX(ioImage.xPalletOnTop) THEN
+		IF io.getX(xPalletOnTop) THEN
 			nextState(stackerLoadStates.stPreparePalletDone);
 		END_IF
-		IF stateDelay(sensorTime) THEN
+		IF stateDelay(sensorTimeX2) THEN
 			IF currentPos > 0 THEN
 				nextState(stackerLoadStates.stPreparePalletMove);
 			ELSIF  currentPos = 0 THEN
@@ -522,8 +532,20 @@ CASE activeState OF
 // *** Prepare Pallet - Done
 // Има стигнала тара на върха на стакера
 	stackerLoadStates.stPreparePalletDone:
-		preparePalletDone := TRUE;
-		TagsHMI.LoadStackerSignal := FALSE;		
+		preparePalletDone          := TRUE;
+		TagsHMI.LoadStackerSignal  := FALSE;	
+		
+		IF (currentPos MOD 2) = 0 THEN
+			TagsRobot.loadPalletPos := Consts.ROT_PALLET;
+		ELSE
+			TagsRobot.loadPalletPos := Consts.TRANS_PALLET;	
+		END_IF
+		
+		IF currentPos = 1 THEN
+			Global.lStackLastPallet := TRUE;
+		ELSE 
+			Global.lStackLastPallet := FALSE;	
+		END_IF
 		nextState(stackerLoadStates.stMoveDownStart);
 
 // *** Move Down - Start
@@ -535,30 +557,30 @@ CASE activeState OF
 // *** Move Down - Check top
 // Проверява дали има тара на върха на стакера 
 	stackerLoadStates.stMoveDownCkeckTop:		
-		IF io.getX(ioImage.xPalletOnTop) THEN
+	//	IF io.getX(ioImage.xPalletOnTop) THEN
 			io.setSR(ioImage.yLock1_lock, ioImage.yLock1_unlock);
 			io.setSR(ioImage.yLock2_lock, ioImage.yLock2_unlock);			
 			nextState(stackerLoadStates.stMoveDownCheckLocks);
-		ELSE
-			preparePalletDone := FALSE;
-			setError(stackerLoadStates.stErrNoPallet);
-		END_IF
+	//	ELSE
+	//		preparePalletDone := FALSE;
+	//		setError(stackerLoadStates.stErrNoPallet);
+	//	END_IF
 			
 // *** Move Down - Check Locks
 // Трябва всички ключалки да са затворени преди да тръгне надолу стакера
 
 	stackerLoadStates.stMoveDownCheckLocks:
-		IF io.getSR(ioImage.xLock1_lock, ioImage.xLock1_unlock) AND 
-		   io.getSR(ioImage.xLock2_lock, ioImage.xLock2_unlock) THEN
+		//IF io.getSR(ioImage.xLock1_lock, ioImage.xLock1_unlock) AND 
+		IF   io.getSR(ioImage.xLock2_lock, ioImage.xLock2_unlock) THEN
 		   		io.setSR(ioImage.yPalletFix_lock, ioImage.yPalletFix_unlock);
 				nextState(stackerLoadStates.stMoveDownCheckFix);
 		END_IF
 		
 		IF stateDelay(cylinderTimeOut) THEN
 			
-			IF NOT io.getSR(ioImage.xLock1_lock, ioImage.xLock1_unlock) THEN
-				setError(stackerLoadStates.stErrLock1NotClose);
-			ELSIF NOT io.getSR(ioImage.xLock2_lock, ioImage.xLock2_unlock) THEN
+			//IF NOT io.getSR(ioImage.xLock1_lock, ioImage.xLock1_unlock) THEN
+            //setError(stackerLoadStates.stErrLock1NotClose);
+			IF NOT io.getSR(ioImage.xLock2_lock, ioImage.xLock2_unlock) THEN
 				setError(stackerLoadStates.stErrLock2NotClose);
 				END_IF
 
@@ -576,8 +598,7 @@ CASE activeState OF
 //  *** Move Down - Sync
 
 	stackerLoadStates.stMoveSync:		
-		depSync(Stations.roboStBase, globalDeps.depSLoadStationReady);		
-		Global.lStackerEmpty := FALSE;
+		depSync(Stations.roboStBase, globalDeps.depSLoadStationReady);
 		IF Stations.sLoadDrive.Enabled AND NOT Stations.sLoadDrive.Error THEN				
 			nextState(stackerLoadStates.stMoveDownMove);
 		ELSE
@@ -639,7 +660,7 @@ CASE activeState OF
 
 	stackerLoadStates.stMoveDownDone:
 		moveDownDone := TRUE;			
-		nextState(stackerLoadStates.stInitDone);       // робота го ползва в stWaitLoadStacker при инициализация
+		nextState(stackerLoadStates.stReady);       // робота го ползва в stWaitLoadStacker при инициализация
 		
 // *** Release Pallet - Start
 // Текушата тара се е изпразнила 
@@ -927,12 +948,16 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       </Implementation>
     </Action>
     <LineIds Name="stackerLoadStation">
-      <LineId Id="8616" Count="120" />
+      <LineId Id="8616" Count="65" />
+      <LineId Id="9746" Count="2" />
+      <LineId Id="9750" Count="1" />
+      <LineId Id="9749" Count="0" />
+      <LineId Id="8682" Count="54" />
       <LineId Id="9503" Count="0" />
-      <LineId Id="8737" Count="63" />
-      <LineId Id="9547" Count="0" />
-      <LineId Id="8801" Count="26" />
-      <LineId Id="8829" Count="43" />
+      <LineId Id="8737" Count="90" />
+      <LineId Id="8829" Count="24" />
+      <LineId Id="9632" Count="0" />
+      <LineId Id="8854" Count="18" />
       <LineId Id="9504" Count="0" />
       <LineId Id="8873" Count="71" />
       <LineId Id="9548" Count="0" />
@@ -940,19 +965,31 @@ axisFesto          ( axis				:= Stations.sLoadAxis,
       <LineId Id="9505" Count="0" />
       <LineId Id="8984" Count="56" />
       <LineId Id="9586" Count="1" />
-      <LineId Id="9591" Count="1" />
+      <LineId Id="9635" Count="0" />
       <LineId Id="9588" Count="0" />
-      <LineId Id="9041" Count="2" />
-      <LineId Id="9046" Count="19" />
-      <LineId Id="9549" Count="0" />
-      <LineId Id="9066" Count="25" />
+      <LineId Id="9041" Count="0" />
+      <LineId Id="9633" Count="0" />
+      <LineId Id="9043" Count="0" />
+      <LineId Id="9046" Count="45" />
       <LineId Id="9593" Count="0" />
+      <LineId Id="9701" Count="1" />
+      <LineId Id="9753" Count="2" />
+      <LineId Id="9757" Count="1" />
+      <LineId Id="9756" Count="0" />
+      <LineId Id="9752" Count="0" />
+      <LineId Id="9704" Count="1" />
+      <LineId Id="9637" Count="0" />
       <LineId Id="9092" Count="12" />
       <LineId Id="9506" Count="0" />
-      <LineId Id="9105" Count="115" />
+      <LineId Id="9105" Count="11" />
+      <LineId Id="9691" Count="0" />
+      <LineId Id="9118" Count="25" />
+      <LineId Id="9145" Count="75" />
       <LineId Id="9507" Count="0" />
       <LineId Id="9221" Count="245" />
       <LineId Id="363" Count="0" />
+      <LineId Id="870" Count="0" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="stackerLoadStation.drivesControl">
       <LineId Id="2" Count="1" />

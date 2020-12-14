@@ -27,15 +27,18 @@ VAR
 	posCount			   : DINT;					 				   // Брой позиций на оста
 	axisLen				   : REAL;				
 	currentPos 			   : DINT;					 				   // Текуща позиция
+	tempPos                : DINT;
 	axisPosArr			   : ARRAY [0..Consts.MAX_AXIS_POS] OF REAL;   // Масив с позицийте на оста
 	
 	cylinderTimeOut		   : TIME := T#2S;                             // Време за ход на цилиндър
 	driveEnTime		       : TIME := T#1S;							   // Време за enable на фесто drive
+	driveEnTimeX2		   : TIME := T#2S;		
 	initMoveTimeOut		   : TIME := T#20S;                            // Време за ход до крайно горно положение
-	sensorTime 			   : TIME := T#250MS;                          // Време за реакция на оптичен сензор
-	palletsLoadTimeOut	   : TIME := T#15S; 						   // Време за ход на зареждане на тари
+	sensorTime 			   : TIME := T#200MS;                          // Време за реакция на оптичен сензор
+	sensorTimeX2 		   : TIME := T#400MS; 
+    palletsLoadTimeOut	   : TIME := T#15S; 						   // Време за ход на зареждане на тари
 	palletMoveTimeOut	   : TIME := T#10S;                            // Време за преместване на 1 позиция
-	drivePosTime           : TIME := T#100MS;                          // Време за задаване на задание за позициониране
+	drivePosTime           : TIME := T#1S;                          // Време за задаване на задание за позициониране
 
 
 
@@ -144,7 +147,7 @@ CASE activeState OF
 	stackerUnloadStates.stResetStart:
 		resetDone   := FALSE;
 		setDisplayState(stackerUnLoadDisplayStates.dStStackerIsReseting);
-		IF NOT Global.robotSafe THEN
+		IF NOT Global.robotSafe AND NOT Global.lStackLastPallet  THEN
 			depWait(globalDeps.depSUnloadWaitRobotReady);
 			nextState(stackerUnloadStates.stResetOpenLocks);
 		ELSE
@@ -195,7 +198,7 @@ CASE activeState OF
 				nextState(stackerUnloadStates.stResetDriveMove);
 			END_IF
 		END_IF
-		timeOutError(driveEnTime*2, stackerUnLoadStates.stErrAxis);
+		timeOutError(driveEnTimeX2, stackerUnLoadStates.stErrAxis);
 
 // *** Reset - Drive Move
 // Оста на стакера прави ход до горно крайно положение
@@ -341,7 +344,7 @@ CASE activeState OF
 				nextState(stackerUnloadStates.stPrepareDriveMove);
 			END_IF
 		END_IF
-		timeOutError(driveEnTime*2, stackerUnloadStates.stErrAxis);
+		timeOutError(driveEnTimeX2, stackerUnloadStates.stErrAxis);
 	
 		
 // *** Prepare - Drive Move
@@ -413,7 +416,7 @@ CASE activeState OF
 				nextState(stackerUnloadStates.stMoveUpDriveMove);
 			END_IF
 		END_IF
-		timeOutError(driveEnTime*2, stackerUnloadStates.stErrAxis);
+		timeOutError(driveEnTimeX2, stackerUnloadStates.stErrAxis);
 	
 // *** Move up - Drive Move
 // Прави 1 ход нагоре
@@ -450,7 +453,7 @@ CASE activeState OF
 
 	stackerUnloadStates.stMoveUpDone:	
 		moveUpStart := FALSE;	
-		IF Global.lStackerEmpty THEN
+		IF Global.lStackLastPallet THEN
 			nextState(stackerUnloadStates.stResetStart);
 		END_IF
 		nextState(stackerUnloadStates.stUnlockPalletStart);
@@ -510,7 +513,7 @@ CASE activeState OF
 				nextState(stackerUnloadStates.stUnlockPalletDriveMove);
 			END_IF
 		END_IF
-		timeOutError(driveEnTime*2, stackerUnloadStates.stErrAxis);	
+		timeOutError(driveEnTimeX2, stackerUnloadStates.stErrAxis);	
 		
 // *** Unlock Pallet - Drive Move
 // Прави ход надолу
@@ -562,6 +565,12 @@ CASE activeState OF
 
 	stackerUnloadStates.stUnlockPalletDone:	
 		unlockPalletStart := FALSE;
+		tempPos := currentPos - 1;
+		IF (tempPos MOD 2) = 0 THEN
+			TagsRobot.unLoadPalletPos := Consts.ROT_PALLET;
+		ELSE
+			TagsRobot.unLoadPalletPos := Consts.TRANS_PALLET;			
+		END_IF
 		nextState(stackerUnloadStates.stReady);	
 	
 // *** Lock Pallet - Start
@@ -865,7 +874,12 @@ axisFesto          ( axis				:= Stations.sUnloadAxis,
       <LineId Id="4739" Count="13" />
       <LineId Id="5154" Count="0" />
       <LineId Id="4753" Count="50" />
-      <LineId Id="4806" Count="57" />
+      <LineId Id="4806" Count="42" />
+      <LineId Id="5240" Count="0" />
+      <LineId Id="5242" Count="1" />
+      <LineId Id="5245" Count="1" />
+      <LineId Id="5244" Count="0" />
+      <LineId Id="4849" Count="14" />
       <LineId Id="5155" Count="0" />
       <LineId Id="4864" Count="248" />
       <LineId Id="9" Count="0" />

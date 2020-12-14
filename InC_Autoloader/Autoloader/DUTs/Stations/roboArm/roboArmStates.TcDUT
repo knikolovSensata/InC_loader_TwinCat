@@ -56,6 +56,7 @@ TYPE roboArmStates :
 		stMoveToEmptyDone,
 		
 		stEmptyToUnloadStart,
+		stEmptyToPalletHome,
 		stMoveToUnloadSync, 
 		stEmptyToUnloadMove,
 		stEmptyToUnloadMoveCheck, 
@@ -76,6 +77,8 @@ TYPE roboArmStates :
 		stLoadPalletDone,
 		
 		stEmptyPosStart, 
+		stEmptyPosPalletHome, 
+		stEmptyPosPalletCheck, 
 		stEmptyPosMove,
 		stEmptyPosMoveCheck,
 		stEmptyPosRelease,
@@ -143,6 +146,8 @@ TYPE roboArmStates :
 		stNextMoveWaitLStacker,
 		stNextMovePalletCheck,
 		stNextMoveSync,
+		stNextMovePalletHome, //
+		
 		stNextMoveCheck1,
 		stNextMovePass,
 		stNextMoveUnlodeFull,
